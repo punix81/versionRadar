@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "🚀 VersionRadar - Fetch Pipeline Versions",
+    "subtitle": "(via Renovate approach)",
+    "dateLabel": "📅 Date",
+    "fileLabel": "📁 Fichier recherché",
+    "repoCountLabel": "🔢 Nombre de repositories"
+  },
+  "status": {
+    "fetching": "🔄 Récupération de",
+    "success": "✅",
+    "error": "❌",
+    "warning": "⚠️",
+    "notFound": "Non trouvé"
+  },
+  "table": {
+    "title": "📋 TABLEAU RÉCAPITULATIF",
+    "headers": {
+      "repository": "Repository",
+      "commonsPipeline": "commons-pipeline",
+      "angularPipeline": "angular-pipeline",
+      "status": "Status"
+    },
+    "statusOk": "✅ OK",
+    "statusError": "❌ Erreur"
+  },
+  "summary": {
+    "icon": "📊",
+    "label": "Résultats",
+    "success": "succès",
+    "errors": "erreurs",
+    "on": "sur",
+    "repositories": "repositories"
+  },
+  "errors": {
+    "missingCredentials": "❌ Erreur: Variables BITBUCKET_USER et BITBUCKET_TOKEN requises dans .env",
+    "parseError": "Impossible de parser le fichier Chart.yaml",
+    "timeout": "Timeout de connexion"
+  },
+  "display": {
+    "chartLabel": "📦 Chart",
+    "repoIcon": "📊",
+    "separator": "═",
+    "separatorLength": 70
+  }
+}
+
