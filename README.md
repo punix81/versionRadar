@@ -2,16 +2,31 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
 
-## 🚀 Fetch Pipeline Versions Script
+## 🚀 VersionRadar Scripts
 
-VersionRadar provides scripts to automatically fetch pipeline versions (e.g., `commons-pipeline`, `angular-pipeline`) from `Chart.yaml` files across multiple Bitbucket Server repositories.
+VersionRadar provides two types of scripts to monitor your repositories:
 
-### Available Implementations
+### 1. Fetch Pipeline Versions (Chart.yaml)
 
+Automatically fetch pipeline versions (e.g., `commons-pipeline`, `angular-pipeline`) from `Chart.yaml` files across multiple Bitbucket Server repositories.
+
+**Available Implementations:**
 - **TypeScript/Node.js** - `scripts/fetch-pipeline-versions.ts`
 - **Python 3** - `scripts/fetch_pipeline_versions.py`
 
-### Prerequisites
+**Configuration:** `config/repositories.json`
+
+### 2. Fetch Package Versions (package.json) 🆕
+
+Automatically fetch **@oblique/oblique** and **@angular/cdk** versions from `package.json` files across Azure DevOps and Bitbucket repositories.
+
+**Available Implementations:**
+- **TypeScript/Node.js** - `scripts/fetch-package-versions.ts`
+- **Python 3** - `scripts/fetch_package_versions.py`
+
+**Configuration:** `config/package-repositories.json`
+
+## Prerequisites
 
 - **For TypeScript:** Node.js 18+ installed
 - **For Python:** Python 3.10+ installed
@@ -27,11 +42,18 @@ VersionRadar provides scripts to automatically fetch pipeline versions (e.g., `c
 npm install
 ```
 
-2. **Create a `.env` file** in the project root with your Bitbucket credentials:
+2. **Create a `.env` file** in the project root with your credentials:
 ```bash
+# Bitbucket Server
 BITBUCKET_BASE_URL=https://bitbucket.bit.admin.ch
 BITBUCKET_USER=your_username
 BITBUCKET_TOKEN=your_token_or_password
+
+# Azure DevOps
+AZUREDEVOPS_USER=your_azure_username
+AZUREDEVOPS_TOKEN=your_azure_pat_token
+
+# Script settings
 REQUEST_TIMEOUT_MS=30000
 DATE_LOCALE=fr-CH
 ```
@@ -83,23 +105,36 @@ sudo apt install python3.12-venv
 
 ### Usage
 
-#### TypeScript/Node.js
+#### Fetch Pipeline Versions (Chart.yaml)
 
-Run the fetch script:
+**TypeScript/Node.js:**
 ```bash
 npm run fetch-pipelines
-```
-
-Or directly:
-```bash
+# Or directly:
 npx ts-node scripts/fetch-pipeline-versions.ts
 ```
 
-#### Python 3
-
-Run the fetch script:
+**Python 3:**
 ```bash
+npm run fetch-pipelines:python
+# Or directly:
 python3 scripts/fetch_pipeline_versions.py
+```
+
+#### Fetch Package Versions (package.json) 🆕
+
+**TypeScript/Node.js:**
+```bash
+npm run fetch-packages
+# Or directly:
+npx ts-node scripts/fetch-package-versions.ts
+```
+
+**Python 3:**
+```bash
+npm run fetch-packages:python
+# Or directly:
+python3 scripts/fetch_package_versions.py
 ```
 
 ### Output
@@ -113,7 +148,8 @@ Both scripts will:
 
 ### Configuration Files
 
-- **`config/repositories.json`** - List of repositories and pipelines to monitor
+- **`config/repositories.json`** - List of Bitbucket repositories and pipelines to monitor (for Chart.yaml)
+- **`config/package-repositories.json`** 🆕 - List of Azure DevOps and Bitbucket repositories to monitor (for package.json)
 - **`config/messages.json`** - Console messages and labels (customizable)
 - **`.env`** - Credentials and connection parameters (not tracked in git)
 - **`requirements.txt`** - Python dependencies (for Python version only)

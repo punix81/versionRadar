@@ -8,7 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "fetch-pipelines": "ts-node --project tsconfig.scripts.json scripts/fetch-pipeline-versions.ts",
-    "fetch-pipelines:python": "python3 scripts/fetch_pipeline_versions.py"
+    "fetch-pipelines:python": "python3 scripts/fetch_pipeline_versions.py",
+    "fetch-packages": "ts-node --project tsconfig.scripts.json scripts/fetch-package-versions.ts",
+    "fetch-packages:python": "python3 scripts/fetch_package_versions.py"
   },
   "prettier": {
     "printWidth": 100,

@@ -46,6 +46,7 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+.credentials-backup.md
 
 # Python
 __pycache__/
