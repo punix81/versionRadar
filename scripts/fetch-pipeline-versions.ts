@@ -19,6 +19,7 @@ import * as https from 'https';
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
+import { signal } from '@angular/core';
 
 // Charger les fichiers de configuration
 const configDir = path.join(__dirname, '..', 'config');
@@ -125,8 +126,14 @@ function createAuthHeader(username: string, token: string): string {
 /**
  * Récupérer le fichier brut depuis Bitbucket Server
  * API: /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/raw/{path}
+ * Utilise une approche callback avec signaux pour la réactivité
  */
-async function fetchRawFile(projectKey: string, repoSlug: string, branch: string | null = null): Promise<string> {
+function fetchRawFile(
+  projectKey: string,
+  repoSlug: string,
+  branch: string | null = null,
+  onComplete: (data: string | null, error: string | null) => void
+): void {
   const { username, token } = getCredentials();
 
   let apiUrl = `${BITBUCKET_BASE_URL}/rest/api/1.0/projects/${projectKey}/repos/${repoSlug}/raw/${FILE_PATH}`;
@@ -135,50 +142,49 @@ async function fetchRawFile(projectKey: string, repoSlug: string, branch: string
     apiUrl += `?at=refs/heads/${branch}`;
   }
 
-  return new Promise((resolve, reject) => {
-    const url = new URL(apiUrl);
+  const url = new URL(apiUrl);
 
-    const options: https.RequestOptions = {
-      hostname: url.hostname,
-      port: 443,
-      path: url.pathname + url.search,
-      method: 'GET',
-      headers: {
-        'Authorization': createAuthHeader(username, token),
-        'Accept': 'text/plain, application/json',
-        'User-Agent': 'VersionRadar/1.0',
-        'X-Atlassian-Token': 'no-check'
-      },
-      rejectUnauthorized: false
-    };
+  const options: https.RequestOptions = {
+    hostname: url.hostname,
+    port: 443,
+    path: url.pathname + url.search,
+    method: 'GET',
+    headers: {
+      'Authorization': createAuthHeader(username, token),
+      'Accept': 'text/plain, application/json',
+      'User-Agent': 'VersionRadar/1.0',
+      'X-Atlassian-Token': 'no-check'
+    },
+    rejectUnauthorized: false
+  };
 
-    const req = https.request(options, (res) => {
-      let data = '';
+  const req = https.request(options, (res) => {
+    let data = '';
 
-      res.on('data', (chunk: Buffer) => data += chunk);
+    res.on('data', (chunk: Buffer) => data += chunk);
 
-      res.on('end', () => {
-        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-          resolve(data);
-        } else {
-          // Ne pas afficher le contenu de la réponse qui pourrait contenir des infos sensibles
-          const statusMsg = `HTTP ${res.statusCode}`;
-          reject(new Error(statusMsg));
-        }
-      });
+    res.on('end', () => {
+      if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+        onComplete(data, null);
+      } else {
+        // Ne pas afficher le contenu de la réponse qui pourrait contenir des infos sensibles
+        const statusMsg = `HTTP ${res.statusCode}`;
+        onComplete(null, statusMsg);
+      }
     });
-
-    req.on('error', () => {
-      // Masquer les erreurs de connexion qui pourraient contenir des infos sensibles
-      reject(new Error(messages.errors.timeout));
-    });
-    req.setTimeout(REQUEST_TIMEOUT_MS, () => {
-      req.destroy();
-      reject(new Error(messages.errors.timeout));
-    });
-
-    req.end();
   });
+
+  req.on('error', () => {
+    // Masquer les erreurs de connexion qui pourraient contenir des infos sensibles
+    onComplete(null, messages.errors.timeout);
+  });
+
+  req.setTimeout(REQUEST_TIMEOUT_MS, () => {
+    req.destroy();
+    onComplete(null, messages.errors.timeout);
+  });
+
+  req.end();
 }
 
 /**
@@ -293,10 +299,13 @@ function displaySummaryTable(results: RepositoryResult[]): void {
 }
 
 /**
- * Point d'entrée principal
+ * Point d'entrée principal - traite les repositories séquentiellement avec callbacks
  */
-async function main(): Promise<RepositoryResult[]> {
+function main(): void {
   const { app, status, summary } = messages;
+
+  // Créer les signaux pour l'état global
+  const results = signal<RepositoryResult[]>([]);
 
   console.log('');
   console.log(`${app.title} ${app.subtitle}`);
@@ -305,62 +314,90 @@ async function main(): Promise<RepositoryResult[]> {
   console.log(`${app.repoCountLabel}: ${REPOSITORIES.length}`);
   console.log('');
 
-  const results: RepositoryResult[] = [];
+  /**
+   * Traiter les repositories récursivement
+   */
+  function processNextRepository(index: number): void {
+    const totalRepos = REPOSITORIES.length;
 
-  for (let i = 0; i < REPOSITORIES.length; i++) {
-    const repoConfig = REPOSITORIES[i];
+    if (index >= totalRepos) {
+      // Fin du traitement
+      displaySummaryTable(results());
 
-    try {
-      console.log(`\n${status.fetching} [${i + 1}/${REPOSITORIES.length}] ${repoConfig.name}...`);
+      // Statistiques finales
+      const successCount = results().filter(r => r.status === 'success').length;
+      const errorCount = results().filter(r => r.status === 'error').length;
 
-      const yamlContent = await fetchRawFile(repoConfig.project, repoConfig.repo, repoConfig.branch || null);
-      const info = extractPipelineVersions(yamlContent);
+      console.log('');
+      console.log(`${summary.icon} ${summary.label}: ${successCount} ${summary.success}, ${errorCount} ${summary.errors} ${summary.on} ${totalRepos} ${summary.repositories}`);
+      console.log('');
+      return;
+    }
 
-      displayRepoResults(repoConfig, info, i);
+    const repoConfig = REPOSITORIES[index];
 
-      results.push({
-        name: repoConfig.name,
-        project: repoConfig.project,
-        repo: repoConfig.repo,
-        status: 'success',
-        pipelineVersions: info.pipelineVersions,
-        chartName: info.chartName,
-        chartVersion: info.chartVersion,
-        allDependencies: info.allDependencies
-      });
+    console.log(`\n${status.fetching} [${index + 1}/${totalRepos}] ${repoConfig.name}...`);
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.log(`\n${status.error} Erreur pour ${repoConfig.name}: ${errorMessage}`);
+    // Récupérer le fichier avec callback
+    fetchRawFile(repoConfig.project, repoConfig.repo, repoConfig.branch || null, (data, error) => {
+      if (error) {
+        console.log(`\n${status.error} Erreur pour ${repoConfig.name}: ${error}`);
 
-      const emptyVersions: PipelineVersions = {};
-      for (const pipelineName of PIPELINE_NAMES) {
-        emptyVersions[pipelineName] = null;
+        const emptyVersions: PipelineVersions = {};
+        for (const pipelineName of PIPELINE_NAMES) {
+          emptyVersions[pipelineName] = null;
+        }
+
+        results.update(prev => [...prev, {
+          name: repoConfig.name,
+          project: repoConfig.project,
+          repo: repoConfig.repo,
+          status: 'error',
+          error: error,
+          pipelineVersions: emptyVersions
+        }]);
+      } else if (data) {
+        try {
+          const info = extractPipelineVersions(data);
+          displayRepoResults(repoConfig, info, index);
+
+          results.update(prev => [...prev, {
+            name: repoConfig.name,
+            project: repoConfig.project,
+            repo: repoConfig.repo,
+            status: 'success',
+            pipelineVersions: info.pipelineVersions,
+            chartName: info.chartName,
+            chartVersion: info.chartVersion,
+            allDependencies: info.allDependencies
+          }]);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.log(`\n${status.error} Erreur pour ${repoConfig.name}: ${errorMessage}`);
+
+          const emptyVersions: PipelineVersions = {};
+          for (const pipelineName of PIPELINE_NAMES) {
+            emptyVersions[pipelineName] = null;
+          }
+
+          results.update(prev => [...prev, {
+            name: repoConfig.name,
+            project: repoConfig.project,
+            repo: repoConfig.repo,
+            status: 'error',
+            error: errorMessage,
+            pipelineVersions: emptyVersions
+          }]);
+        }
       }
 
-      results.push({
-        name: repoConfig.name,
-        project: repoConfig.project,
-        repo: repoConfig.repo,
-        status: 'error',
-        error: errorMessage,
-        pipelineVersions: emptyVersions
-      });
-    }
+      // Passer au repository suivant
+      processNextRepository(index + 1);
+    });
   }
 
-  // Afficher le tableau récapitulatif
-  displaySummaryTable(results);
-
-  // Statistiques finales
-  const successCount = results.filter(r => r.status === 'success').length;
-  const errorCount = results.filter(r => r.status === 'error').length;
-
-  console.log('');
-  console.log(`${summary.icon} ${summary.label}: ${successCount} ${summary.success}, ${errorCount} ${summary.errors} ${summary.on} ${REPOSITORIES.length} ${summary.repositories}`);
-  console.log('');
-
-  return results;
+  // Démarrer le traitement avec le premier repository
+  processNextRepository(0);
 }
 
 main();
