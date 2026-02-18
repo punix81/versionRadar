@@ -1,0 +1,248 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1>🚀 VersionRadar Dashboard</h1>
+      <p class="subtitle">Monitoring des versions Oblique et Angular CDK</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="refresh()" [disabled]="loading()">
+        <span class="icon">🔄</span>
+        <span>Rafraîchir</span>
+      </button>
+      @if (data()) {
+        <div class="last-update">
+          Dernière mise à jour: {{ data()!.timestamp | date:'short' }}
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Chargement des données...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-container">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error() }}</p>
+      <button (click)="refresh()">Réessayer</button>
+    </div>
+  }
+
+  <!-- Dashboard Content -->
+  @if (data() && !loading()) {
+    <div class="dashboard-content">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-icon">📊</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ data()!.stats.total }}</div>
+            <div class="stat-label">Total Repositories</div>
+          </div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-icon">✅</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ data()!.stats.success }}</div>
+            <div class="stat-label">Succès</div>
+          </div>
+        </div>
+        <div class="stat-card error">
+          <div class="stat-icon">❌</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ data()!.stats.errors }}</div>
+            <div class="stat-label">Erreurs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="charts-grid">
+        <!-- Status Chart -->
+        <div class="chart-card">
+          <div echarts [options]="statsChartOption" class="chart"></div>
+        </div>
+
+        <!-- Platform Chart -->
+        <div class="chart-card">
+          <div echarts [options]="platformChartOption" class="chart"></div>
+        </div>
+
+        <!-- Oblique Versions Chart -->
+        <div class="chart-card wide">
+          <div echarts [options]="obliqueVersionsChartOption" class="chart"></div>
+        </div>
+
+        <!-- Angular Versions Chart -->
+        <div class="chart-card wide">
+          <div echarts [options]="angularVersionsChartOption" class="chart"></div>
+        </div>
+
+        <!-- Commons Pipeline Versions Chart -->
+        <div class="chart-card wide">
+          <div echarts [options]="commonsPipelineChartOption" class="chart"></div>
+        </div>
+
+        <!-- Angular Pipeline Versions Chart -->
+        <div class="chart-card wide">
+          <div echarts [options]="angularPipelineChartOption" class="chart"></div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="chart-card full-width">
+          <div echarts [options]="timelineChartOption" class="chart"></div>
+        </div>
+      </div>
+
+      <!-- Repositories Table -->
+      <div class="table-container">
+        <h2>📋 Détails des Repositories</h2>
+        <div class="table-wrapper">
+          <table class="repositories-table">
+            <thead>
+              <tr>
+                <th>Repository</th>
+                <th>Plateforme</th>
+                <th>{{'@'}}oblique/oblique</th>
+                <th>{{'@'}}angular/cdk</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (repo of data()!.repositories; track repo.name) {
+                <tr [class]="getStatusClass(repo)">
+                  <td class="repo-name">
+                    <div class="repo-info">
+                      <strong>{{ repo.name }}</strong>
+                      @if (repo.packageName) {
+                        <small>{{ repo.packageName }} v{{ repo.packageVersion }}</small>
+                      }
+                    </div>
+                  </td>
+                  <td class="platform">
+                    <span class="platform-badge" [class.azure]="repo.platform === 'azure'"
+                          [class.bitbucket]="repo.platform === 'bitbucket'">
+                      {{ getPlatformIcon(repo.platform) }} {{ repo.platform }}
+                    </span>
+                  </td>
+                  <td class="version">
+                    @if (repo.packageVersions['@oblique/oblique']) {
+                      <span class="version-badge oblique">
+                        {{ repo.packageVersions['@oblique/oblique'] }}
+                      </span>
+                    } @else {
+                      <span class="no-version">-</span>
+                    }
+                  </td>
+                  <td class="version">
+                    @if (repo.packageVersions['@angular/cdk']) {
+                      <span class="version-badge angular">
+                        {{ repo.packageVersions['@angular/cdk'] }}
+                      </span>
+                    } @else {
+                      <span class="no-version">-</span>
+                    }
+                  </td>
+                  <td class="status">
+                    @if (repo.status === 'success') {
+                      <span class="status-badge success">✅ OK</span>
+                    } @else {
+                      <span class="status-badge error" [title]="repo.error || ''">
+                        ❌ {{ repo.error || 'Erreur' }}
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pipelines Table -->
+      <div class="table-container">
+        <h2>🔧 Détails des Pipelines</h2>
+        <div class="pipeline-stats">
+          <span class="stat-item">
+            📊 Total: {{ data()!.pipelineStats.total }}
+          </span>
+          <span class="stat-item success">
+            ✅ Succès: {{ data()!.pipelineStats.success }}
+          </span>
+          <span class="stat-item error">
+            ❌ Erreurs: {{ data()!.pipelineStats.errors }}
+          </span>
+        </div>
+        <div class="table-wrapper">
+          <table class="repositories-table pipelines-table">
+            <thead>
+              <tr>
+                <th>Projet</th>
+                <th>Chart</th>
+                <th>commons-pipeline</th>
+                <th>angular-pipeline</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (pipeline of data()!.pipelines; track pipeline.name) {
+                <tr [class]="pipeline.status === 'success' ? 'status-success' : 'status-error'">
+                  <td class="repo-name">
+                    <div class="repo-info">
+                      <strong>{{ pipeline.name }}</strong>
+                      <small>{{ pipeline.project }}/{{ pipeline.repo }}</small>
+                    </div>
+                  </td>
+                  <td class="chart-info">
+                    @if (pipeline.chartName) {
+                      <span class="chart-badge">
+                        {{ pipeline.chartName }} v{{ pipeline.chartVersion }}
+                      </span>
+                    } @else {
+                      <span class="no-version">-</span>
+                    }
+                  </td>
+                  <td class="version">
+                    @if (pipeline.pipelineVersions['commons-pipeline']) {
+                      <span class="version-badge commons">
+                        {{ pipeline.pipelineVersions['commons-pipeline'] }}
+                      </span>
+                    } @else {
+                      <span class="no-version">-</span>
+                    }
+                  </td>
+                  <td class="version">
+                    @if (pipeline.pipelineVersions['angular-pipeline']) {
+                      <span class="version-badge angular-pipeline">
+                        {{ pipeline.pipelineVersions['angular-pipeline'] }}
+                      </span>
+                    } @else {
+                      <span class="no-version">-</span>
+                    }
+                  </td>
+                  <td class="status">
+                    @if (pipeline.status === 'success') {
+                      <span class="status-badge success">✅ OK</span>
+                    } @else {
+                      <span class="status-badge error" [title]="pipeline.error || ''">
+                        ❌ {{ pipeline.error || 'Erreur' }}
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

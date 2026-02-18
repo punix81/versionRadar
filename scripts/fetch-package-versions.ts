@@ -18,7 +18,6 @@ import 'dotenv/config';
 import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
-import { signal } from '@angular/core';
 
 // Charger les fichiers de configuration
 const configDir = path.join(__dirname, '..', 'config');
@@ -363,7 +362,7 @@ function main(): void {
   const status = messages.status;
   const summary = messages.summary;
 
-  const results = signal<RepositoryResult[]>([]);
+  const results: RepositoryResult[] = [];
   const credentials = getCredentials();
 
   console.log('');
@@ -379,11 +378,11 @@ function main(): void {
 
     if (index >= totalRepos) {
       // Fin du traitement
-      displaySummaryTable(results());
+      displaySummaryTable(results);
 
       // Statistiques finales
-      const successCount = results().filter(r => r.status === 'success').length;
-      const errorCount = results().filter(r => r.status === 'error').length;
+      const successCount = results.filter(r => r.status === 'success').length;
+      const errorCount = results.filter(r => r.status === 'error').length;
 
       console.log('');
       console.log(`${summary.icon} ${summary.label}: ${successCount} ${summary.success}, ${errorCount} ${summary.errors} ${summary.on} ${totalRepos} ${summary.repositories}`);
@@ -404,7 +403,7 @@ function main(): void {
           emptyVersions[packageName] = null;
         }
 
-        results.update(prev => [...prev, {
+        results.push({
           name: repo.name,
           platform: repo.platform,
           project: repo.project,
@@ -412,13 +411,13 @@ function main(): void {
           status: 'error',
           error: error,
           packageVersions: emptyVersions
-        }]);
+        });
       } else if (data) {
         try {
           const info = extractPackageVersions(data);
           displayRepoResults(repo, info, index);
 
-          results.update(prev => [...prev, {
+          results.push({
             name: repo.name,
             platform: repo.platform,
             project: repo.project,
@@ -428,7 +427,7 @@ function main(): void {
             packageName: info.packageName,
             packageVersion: info.packageVersion,
             allDependencies: info.allDependencies
-          }]);
+          });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           console.log(`\n${status.error} Erreur pour ${repo.name}: ${errorMessage}`);
@@ -444,7 +443,7 @@ function main(): void {
             emptyVersions[packageName] = null;
           }
 
-          results.update(prev => [...prev, {
+          results.push({
             name: repo.name,
             platform: repo.platform,
             project: repo.project,
@@ -452,7 +451,7 @@ function main(): void {
             status: 'error',
             error: errorMessage,
             packageVersions: emptyVersions
-          }]);
+          });
         }
       }
 

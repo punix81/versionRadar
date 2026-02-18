@@ -19,7 +19,6 @@ import * as https from 'https';
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
-import { signal } from '@angular/core';
 
 // Charger les fichiers de configuration
 const configDir = path.join(__dirname, '..', 'config');
@@ -304,8 +303,8 @@ function displaySummaryTable(results: RepositoryResult[]): void {
 function main(): void {
   const { app, status, summary } = messages;
 
-  // Créer les signaux pour l'état global
-  const results = signal<RepositoryResult[]>([]);
+  // Utiliser un simple tableau pour stocker les résultats
+  const results: RepositoryResult[] = [];
 
   console.log('');
   console.log(`${app.title} ${app.subtitle}`);
@@ -322,11 +321,11 @@ function main(): void {
 
     if (index >= totalRepos) {
       // Fin du traitement
-      displaySummaryTable(results());
+      displaySummaryTable(results);
 
       // Statistiques finales
-      const successCount = results().filter(r => r.status === 'success').length;
-      const errorCount = results().filter(r => r.status === 'error').length;
+      const successCount = results.filter(r => r.status === 'success').length;
+      const errorCount = results.filter(r => r.status === 'error').length;
 
       console.log('');
       console.log(`${summary.icon} ${summary.label}: ${successCount} ${summary.success}, ${errorCount} ${summary.errors} ${summary.on} ${totalRepos} ${summary.repositories}`);
@@ -348,20 +347,20 @@ function main(): void {
           emptyVersions[pipelineName] = null;
         }
 
-        results.update(prev => [...prev, {
+        results.push({
           name: repoConfig.name,
           project: repoConfig.project,
           repo: repoConfig.repo,
           status: 'error',
           error: error,
           pipelineVersions: emptyVersions
-        }]);
+        });
       } else if (data) {
         try {
           const info = extractPipelineVersions(data);
           displayRepoResults(repoConfig, info, index);
 
-          results.update(prev => [...prev, {
+          results.push({
             name: repoConfig.name,
             project: repoConfig.project,
             repo: repoConfig.repo,
@@ -370,7 +369,7 @@ function main(): void {
             chartName: info.chartName,
             chartVersion: info.chartVersion,
             allDependencies: info.allDependencies
-          }]);
+          });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           console.log(`\n${status.error} Erreur pour ${repoConfig.name}: ${errorMessage}`);
@@ -380,14 +379,14 @@ function main(): void {
             emptyVersions[pipelineName] = null;
           }
 
-          results.update(prev => [...prev, {
+          results.push({
             name: repoConfig.name,
             project: repoConfig.project,
             repo: repoConfig.repo,
             status: 'error',
             error: errorMessage,
             pipelineVersions: emptyVersions
-          }]);
+          });
         }
       }
 
