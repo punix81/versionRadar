@@ -1,1 +1,53 @@
-/* You can add global styles to this file, and also import other style files */
+// ==============================================
+// VersionRadar - Styles globaux
+// ==============================================
+
+@import 'styles/variables';
+
+// Reset et styles de base
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family;
+  color: $text-primary;
+  background-color: $background-light;
+  line-height: 1.5;
+}
+
+// Scrollbar personnalisée
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: $background-light;
+  border-radius: $border-radius-full;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $text-muted;
+  border-radius: $border-radius-full;
+
+  &:hover {
+    background: $text-secondary;
+  }
+}
+
+// Sélection de texte
+::selection {
+  background: rgba($primary-color, 0.2);
+  color: $primary-dark;
+}
