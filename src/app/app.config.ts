@@ -9,7 +9,6 @@ import { CanvasRenderer } from 'echarts/renderers';
 
 import { routes } from './app.routes';
 
-// Enregistrer les composants ECharts nécessaires
 echarts.use([BarChart, LineChart, PieChart, GridComponent, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer]);
 
 export const appConfig: ApplicationConfig = {
