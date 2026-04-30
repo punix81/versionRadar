@@ -2,7 +2,7 @@
 // VersionRadar - Styles globaux
 // ==============================================
 
-@import 'styles/variables';
+@use 'styles/variables';
 
 // Reset et styles de base
 *,
@@ -20,9 +20,9 @@ html {
 }
 
 body {
-  font-family: $font-family;
-  color: $text-primary;
-  background-color: $background-light;
+  font-family: variables.$font-family;
+  color: variables.$text-primary;
+  background-color: variables.$background-light;
   line-height: 1.5;
 }
 
@@ -33,21 +33,21 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: $background-light;
-  border-radius: $border-radius-full;
+  background: variables.$background-light;
+  border-radius: variables.$border-radius-full;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $text-muted;
-  border-radius: $border-radius-full;
+  background: variables.$text-muted;
+  border-radius: variables.$border-radius-full;
 
   &:hover {
-    background: $text-secondary;
+    background: variables.$text-secondary;
   }
 }
 
 // Sélection de texte
 ::selection {
-  background: rgba($primary-color, 0.2);
-  color: $primary-dark;
+  background: rgba(variables.$primary-color, 0.2);
+  color: variables.$primary-dark;
 }

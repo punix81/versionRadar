@@ -1,63 +1,64 @@
-@import 'variables';
+@use 'variables' as var;
+@use 'sass:color';
 
 .dashboard-container {
   min-height: 100vh;
-  background: $gradient-background;
-  padding: $spacing-xl;
-  font-family: $font-family;
+  background: var.$gradient-background;
+  padding: var.$spacing-xl;
+  font-family: var.$font-family;
 }
 
-// Header
+
 .dashboard-header {
-  background: $background-white;
-  border-radius: $border-radius-xl;
-  padding: $spacing-xl;
-  margin-bottom: $spacing-xl;
-  box-shadow: $shadow-md;
+  background: var.$background-white;
+  border-radius: var.$border-radius-xl;
+  padding: var.$spacing-xl;
+  margin-bottom: var.$spacing-xl;
+  box-shadow: var.$shadow-md;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: $spacing-md;
+  gap: var.$spacing-md;
 
   h1 {
     margin: 0;
-    font-size: $font-size-4xl;
-    background: $gradient-primary;
+    font-size: var.$font-size-4xl;
+    background: var.$gradient-primary;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .subtitle {
-    margin: $spacing-xs 0 0 0;
-    color: $text-secondary;
-    font-size: $font-size-lg;
+    margin: var.$spacing-xs 0 0 0;
+    color: var.$text-secondary;
+    font-size: var.$font-size-lg;
   }
 
   .header-actions {
     display: flex;
     align-items: center;
-    gap: $spacing-md;
+    gap: var.$spacing-md;
   }
 
   .refresh-btn {
-    background: $gradient-primary;
-    color: $background-white;
+    background: var.$gradient-primary;
+    color: var.$background-white;
     border: none;
-    padding: $spacing-sm $spacing-lg;
-    border-radius: $border-radius-md;
+    padding: var.$spacing-sm var.$spacing-lg;
+    border-radius: var.$border-radius-md;
     cursor: pointer;
-    font-size: $font-size-base;
+    font-size: var.$font-size-base;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: $spacing-xs;
-    transition: transform $transition-fast, box-shadow $transition-fast;
+    gap: var.$spacing-xs;
+    transition: transform var.$transition-fast, box-shadow var.$transition-fast;
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: $shadow-lg;
+      box-shadow: var.$shadow-lg;
     }
 
     &:disabled {
@@ -71,11 +72,11 @@
   }
 
   .last-update {
-    font-size: $font-size-sm;
-    color: $text-secondary;
-    padding: $spacing-xs $spacing-md;
-    background: $primary-light;
-    border-radius: $border-radius-sm;
+    font-size: var.$font-size-sm;
+    color: var.$text-secondary;
+    padding: var.$spacing-xs var.$spacing-md;
+    background: var.$primary-light;
+    border-radius: var.$border-radius-sm;
   }
 
   .logo {
@@ -88,18 +89,18 @@
 // Loading & Error States
 .loading-container,
 .error-container {
-  background: $background-white;
-  border-radius: $border-radius-xl;
+  background: var.$background-white;
+  border-radius: var.$border-radius-xl;
   padding: 4rem 2rem;
   text-align: center;
-  box-shadow: $shadow-md;
+  box-shadow: var.$shadow-md;
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid $primary-light;
-  border-top-color: $primary-color;
+  border: 4px solid var.$primary-light;
+  border-top-color: var.$primary-color;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -117,19 +118,19 @@
   }
 
   button {
-    background: $gradient-error;
-    color: $background-white;
-    border: none;
-    padding: $spacing-sm $spacing-lg;
-    border-radius: $border-radius-md;
-    cursor: pointer;
-    margin-top: $spacing-md;
-    font-size: $font-size-base;
-    transition: background $transition-fast;
+      background: var.$gradient-error;
+      color: var.$background-white;
+      border: none;
+      padding: var.$spacing-sm var.$spacing-lg;
+      border-radius: var.$border-radius-md;
+      cursor: pointer;
+      margin-top: var.$spacing-md;
+      font-size: var.$font-size-base;
+      transition: background var.$transition-fast;
 
-    &:hover {
-      background: darken($error-color, 10%);
-    }
+      &:hover {
+        background: color.adjust(var.$error-color, $lightness: -10%);
+      }
   }
 }
 
@@ -137,29 +138,29 @@
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xl;
+  gap: var.$spacing-xl;
 }
 
 // Stats Grid
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: $spacing-lg;
+  gap: var.$spacing-lg;
 }
 
 .stat-card {
-  background: $background-white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-lg;
+  background: var.$background-white;
+  border-radius: var.$border-radius-lg;
+  padding: var.$spacing-lg;
   display: flex;
   align-items: center;
-  gap: $spacing-md;
-  box-shadow: $shadow-md;
-  transition: transform $transition-fast, box-shadow $transition-fast;
+  gap: var.$spacing-md;
+  box-shadow: var.$shadow-md;
+  transition: transform var.$transition-fast, box-shadow var.$transition-fast;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: $shadow-lg;
+    box-shadow: var.$shadow-lg;
   }
 
   .stat-icon {
@@ -169,22 +170,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: $border-radius-md;
+    border-radius: var.$border-radius-md;
   }
 
   &.total .stat-icon {
-    background: $gradient-primary;
-    color: $background-white;
+    background: var.$gradient-primary;
+    color: var.$background-white;
   }
 
   &.success .stat-icon {
-    background: $gradient-success;
-    color: $background-white;
+    background: var.$gradient-success;
+    color: var.$background-white;
   }
 
   &.error .stat-icon {
-    background: $gradient-error;
-    color: $background-white;
+    background: var.$gradient-error;
+    color: var.$background-white;
   }
 
   .stat-content {
@@ -192,15 +193,15 @@
   }
 
   .stat-value {
-    font-size: $font-size-3xl;
+    font-size: var.$font-size-3xl;
     font-weight: bold;
-    color: $primary-color;
+    color: var.$primary-color;
   }
 
   .stat-label {
-    font-size: $font-size-base;
-    color: $text-secondary;
-    margin-top: $spacing-xs;
+    font-size: var.$font-size-base;
+    color: var.$text-secondary;
+    margin-top: var.$spacing-xs;
   }
 }
 
@@ -208,14 +209,14 @@
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-lg;
+  gap: var.$spacing-lg;
 }
 
 .chart-card {
-  background: $background-white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-lg;
-  box-shadow: $shadow-md;
+  background: var.$background-white;
+  border-radius: var.$border-radius-lg;
+  padding: var.$spacing-lg;
+  box-shadow: var.$shadow-md;
 
   &.wide {
     grid-column: span 1;
@@ -233,43 +234,43 @@
 
 // Table
 .table-container {
-  background: $background-white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-xl;
-  box-shadow: $shadow-md;
+  background: var.$background-white;
+  border-radius: var.$border-radius-lg;
+  padding: var.$spacing-xl;
+  box-shadow: var.$shadow-md;
 
   h2 {
-    margin: 0 0 $spacing-lg 0;
-    font-size: $font-size-2xl;
-    color: $primary-dark;
+    margin: 0 0 var.$spacing-lg 0;
+    font-size: var.$font-size-2xl;
+    color: var.$primary-dark;
   }
 }
 
 .pipeline-stats {
   display: flex;
-  gap: $spacing-lg;
-  margin-bottom: $spacing-lg;
+  gap: var.$spacing-lg;
+  margin-bottom: var.$spacing-lg;
   flex-wrap: wrap;
 
   .stat-item {
     display: inline-flex;
     align-items: center;
-    gap: $spacing-xs;
-    padding: $spacing-xs $spacing-md;
-    border-radius: $border-radius-md;
+    gap: var.$spacing-xs;
+    padding: var.$spacing-xs var.$spacing-md;
+    border-radius: var.$border-radius-md;
     font-weight: 600;
-    font-size: $font-size-base;
-    background: $primary-light;
-    color: $primary-dark;
+    font-size: var.$font-size-base;
+    background: var.$primary-light;
+    color: var.$primary-dark;
 
     &.success {
-      background: $success-light;
-      color: $success-color;
+      background: var.$success-light;
+      color: var.$success-color;
     }
 
     &.error {
-      background: $error-light;
-      color: $error-color;
+      background: var.$error-light;
+      color: var.$error-color;
     }
   }
 }
@@ -287,48 +288,48 @@
 .repositories-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-base;
+  font-size: var.$font-size-base;
 
   thead {
-    background: $gradient-primary;
-    color: $background-white;
+    background: var.$gradient-primary;
+    color: var.$background-white;
 
     th {
-      padding: $spacing-md;
+      padding: var.$spacing-md;
       text-align: left;
       font-weight: 600;
       border: none;
 
       &:first-child {
-        border-radius: $border-radius-sm 0 0 0;
+        border-radius: var.$border-radius-sm 0 0 0;
       }
 
       &:last-child {
-        border-radius: 0 $border-radius-sm 0 0;
+        border-radius: 0 var.$border-radius-sm 0 0;
       }
     }
   }
 
   tbody {
     tr {
-      border-bottom: 1px solid $border-color;
-      transition: background $transition-fast;
+      border-bottom: 1px solid var.$border-color;
+      transition: background var.$transition-fast;
 
       &:hover {
-        background: $primary-light;
+        background: var.$primary-light;
       }
 
       &.status-success {
-        border-left: 4px solid $success-color;
+        border-left: 4px solid var.$success-color;
       }
 
       &.status-error {
-        border-left: 4px solid $error-color;
+        border-left: 4px solid var.$error-color;
       }
     }
 
     td {
-      padding: $spacing-md;
+      padding: var.$spacing-md;
     }
   }
 
@@ -336,15 +337,15 @@
     .repo-info {
       display: flex;
       flex-direction: column;
-      gap: $spacing-xs;
+      gap: var.$spacing-xs;
 
       strong {
-        color: $primary-dark;
+        color: var.$primary-dark;
       }
 
       small {
-        color: $text-muted;
-        font-size: $font-size-sm;
+        color: var.$text-muted;
+        font-size: var.$font-size-sm;
       }
     }
   }
@@ -352,82 +353,82 @@
   .platform-badge {
     display: inline-flex;
     align-items: center;
-    gap: $spacing-xs;
-    padding: $spacing-xs $spacing-md;
-    border-radius: $border-radius-full;
-    font-size: $font-size-sm;
+    gap: var.$spacing-xs;
+    padding: var.$spacing-xs var.$spacing-md;
+    border-radius: var.$border-radius-full;
+    font-size: var.$font-size-sm;
     font-weight: 600;
 
     &.azure {
-      background: rgba($badge-azure, 0.1);
-      color: $badge-azure;
+      background: rgba(var.$badge-azure, 0.1);
+      color: var.$badge-azure;
     }
 
     &.bitbucket {
-      background: rgba($badge-bitbucket, 0.1);
-      color: $badge-bitbucket;
+      background: rgba(var.$badge-bitbucket, 0.1);
+      color: var.$badge-bitbucket;
     }
   }
 
   .version-badge {
     display: inline-block;
-    padding: $spacing-xs $spacing-md;
-    border-radius: $border-radius-sm;
+    padding: var.$spacing-xs var.$spacing-md;
+    border-radius: var.$border-radius-sm;
     font-family: 'Courier New', monospace;
-    font-size: $font-size-base;
+    font-size: var.$font-size-base;
     font-weight: 600;
 
     &.oblique {
-      background: rgba($badge-oblique, 0.1);
-      color: $badge-oblique;
+      background: rgba(var.$badge-oblique, 0.1);
+      color: var.$badge-oblique;
     }
 
     &.angular {
-      background: rgba($badge-angular, 0.1);
-      color: $badge-angular;
+      background: rgba(var.$badge-angular, 0.1);
+      color: var.$badge-angular;
     }
 
     &.commons {
-      background: rgba($badge-commons, 0.1);
-      color: $badge-commons;
+      background: rgba(var.$badge-commons, 0.1);
+      color: var.$badge-commons;
     }
 
     &.angular-pipeline {
-      background: rgba($badge-angular-pipeline, 0.1);
-      color: $badge-angular-pipeline;
+      background: rgba(var.$badge-angular-pipeline, 0.1);
+      color: var.$badge-angular-pipeline;
     }
   }
 
   .chart-badge {
     display: inline-block;
-    padding: $spacing-xs $spacing-md;
-    border-radius: $border-radius-sm;
+    padding: var.$spacing-xs var.$spacing-md;
+    border-radius: var.$border-radius-sm;
     font-family: 'Courier New', monospace;
-    font-size: $font-size-sm;
+    font-size: var.$font-size-sm;
     font-weight: 600;
-    background: $primary-light;
-    color: $primary-dark;
+    background: var.$primary-light;
+    color: var.$primary-dark;
   }
 
   .no-version {
-    color: $text-muted;
+    color: var.$text-muted;
   }
 
   .status-badge {
     display: inline-block;
-    padding: $spacing-xs $spacing-md;
-    border-radius: $border-radius-full;
-    font-size: $font-size-sm;
+    padding: var.$spacing-xs var.$spacing-md;
+    border-radius: var.$border-radius-full;
+    font-size: var.$font-size-sm;
     font-weight: 600;
 
     &.success {
-      background: $success-light;
-      color: $success-color;
+      background: var.$success-light;
+      color: var.$success-color;
     }
 
     &.error {
-      background: $error-light;
-      color: $error-color;
+      background: var.$error-light;
+      color: var.$error-color;
     }
   }
 }
@@ -448,7 +449,7 @@
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: $spacing-md;
+    padding: var.$spacing-md;
   }
 
   .dashboard-header {
@@ -456,7 +457,7 @@
     align-items: flex-start;
 
     h1 {
-      font-size: $font-size-2xl;
+      font-size: var.$font-size-2xl;
     }
 
     .header-actions {
@@ -476,11 +477,11 @@
   }
 
   .repositories-table {
-    font-size: $font-size-sm;
+    font-size: var.$font-size-sm;
 
     thead th,
     tbody td {
-      padding: $spacing-sm $spacing-xs;
+      padding: var.$spacing-sm var.$spacing-xs;
     }
   }
 }
