@@ -1,0 +1,63 @@
+<div class="table-container">
+  <h2>{{ 'table.repo_details' | translate }}</h2>
+  <div class="table-wrapper">
+    <table class="repositories-table">
+      <thead>
+        <tr>
+          <th>{{ 'table.repository' | translate }}</th>
+          <th>{{ 'table.platform' | translate }}</th>
+          @if (repositories.length > 0) {
+            @for (name of display.getPackageNames(repositories[0]); track name) {
+              <th>{{ name }}</th>
+            }
+          }
+          <th>{{ 'table.status' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (repo of repositories; track repo.name) {
+          <tr [class]="display.getStatusClass(repo)">
+            <td class="repo-name">
+              <div class="repo-info">
+                <strong>{{ repo.name }}</strong>
+                @if (repo.packageName) {
+                  <small>{{ repo.packageName }} v{{ repo.packageVersion }}</small>
+                }
+              </div>
+            </td>
+            <td class="platform">
+              <span class="platform-badge"
+                    [class.azure]="repo.platform === 'azure'"
+                    [class.bitbucket]="repo.platform === 'bitbucket'">
+                {{ display.getPlatformIcon(repo.platform) }} {{ repo.platform }}
+              </span>
+            </td>
+            @for (name of display.getPackageNames(repo); track name) {
+              <td class="version">
+                @if (repo.packageVersions[name]) {
+                  <a class="version-badge package-version"
+                     [href]="display.getPackageUrl(name, repo.packageVersions[name]!)"
+                     target="_blank" rel="noopener noreferrer">
+                    {{ repo.packageVersions[name] }}
+                  </a>
+                } @else {
+                  <span class="no-version">-</span>
+                }
+              </td>
+            }
+            <td class="status">
+              @if (repo.status === 'success') {
+                <span class="status-badge success">✅ {{ 'table.status_ok' | translate }}</span>
+              } @else {
+                <span class="status-badge error" [title]="repo.error || ''">
+                  ❌ {{ repo.error || ('table.status_error' | translate) }}
+                </span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+

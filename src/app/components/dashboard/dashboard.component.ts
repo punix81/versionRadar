@@ -4,11 +4,13 @@ import { NgxEchartsModule } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { VersionMonitoringService, RepositoryResult, PipelineResult } from '../../services/version-monitoring.service';
+import { PackagesRadarComponent } from '../packages-radar/packages-radar.component';
+import { PipelinesRadarComponent } from '../pipelines-radar/pipelines-radar.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxEchartsModule, TranslateModule],
+  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -48,6 +50,15 @@ export class DashboardComponent implements OnInit {
 
   async loadData(): Promise<void> {
     await this.versionService.loadVersionData();
+  }
+
+  refresh(): void {
+    this.loadData();
+  }
+
+  switchLang(lang: string): void {
+    this.currentLang = lang;
+    this.translate.use(lang);
   }
 
   private updateCharts(repositories: RepositoryResult[]): void {
@@ -302,10 +313,6 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  refresh(): void {
-    this.loadData();
-  }
-
   private updatePipelineCharts(pipelines: PipelineResult[]): void {
     if (!pipelines.length) return;
 
@@ -348,36 +355,5 @@ export class DashboardComponent implements OnInit {
         } as EChartsOption
       };
     });
-  }
-
-  getPackageNames(repo: RepositoryResult): string[] {
-    return Object.keys(repo.packageVersions);
-  }
-
-  getPipelineNames(pipeline: PipelineResult): string[] {
-    return Object.keys(pipeline.pipelineVersions);
-  }
-
-  getStatusClass(repo: RepositoryResult): string {
-    return repo.status === 'success' ? 'status-success' : 'status-error';
-  }
-
-  getPlatformIcon(platform: string): string {
-    return platform === 'azure' ? '☁️' : '🔷';
-  }
-
-  getPackageUrl(packageName: string, version: string): string {
-    const clean = version.replace(/[\^~]/, '');
-    return `https://www.npmjs.com/package/${packageName}/v/${clean}`;
-  }
-
-  getPipelineUrl(pipeline: PipelineResult): string {
-    const baseUrl = 'https://bitbucket.bit.admin.ch';
-    return `${baseUrl}/projects/${pipeline.project}/repos/${pipeline.repo}/browse/pipeline/Chart.yaml`;
-  }
-
-  switchLang(lang: string): void {
-    this.currentLang = lang;
-    this.translate.use(lang);
   }
 }

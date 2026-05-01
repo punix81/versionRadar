@@ -1,0 +1,76 @@
+<div class="table-container">
+  <h2>{{ 'table.pipeline_details' | translate }}</h2>
+
+  <div class="pipeline-stats">
+    <span class="stat-item">
+      {{ 'pipeline_stats.total' | translate }}: {{ pipelineStats.total }}
+    </span>
+    <span class="stat-item success">
+      ✅ {{ 'pipeline_stats.success' | translate }}: {{ pipelineStats.success }}
+    </span>
+    <span class="stat-item error">
+      ❌ {{ 'pipeline_stats.errors' | translate }}: {{ pipelineStats.errors }}
+    </span>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="repositories-table pipelines-table">
+      <thead>
+        <tr>
+          <th>{{ 'table.project' | translate }}</th>
+          <th>{{ 'table.chart' | translate }}</th>
+          @if (pipelines.length > 0) {
+            @for (name of display.getPipelineNames(pipelines[0]); track name) {
+              <th>{{ name }}</th>
+            }
+          }
+          <th>{{ 'table.status' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (pipeline of pipelines; track pipeline.name) {
+          <tr [class]="pipeline.status === 'success' ? 'status-success' : 'status-error'">
+            <td class="repo-name">
+              <div class="repo-info">
+                <strong>{{ pipeline.name }}</strong>
+                <small>{{ pipeline.project }}/{{ pipeline.repo }}</small>
+              </div>
+            </td>
+            <td class="chart-info">
+              @if (pipeline.chartName) {
+                <span class="chart-badge">
+                  {{ pipeline.chartName }} v{{ pipeline.chartVersion }}
+                </span>
+              } @else {
+                <span class="no-version">-</span>
+              }
+            </td>
+            @for (name of display.getPipelineNames(pipeline); track name) {
+              <td class="version">
+                @if (pipeline.pipelineVersions[name]) {
+                  <a class="version-badge pipeline-version"
+                     [href]="display.getPipelineUrl(pipeline)"
+                     target="_blank" rel="noopener noreferrer">
+                    {{ pipeline.pipelineVersions[name] }}
+                  </a>
+                } @else {
+                  <span class="no-version">-</span>
+                }
+              </td>
+            }
+            <td class="status">
+              @if (pipeline.status === 'success') {
+                <span class="status-badge success">✅ {{ 'table.status_ok' | translate }}</span>
+              } @else {
+                <span class="status-badge error" [title]="pipeline.error || ''">
+                  ❌ {{ pipeline.error || ('table.status_error' | translate) }}
+                </span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
