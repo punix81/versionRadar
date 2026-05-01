@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     provideEchartsCore({ echarts }),
-    provideTranslateService({ defaultLanguage: 'fr' }),
+    provideTranslateService({ fallbackLang: 'fr' }),
     ...provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' })
   ]
 };
