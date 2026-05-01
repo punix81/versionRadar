@@ -12,27 +12,22 @@ import { VersionMonitoringService, RepositoryResult, PipelineResult } from '../.
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
-  // Signaux pour les données
   data;
   loading;
   error;
 
-  // Options pour les graphiques ECharts
   statsChartOption: EChartsOption = {};
   obliqueVersionsChartOption: EChartsOption = {};
   angularVersionsChartOption: EChartsOption = {};
   platformChartOption: EChartsOption = {};
   timelineChartOption: EChartsOption = {};
-  commonsPipelineChartOption: EChartsOption = {};
-  angularPipelineChartOption: EChartsOption = {};
+  pipelineChartOptions: { name: string; option: EChartsOption }[] = [];
 
   constructor(private versionService: VersionMonitoringService) {
-    // Initialiser les signaux
     this.data = this.versionService.data;
     this.loading = this.versionService.loading;
     this.error = this.versionService.error;
 
-    // Effet pour mettre à jour les graphiques quand les données changent
     effect(() => {
       const currentData = this.data();
       if (currentData) {
@@ -377,118 +372,51 @@ export class DashboardComponent implements OnInit {
   }
 
   private updatePipelineCharts(pipelines: PipelineResult[]): void {
-    this.updateCommonsPipelineChart(pipelines);
-    this.updateAngularPipelineChart(pipelines);
+    if (!pipelines.length) return;
+
+    // Extract pipeline names dynamically from the first result's keys
+    const pipelineNames = Object.keys(pipelines[0].pipelineVersions);
+    const colors = ['#52c41a', '#fa8c16', '#1890ff', '#722ed1', '#f5222d', '#13c2c2'];
+
+    this.pipelineChartOptions = pipelineNames.map((name, i) => {
+      const versionMap = new Map<string, number>();
+      pipelines.forEach(pipeline => {
+        const version = pipeline.pipelineVersions[name];
+        if (version) {
+          versionMap.set(version, (versionMap.get(version) || 0) + 1);
+        }
+      });
+      const sortedVersions = Array.from(versionMap.entries()).sort((a, b) => b[1] - a[1]);
+      const color = colors[i % colors.length];
+
+      return {
+        name,
+        option: {
+          title: {
+            text: `Versions ${name}`,
+            left: 'center',
+            textStyle: { fontSize: 18, fontWeight: 'bold' }
+          },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+          xAxis: {
+            type: 'category',
+            data: sortedVersions.map(v => v[0]),
+            axisLabel: { rotate: 45 }
+          },
+          yAxis: { type: 'value', name: 'Nombre de repos' },
+          series: [{
+            data: sortedVersions.map(v => ({ value: v[1], itemStyle: { color } })),
+            type: 'bar',
+            barWidth: '60%',
+            label: { show: true, position: 'top' }
+          }]
+        } as EChartsOption
+      };
+    });
   }
 
-  private updateCommonsPipelineChart(pipelines: PipelineResult[]): void {
-    const versionMap = new Map<string, number>();
-
-    pipelines.forEach(pipeline => {
-      const version = pipeline.pipelineVersions['commons-pipeline'];
-      if (version) {
-        versionMap.set(version, (versionMap.get(version) || 0) + 1);
-      }
-    });
-
-    const sortedVersions = Array.from(versionMap.entries()).sort((a, b) => b[1] - a[1]);
-
-    this.commonsPipelineChartOption = {
-      title: {
-        text: 'Versions Commons Pipeline',
-        left: 'center',
-        textStyle: {
-          fontSize: 18,
-          fontWeight: 'bold'
-        }
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      xAxis: {
-        type: 'category',
-        data: sortedVersions.map(v => v[0]),
-        axisLabel: {
-          rotate: 45
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Nombre de repos'
-      },
-      series: [
-        {
-          data: sortedVersions.map(v => ({
-            value: v[1],
-            itemStyle: { color: '#52c41a' }
-          })),
-          type: 'bar',
-          barWidth: '60%',
-          label: {
-            show: true,
-            position: 'top'
-          }
-        }
-      ]
-    };
-  }
-
-  private updateAngularPipelineChart(pipelines: PipelineResult[]): void {
-    const versionMap = new Map<string, number>();
-
-    pipelines.forEach(pipeline => {
-      const version = pipeline.pipelineVersions['angular-pipeline'];
-      if (version) {
-        versionMap.set(version, (versionMap.get(version) || 0) + 1);
-      }
-    });
-
-    const sortedVersions = Array.from(versionMap.entries()).sort((a, b) => b[1] - a[1]);
-
-    this.angularPipelineChartOption = {
-      title: {
-        text: 'Versions Angular Pipeline',
-        left: 'center',
-        textStyle: {
-          fontSize: 18,
-          fontWeight: 'bold'
-        }
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      xAxis: {
-        type: 'category',
-        data: sortedVersions.map(v => v[0]),
-        axisLabel: {
-          rotate: 45
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Nombre de repos'
-      },
-      series: [
-        {
-          data: sortedVersions.map(v => ({
-            value: v[1],
-            itemStyle: { color: '#fa8c16' }
-          })),
-          type: 'bar',
-          barWidth: '60%',
-          label: {
-            show: true,
-            position: 'top'
-          }
-        }
-      ]
-    };
+  getPipelineNames(pipeline: PipelineResult): string[] {
+    return Object.keys(pipeline.pipelineVersions);
   }
 
   getStatusClass(repo: RepositoryResult): string {

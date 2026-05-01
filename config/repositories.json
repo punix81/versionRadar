@@ -1,6 +1,6 @@
 {
   "filePath": "pipeline/Chart.yaml",
-  "pipelineNames": ["commons-pipeline", "angular-pipeline"],
+  "pipelineNames": ["commons-pipeline", "angular-pipeline", "cd-pipelines", "dotnet-pipeline"],
   "repositories": [
     {
       "project": "GEOSI",

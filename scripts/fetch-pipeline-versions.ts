@@ -330,6 +330,12 @@ function main(): void {
       console.log('');
       console.log(`${summary.icon} ${summary.label}: ${successCount} ${summary.success}, ${errorCount} ${summary.errors} ${summary.on} ${totalRepos} ${summary.repositories}`);
       console.log('');
+
+      // Sauvegarder les résultats en JSON pour le dashboard Angular
+      const outputPath = path.join(__dirname, '..', 'src', 'assets', 'data', 'pipelines.json');
+      fs.writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf-8');
+      console.log(`💾 Résultats sauvegardés: ${outputPath}`);
+
       return;
     }
 

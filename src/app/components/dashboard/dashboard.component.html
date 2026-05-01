@@ -8,7 +8,7 @@
     </div>
     <div class="header-actions">
       <button class="refresh-btn" (click)="refresh()" [disabled]="loading()">
-        <span class="icon">🔄</span>
+        <span class="icon"></span>
         <span>Rafraîchir</span>
       </button>
       @if (data()) {
@@ -42,7 +42,7 @@
       <!-- Stats Cards -->
       <div class="stats-grid">
         <div class="stat-card total">
-          <div class="stat-icon">📊</div>
+          <div class="stat-icon"></div>
           <div class="stat-content">
             <div class="stat-value">{{ data()!.stats.total }}</div>
             <div class="stat-label">Total Repositories</div>
@@ -86,15 +86,12 @@
           <div echarts [options]="angularVersionsChartOption" class="chart"></div>
         </div>
 
-        <!-- Commons Pipeline Versions Chart -->
-        <div class="chart-card wide">
-          <div echarts [options]="commonsPipelineChartOption" class="chart"></div>
-        </div>
-
-        <!-- Angular Pipeline Versions Chart -->
-        <div class="chart-card wide">
-          <div echarts [options]="angularPipelineChartOption" class="chart"></div>
-        </div>
+        <!-- Dynamic Pipeline Charts -->
+        @for (pipelineChart of pipelineChartOptions; track pipelineChart.name) {
+          <div class="chart-card wide">
+            <div echarts [options]="pipelineChart.option" class="chart"></div>
+          </div>
+        }
 
         <!-- Timeline Chart -->
         <div class="chart-card full-width">
@@ -104,7 +101,7 @@
 
       <!-- Repositories Table -->
       <div class="table-container">
-        <h2>📋 Détails des Repositories</h2>
+        <h2> Détails des Repositories</h2>
         <div class="table-wrapper">
           <table class="repositories-table">
             <thead>
@@ -169,10 +166,10 @@
 
       <!-- Pipelines Table -->
       <div class="table-container">
-        <h2>🔧 Détails des Pipelines</h2>
+        <h2> Détails des Pipelines</h2>
         <div class="pipeline-stats">
           <span class="stat-item">
-            📊 Total: {{ data()!.pipelineStats.total }}
+             Total: {{ data()!.pipelineStats.total }}
           </span>
           <span class="stat-item success">
             ✅ Succès: {{ data()!.pipelineStats.success }}
@@ -187,8 +184,11 @@
               <tr>
                 <th>Projet</th>
                 <th>Chart</th>
-                <th>commons-pipeline</th>
-                <th>angular-pipeline</th>
+                @if (data()!.pipelines.length > 0) {
+                  @for (name of getPipelineNames(data()!.pipelines[0]); track name) {
+                    <th>{{ name }}</th>
+                  }
+                }
                 <th>Status</th>
               </tr>
             </thead>
@@ -210,24 +210,17 @@
                       <span class="no-version">-</span>
                     }
                   </td>
-                  <td class="version">
-                    @if (pipeline.pipelineVersions['commons-pipeline']) {
-                      <span class="version-badge commons">
-                        {{ pipeline.pipelineVersions['commons-pipeline'] }}
-                      </span>
-                    } @else {
-                      <span class="no-version">-</span>
-                    }
-                  </td>
-                  <td class="version">
-                    @if (pipeline.pipelineVersions['angular-pipeline']) {
-                      <span class="version-badge angular-pipeline">
-                        {{ pipeline.pipelineVersions['angular-pipeline'] }}
-                      </span>
-                    } @else {
-                      <span class="no-version">-</span>
-                    }
-                  </td>
+                  @for (name of getPipelineNames(pipeline); track name) {
+                    <td class="version">
+                      @if (pipeline.pipelineVersions[name]) {
+                        <span class="version-badge pipeline-version">
+                          {{ pipeline.pipelineVersions[name] }}
+                        </span>
+                      } @else {
+                        <span class="no-version">-</span>
+                      }
+                    </td>
+                  }
                   <td class="status">
                     @if (pipeline.status === 'success') {
                       <span class="status-badge success">✅ OK</span>

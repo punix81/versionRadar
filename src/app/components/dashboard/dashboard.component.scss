@@ -397,6 +397,11 @@
       background: rgba(var.$badge-angular-pipeline, 0.1);
       color: var.$badge-angular-pipeline;
     }
+
+    &.pipeline-version {
+      background: rgba(var.$primary-color, 0.1);
+      color: var.$primary-dark;
+    }
   }
 
   .chart-badge {
