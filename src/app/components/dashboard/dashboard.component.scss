@@ -377,6 +377,19 @@
     font-family: 'Courier New', monospace;
     font-size: var.$font-size-base;
     font-weight: 600;
+    text-decoration: none;
+    cursor: default;
+
+    &[href] {
+      cursor: pointer;
+      transition: opacity var.$transition-fast, transform var.$transition-fast;
+
+      &:hover {
+        opacity: 0.8;
+        transform: translateY(-1px);
+        text-decoration: none;
+      }
+    }
 
     &.oblique {
       background: rgba(var.$badge-oblique, 0.1);

@@ -426,5 +426,15 @@ export class DashboardComponent implements OnInit {
   getPlatformIcon(platform: string): string {
     return platform === 'azure' ? '☁️' : '🔷';
   }
+
+  getPackageUrl(packageName: string, version: string): string {
+    const clean = version.replace(/[\^~]/, '');
+    return `https://www.npmjs.com/package/${packageName}/v/${clean}`;
+  }
+
+  getPipelineUrl(pipeline: PipelineResult): string {
+    const baseUrl = 'https://bitbucket.bit.admin.ch';
+    return `${baseUrl}/projects/${pipeline.project}/repos/${pipeline.repo}/browse/pipeline/Chart.yaml`;
+  }
 }
 

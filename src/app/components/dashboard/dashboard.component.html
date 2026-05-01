@@ -132,18 +132,22 @@
                   </td>
                   <td class="version">
                     @if (repo.packageVersions['@oblique/oblique']) {
-                      <span class="version-badge oblique">
+                      <a class="version-badge oblique"
+                         [href]="getPackageUrl('@oblique/oblique', repo.packageVersions['@oblique/oblique']!)"
+                         target="_blank" rel="noopener noreferrer">
                         {{ repo.packageVersions['@oblique/oblique'] }}
-                      </span>
+                      </a>
                     } @else {
                       <span class="no-version">-</span>
                     }
                   </td>
                   <td class="version">
                     @if (repo.packageVersions['@angular/cdk']) {
-                      <span class="version-badge angular">
+                      <a class="version-badge angular"
+                         [href]="getPackageUrl('@angular/cdk', repo.packageVersions['@angular/cdk']!)"
+                         target="_blank" rel="noopener noreferrer">
                         {{ repo.packageVersions['@angular/cdk'] }}
-                      </span>
+                      </a>
                     } @else {
                       <span class="no-version">-</span>
                     }
@@ -213,9 +217,11 @@
                   @for (name of getPipelineNames(pipeline); track name) {
                     <td class="version">
                       @if (pipeline.pipelineVersions[name]) {
-                        <span class="version-badge pipeline-version">
+                        <a class="version-badge pipeline-version"
+                           [href]="getPipelineUrl(pipeline)"
+                           target="_blank" rel="noopener noreferrer">
                           {{ pipeline.pipelineVersions[name] }}
-                        </span>
+                        </a>
                       } @else {
                         <span class="no-version">-</span>
                       }
