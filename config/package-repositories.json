@@ -18,6 +18,14 @@
       "path": "package.json"
     },
     {
+      "platform": "bitbucket",
+      "project": "coin",
+      "repo": "coin-ui",
+      "name": "VTG_COIN",
+      "path": "package.json",
+      "branch": "master"
+    },
+    {
       "platform": "azure",
       "collection": "DefaultCollection",
       "project": "Fedpol_PWA_App",

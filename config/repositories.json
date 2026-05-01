@@ -14,6 +14,11 @@
       "name": "BJ BO HREG"
     },
     {
+      "project": "coin",
+      "repo": "coin-gitops",
+      "name": "VTG_COIN"
+    },
+    {
       "project": "FEDPOLPWA",
       "repo": "fedpol-pwa-app-gitops",
       "name": "FEDPOL PWA"

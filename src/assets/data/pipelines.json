@@ -57,6 +57,37 @@
     ]
   },
   {
+    "name": "VTG_COIN",
+    "project": "coin",
+    "repo": "coin-gitops",
+    "status": "success",
+    "pipelineVersions": {
+      "commons-pipeline": "2.0.2",
+      "angular-pipeline": "2.2.1",
+      "cd-pipelines": "8.1.0",
+      "dotnet-pipeline": null
+    },
+    "chartName": "coin-pipeline",
+    "chartVersion": "1.0.0",
+    "allDependencies": [
+      {
+        "name": "commons-pipeline",
+        "version": "2.0.2",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "angular-pipeline",
+        "version": "2.2.1",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "cd-pipelines",
+        "version": "8.1.0",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      }
+    ]
+  },
+  {
     "name": "FEDPOL PWA",
     "project": "FEDPOLPWA",
     "repo": "fedpol-pwa-app-gitops",
