@@ -17,10 +17,9 @@ export class DashboardComponent implements OnInit {
   error;
 
   statsChartOption: EChartsOption = {};
-  obliqueVersionsChartOption: EChartsOption = {};
-  angularVersionsChartOption: EChartsOption = {};
   platformChartOption: EChartsOption = {};
   timelineChartOption: EChartsOption = {};
+  packageChartOptions: { name: string; option: EChartsOption }[] = [];
   pipelineChartOptions: { name: string; option: EChartsOption }[] = [];
 
   constructor(private versionService: VersionMonitoringService) {
@@ -47,8 +46,7 @@ export class DashboardComponent implements OnInit {
 
   private updateCharts(repositories: RepositoryResult[]): void {
     this.updateStatsChart(repositories);
-    this.updateObliqueVersionsChart(repositories);
-    this.updateAngularVersionsChart(repositories);
+    this.updatePackageCharts(repositories);
     this.updatePlatformChart(repositories);
     this.updateTimelineChart(repositories);
   }
@@ -116,116 +114,47 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  private updateObliqueVersionsChart(repositories: RepositoryResult[]): void {
-    const versionMap = new Map<string, number>();
+  private updatePackageCharts(repositories: RepositoryResult[]): void {
+    if (!repositories.length) return;
+    const packageNames = Object.keys(repositories[0].packageVersions);
+    const colors = ['#1890ff', '#722ed1', '#fa8c16', '#52c41a', '#f5222d', '#13c2c2'];
 
-    repositories.forEach(repo => {
-      const version = repo.packageVersions['@oblique/oblique'];
-      if (version) {
-        const cleanVersion = version.replace(/[\^~]/, '');
-        versionMap.set(cleanVersion, (versionMap.get(cleanVersion) || 0) + 1);
-      }
+    this.packageChartOptions = packageNames.map((name, i) => {
+      const versionMap = new Map<string, number>();
+      repositories.forEach(repo => {
+        const version = repo.packageVersions[name];
+        if (version) {
+          const clean = version.replace(/[\^~]/, '');
+          versionMap.set(clean, (versionMap.get(clean) || 0) + 1);
+        }
+      });
+      const sortedVersions = Array.from(versionMap.entries()).sort((a, b) => b[1] - a[1]);
+      const color = colors[i % colors.length];
+
+      return {
+        name,
+        option: {
+          title: {
+            text: `Versions ${name}`,
+            left: 'center',
+            textStyle: { fontSize: 18, fontWeight: 'bold' }
+          },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+          xAxis: {
+            type: 'category',
+            data: sortedVersions.map(v => v[0]),
+            axisLabel: { rotate: 45 }
+          },
+          yAxis: { type: 'value', name: 'Nombre de repos' },
+          series: [{
+            data: sortedVersions.map(v => ({ value: v[1], itemStyle: { color } })),
+            type: 'bar',
+            barWidth: '60%',
+            label: { show: true, position: 'top' }
+          }]
+        } as EChartsOption
+      };
     });
-
-    const sortedVersions = Array.from(versionMap.entries()).sort((a, b) => b[1] - a[1]);
-
-    this.obliqueVersionsChartOption = {
-      title: {
-        text: 'Versions Oblique',
-        left: 'center',
-        textStyle: {
-          fontSize: 18,
-          fontWeight: 'bold'
-        }
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      xAxis: {
-        type: 'category',
-        data: sortedVersions.map(v => v[0]),
-        axisLabel: {
-          rotate: 45
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Nombre de repos'
-      },
-      series: [
-        {
-          data: sortedVersions.map(v => ({
-            value: v[1],
-            itemStyle: { color: '#1890ff' }
-          })),
-          type: 'bar',
-          barWidth: '60%',
-          label: {
-            show: true,
-            position: 'top'
-          }
-        }
-      ]
-    };
-  }
-
-  private updateAngularVersionsChart(repositories: RepositoryResult[]): void {
-    const versionMap = new Map<string, number>();
-
-    repositories.forEach(repo => {
-      const version = repo.packageVersions['@angular/cdk'];
-      if (version) {
-        const cleanVersion = version.replace(/[\^~]/, '');
-        versionMap.set(cleanVersion, (versionMap.get(cleanVersion) || 0) + 1);
-      }
-    });
-
-    const sortedVersions = Array.from(versionMap.entries()).sort((a, b) => b[1] - a[1]);
-
-    this.angularVersionsChartOption = {
-      title: {
-        text: 'Versions Angular CDK',
-        left: 'center',
-        textStyle: {
-          fontSize: 18,
-          fontWeight: 'bold'
-        }
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      xAxis: {
-        type: 'category',
-        data: sortedVersions.map(v => v[0]),
-        axisLabel: {
-          rotate: 45
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Nombre de repos'
-      },
-      series: [
-        {
-          data: sortedVersions.map(v => ({
-            value: v[1],
-            itemStyle: { color: '#722ed1' }
-          })),
-          type: 'bar',
-          barWidth: '60%',
-          label: {
-            show: true,
-            position: 'top'
-          }
-        }
-      ]
-    };
   }
 
   private updatePlatformChart(repositories: RepositoryResult[]): void {
@@ -415,6 +344,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  getPackageNames(repo: RepositoryResult): string[] {
+    return Object.keys(repo.packageVersions);
+  }
+
   getPipelineNames(pipeline: PipelineResult): string[] {
     return Object.keys(pipeline.pipelineVersions);
   }
@@ -437,4 +370,3 @@ export class DashboardComponent implements OnInit {
     return `${baseUrl}/projects/${pipeline.project}/repos/${pipeline.repo}/browse/pipeline/Chart.yaml`;
   }
 }
-

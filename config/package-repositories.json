@@ -1,6 +1,6 @@
 {
   "filePath": "package.json",
-  "packageNames": ["@oblique/oblique", "@angular/cdk"],
+  "packageNames": ["@oblique/oblique", "@angular/cdk", "eslint", "zone.js"],
   "repositories": [
     {
       "platform": "azure",

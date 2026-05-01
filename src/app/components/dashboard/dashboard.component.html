@@ -76,15 +76,12 @@
           <div echarts [options]="platformChartOption" class="chart"></div>
         </div>
 
-        <!-- Oblique Versions Chart -->
-        <div class="chart-card wide">
-          <div echarts [options]="obliqueVersionsChartOption" class="chart"></div>
-        </div>
-
-        <!-- Angular Versions Chart -->
-        <div class="chart-card wide">
-          <div echarts [options]="angularVersionsChartOption" class="chart"></div>
-        </div>
+        <!-- Dynamic Package Charts -->
+        @for (packageChart of packageChartOptions; track packageChart.name) {
+          <div class="chart-card wide">
+            <div echarts [options]="packageChart.option" class="chart"></div>
+          </div>
+        }
 
         <!-- Dynamic Pipeline Charts -->
         @for (pipelineChart of pipelineChartOptions; track pipelineChart.name) {
@@ -108,8 +105,11 @@
               <tr>
                 <th>Repository</th>
                 <th>Plateforme</th>
-                <th>{{'@'}}oblique/oblique</th>
-                <th>{{'@'}}angular/cdk</th>
+                @if (data()!.repositories.length > 0) {
+                  @for (name of getPackageNames(data()!.repositories[0]); track name) {
+                    <th>{{ name }}</th>
+                  }
+                }
                 <th>Status</th>
               </tr>
             </thead>
@@ -130,28 +130,19 @@
                       {{ getPlatformIcon(repo.platform) }} {{ repo.platform }}
                     </span>
                   </td>
-                  <td class="version">
-                    @if (repo.packageVersions['@oblique/oblique']) {
-                      <a class="version-badge oblique"
-                         [href]="getPackageUrl('@oblique/oblique', repo.packageVersions['@oblique/oblique']!)"
-                         target="_blank" rel="noopener noreferrer">
-                        {{ repo.packageVersions['@oblique/oblique'] }}
-                      </a>
-                    } @else {
-                      <span class="no-version">-</span>
-                    }
-                  </td>
-                  <td class="version">
-                    @if (repo.packageVersions['@angular/cdk']) {
-                      <a class="version-badge angular"
-                         [href]="getPackageUrl('@angular/cdk', repo.packageVersions['@angular/cdk']!)"
-                         target="_blank" rel="noopener noreferrer">
-                        {{ repo.packageVersions['@angular/cdk'] }}
-                      </a>
-                    } @else {
-                      <span class="no-version">-</span>
-                    }
-                  </td>
+                  @for (name of getPackageNames(repo); track name) {
+                    <td class="version">
+                      @if (repo.packageVersions[name]) {
+                        <a class="version-badge package-version"
+                           [href]="getPackageUrl(name, repo.packageVersions[name]!)"
+                           target="_blank" rel="noopener noreferrer">
+                          {{ repo.packageVersions[name] }}
+                        </a>
+                      } @else {
+                        <span class="no-version">-</span>
+                      }
+                    </td>
+                  }
                   <td class="status">
                     @if (repo.status === 'success') {
                       <span class="status-badge success">✅ OK</span>
