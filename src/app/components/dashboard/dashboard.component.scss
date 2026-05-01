@@ -84,6 +84,29 @@
     margin-bottom: 0.5rem;
     display: block;
   }
+
+  .lang-switcher {
+    display: flex;
+    gap: var.$spacing-xs;
+
+    button {
+      background: transparent;
+      border: 2px solid var.$primary-color;
+      color: var.$primary-color;
+      padding: var.$spacing-xs var.$spacing-sm;
+      border-radius: var.$border-radius-sm;
+      cursor: pointer;
+      font-size: var.$font-size-sm;
+      font-weight: 600;
+      transition: background var.$transition-fast, color var.$transition-fast;
+
+      &.active,
+      &:hover {
+        background: var.$primary-color;
+        color: var.$background-white;
+      }
+    }
+  }
 }
 
 // Loading & Error States

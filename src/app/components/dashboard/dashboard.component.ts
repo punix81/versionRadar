@@ -2,12 +2,13 @@ import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { VersionMonitoringService, RepositoryResult, PipelineResult } from '../../services/version-monitoring.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxEchartsModule],
+  imports: [CommonModule, NgxEchartsModule, TranslateModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -22,7 +23,12 @@ export class DashboardComponent implements OnInit {
   packageChartOptions: { name: string; option: EChartsOption }[] = [];
   pipelineChartOptions: { name: string; option: EChartsOption }[] = [];
 
-  constructor(private versionService: VersionMonitoringService) {
+  currentLang = 'fr';
+
+  constructor(
+    private versionService: VersionMonitoringService,
+    private translate: TranslateService
+  ) {
     this.data = this.versionService.data;
     this.loading = this.versionService.loading;
     this.error = this.versionService.error;
@@ -368,5 +374,10 @@ export class DashboardComponent implements OnInit {
   getPipelineUrl(pipeline: PipelineResult): string {
     const baseUrl = 'https://bitbucket.bit.admin.ch';
     return `${baseUrl}/projects/${pipeline.project}/repos/${pipeline.repo}/browse/pipeline/Chart.yaml`;
+  }
+
+  switchLang(lang: string): void {
+    this.currentLang = lang;
+    this.translate.use(lang);
   }
 }

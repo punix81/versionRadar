@@ -4,16 +4,21 @@
     <div class="header-content">
       <img src="assets/icons/versionradar_logo_with_text.png" alt="VersionRadar Logo" class="logo" style="height: 60px; margin-bottom: 0.5rem;" />
       <h1>VersionRadar Dashboard</h1>
-      <p class="subtitle">Monitoring des versions Oblique et Angular CDK</p>
+      <p class="subtitle">{{ 'dashboard.subtitle' | translate }}</p>
     </div>
     <div class="header-actions">
+      <!-- Language switcher -->
+      <div class="lang-switcher">
+        <button [class.active]="currentLang === 'fr'" (click)="switchLang('fr')">FR</button>
+        <button [class.active]="currentLang === 'en'" (click)="switchLang('en')">EN</button>
+      </div>
       <button class="refresh-btn" (click)="refresh()" [disabled]="loading()">
         <span class="icon"></span>
-        <span>Rafraîchir</span>
+        <span>{{ 'dashboard.refresh' | translate }}</span>
       </button>
       @if (data()) {
         <div class="last-update">
-          Dernière mise à jour: {{ data()!.timestamp | date:'short' }}
+          {{ 'dashboard.last_update' | translate }}: {{ data()!.timestamp | date:'short' }}
         </div>
       }
     </div>
@@ -23,7 +28,7 @@
   @if (loading()) {
     <div class="loading-container">
       <div class="spinner"></div>
-      <p>Chargement des données...</p>
+      <p>{{ 'dashboard.loading' | translate }}</p>
     </div>
   }
 
@@ -32,7 +37,7 @@
     <div class="error-container">
       <span class="error-icon">⚠️</span>
       <p>{{ error() }}</p>
-      <button (click)="refresh()">Réessayer</button>
+      <button (click)="refresh()">{{ 'dashboard.retry' | translate }}</button>
     </div>
   }
 
@@ -45,72 +50,40 @@
           <div class="stat-icon"></div>
           <div class="stat-content">
             <div class="stat-value">{{ data()!.stats.total }}</div>
-            <div class="stat-label">Total Repositories</div>
+            <div class="stat-label">{{ 'dashboard.total_repos' | translate }}</div>
           </div>
         </div>
         <div class="stat-card success">
           <div class="stat-icon">✅</div>
           <div class="stat-content">
             <div class="stat-value">{{ data()!.stats.success }}</div>
-            <div class="stat-label">Succès</div>
+            <div class="stat-label">{{ 'dashboard.success' | translate }}</div>
           </div>
         </div>
         <div class="stat-card error">
           <div class="stat-icon">❌</div>
           <div class="stat-content">
             <div class="stat-value">{{ data()!.stats.errors }}</div>
-            <div class="stat-label">Erreurs</div>
+            <div class="stat-label">{{ 'dashboard.errors' | translate }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Charts Grid -->
-      <div class="charts-grid">
-        <!-- Status Chart -->
-        <div class="chart-card">
-          <div echarts [options]="statsChartOption" class="chart"></div>
-        </div>
-
-        <!-- Platform Chart -->
-        <div class="chart-card">
-          <div echarts [options]="platformChartOption" class="chart"></div>
-        </div>
-
-        <!-- Dynamic Package Charts -->
-        @for (packageChart of packageChartOptions; track packageChart.name) {
-          <div class="chart-card wide">
-            <div echarts [options]="packageChart.option" class="chart"></div>
-          </div>
-        }
-
-        <!-- Dynamic Pipeline Charts -->
-        @for (pipelineChart of pipelineChartOptions; track pipelineChart.name) {
-          <div class="chart-card wide">
-            <div echarts [options]="pipelineChart.option" class="chart"></div>
-          </div>
-        }
-
-        <!-- Timeline Chart -->
-        <div class="chart-card full-width">
-          <div echarts [options]="timelineChartOption" class="chart"></div>
-        </div>
-      </div>
-
-      <!-- Repositories Table -->
+       <!-- Repositories Table -->
       <div class="table-container">
-        <h2> Détails des Repositories</h2>
+        <h2>{{ 'table.repo_details' | translate }}</h2>
         <div class="table-wrapper">
           <table class="repositories-table">
             <thead>
               <tr>
-                <th>Repository</th>
-                <th>Plateforme</th>
+                <th>{{ 'table.repository' | translate }}</th>
+                <th>{{ 'table.platform' | translate }}</th>
                 @if (data()!.repositories.length > 0) {
                   @for (name of getPackageNames(data()!.repositories[0]); track name) {
                     <th>{{ name }}</th>
                   }
                 }
-                <th>Status</th>
+                <th>{{ 'table.status' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -161,30 +134,30 @@
 
       <!-- Pipelines Table -->
       <div class="table-container">
-        <h2> Détails des Pipelines</h2>
+        <h2>{{ 'table.pipeline_details' | translate }}</h2>
         <div class="pipeline-stats">
           <span class="stat-item">
-             Total: {{ data()!.pipelineStats.total }}
+             {{ 'pipeline_stats.total' | translate }}: {{ data()!.pipelineStats.total }}
           </span>
           <span class="stat-item success">
-            ✅ Succès: {{ data()!.pipelineStats.success }}
+            ✅ {{ 'pipeline_stats.success' | translate }}: {{ data()!.pipelineStats.success }}
           </span>
           <span class="stat-item error">
-            ❌ Erreurs: {{ data()!.pipelineStats.errors }}
+            ❌ {{ 'pipeline_stats.errors' | translate }}: {{ data()!.pipelineStats.errors }}
           </span>
         </div>
         <div class="table-wrapper">
           <table class="repositories-table pipelines-table">
             <thead>
               <tr>
-                <th>Projet</th>
-                <th>Chart</th>
+                <th>{{ 'table.project' | translate }}</th>
+                <th>{{ 'table.chart' | translate }}</th>
                 @if (data()!.pipelines.length > 0) {
                   @for (name of getPipelineNames(data()!.pipelines[0]); track name) {
                     <th>{{ name }}</th>
                   }
                 }
-                <th>Status</th>
+                <th>{{ 'table.status' | translate }}</th>
               </tr>
             </thead>
             <tbody>
