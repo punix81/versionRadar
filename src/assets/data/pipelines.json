@@ -34,5 +34,52 @@
         "repository": "file://../dotnet-pipeline"
       }
     ]
+  },
+  {
+    "name": "bit_fmz_app-gitops",
+    "project": "fmz",
+    "repo": "bit_fmz_app-gitops",
+    "status": "success",
+    "pipelineVersions": {
+      "commons-pipeline": "2.0.2",
+      "angular-pipeline": "2.2.1",
+      "cd-pipelines": "7.10.0",
+      "dotnet-pipeline": "1.4.0-ResourceNamings-40"
+    },
+    "chartName": "bit-journey-app-pipeline",
+    "chartVersion": "1.1.1",
+    "allDependencies": [
+      {
+        "name": "commons-pipeline",
+        "version": "2.0.2",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "angular-pipeline",
+        "version": "2.2.1",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "cd-pipelines",
+        "version": "7.10.0",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "generic-application-pipeline",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
+        "version": "8.0.1"
+      },
+      {
+        "name": "dotnet-pipeline",
+        "version": "1.2.2-9",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted-test"
+      },
+      {
+        "name": "dotnet-pipeline",
+        "alias": "dotnet-pipeline-new",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted-test",
+        "version": "1.4.0-ResourceNamings-40"
+      }
+    ]
   }
 ]

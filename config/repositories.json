@@ -10,7 +10,12 @@
     {
       "project": "bjbohreg",
       "repo": "bj_bo_hreg_gitops",
-      "name": "bj bo"
+      "name": "bj_bo_hreg_gitops"
+    },
+    {
+      "project": "fmz",
+      "repo": "bit_fmz_app-gitops",
+      "name": "bit_fmz_app-gitops"
     }
   ]
 }
