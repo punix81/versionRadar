@@ -7,11 +7,13 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { VersionMonitoringService, RepositoryResult, PipelineResult } from '../../services/version-monitoring.service';
 import { PackagesRadarComponent } from '../packages-radar/packages-radar.component';
 import { PipelinesRadarComponent } from '../pipelines-radar/pipelines-radar.component';
+import { ConfigAdminComponent } from '../config-admin/config-admin.component';
+import { ConfigService } from '../../services/config.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent],
+  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, ConfigAdminComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -31,6 +33,7 @@ export class DashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly versionService = inject(VersionMonitoringService);
   private readonly translate = inject(TranslateService);
+  private readonly configService = inject(ConfigService);
 
   constructor() {
     this.data = this.versionService.data;
@@ -42,6 +45,13 @@ export class DashboardComponent implements OnInit {
       if (currentData) {
         this.updateCharts(currentData.repositories);
         this.updatePipelineCharts(currentData.pipelines);
+      }
+    });
+
+    // Reload dashboard data whenever admin saves a config change
+    effect(() => {
+      if (this.configService.savedVersion() > 0) {
+        this.loadData();
       }
     });
   }

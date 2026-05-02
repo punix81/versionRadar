@@ -1,0 +1,331 @@
+<div class="admin-panel">
+  <!-- Toggle Header -->
+  <div class="admin-toggle" (click)="togglePanel()" role="button" tabindex="0" (keydown.enter)="togglePanel()" (keydown.space)="togglePanel()">
+    <span class="admin-toggle-title">
+      <span aria-hidden="true">⚙️</span>
+      Administration des configurations
+    </span>
+    <span class="admin-toggle-icon" aria-hidden="true">{{ isOpen() ? '▲' : '▼' }}</span>
+  </div>
+
+  @if (isOpen()) {
+    <div class="admin-body">
+
+      <!-- Tabs -->
+      <div class="tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          [class.active]="activeTab() === 'pipelines'"
+          (click)="setTab('pipelines')"
+        >
+          <span aria-hidden="true">🔁</span> Pipeline Repositories
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [class.active]="activeTab() === 'packages'"
+          (click)="setTab('packages')"
+        >
+          <span aria-hidden="true">📦</span> Package Repositories
+        </button>
+      </div>
+
+      <!-- ============================== PIPELINE TAB ============================== -->
+      @if (activeTab() === 'pipelines') {
+        <div class="tab-content" role="tabpanel">
+
+          @if (pipelineLoading()) {
+            <div class="loading-msg"><span aria-hidden="true">⏳</span> Chargement...</div>
+          }
+          @if (pipelineError(); as err) {
+            <div class="error-msg">
+              <span aria-hidden="true">⚠️</span>
+              {{ err }}
+              @if (err.includes('npm start')) {
+                <code class="inline-cmd">npm start</code>
+              }
+              <button type="button" class="btn btn-sm btn-cancel" (click)="loadPipelineConfig()" style="margin-left: 8px">Réessayer</button>
+            </div>
+          }
+          @if (pipelineSuccess()) {
+            <div class="success-msg"><span aria-hidden="true">✅</span> Sauvegardé avec succès !</div>
+          }
+
+          @if (pipelineConfig(); as cfg) {
+            <!-- FilePath setting -->
+            <div class="settings-row">
+              <label class="settings-label" for="pipeline-filepath">Chemin du fichier :</label>
+              <input
+                id="pipeline-filepath"
+                class="settings-input"
+                type="text"
+                [ngModel]="cfg.filePath"
+                (ngModelChange)="updatePipelineFilePath($event)"
+                placeholder="pipeline/Chart.yaml"
+              />
+            </div>
+
+            <!-- Pipeline names (tags) -->
+            <div class="settings-section">
+              <div class="settings-section-title">Noms des pipelines surveillés :</div>
+              <div class="tags-list">
+                @for (name of cfg.pipelineNames; track name; let i = $index) {
+                  <span class="tag">
+                    {{ name }}
+                    <button type="button" class="tag-remove" (click)="removePipelineName(i)" title="Supprimer">×</button>
+                  </span>
+                }
+                <div class="tag-add-row">
+                  <input
+                    class="tag-input"
+                    type="text"
+                    placeholder="Nouveau nom…"
+                    [ngModel]="newPipelineName()"
+                    (ngModelChange)="newPipelineName.set($event)"
+                    (keydown.enter)="addPipelineName()"
+                  />
+                  <button type="button" class="btn btn-sm btn-add" (click)="addPipelineName()">+ Ajouter</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Repositories table -->
+            <div class="settings-section">
+              <div class="settings-section-title">Repositories :</div>
+              <div class="table-wrapper">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Project</th>
+                      <th>Repo</th>
+                      <th>Branche</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (repo of cfg.repositories; track repo.repo; let i = $index) {
+                      @if (pipelineEditingIndex() === i) {
+                        <tr class="row-editing">
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].name" placeholder="Nom" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].project" placeholder="Project" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].repo" placeholder="Repo" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" placeholder="main" /></td>
+                          <td class="actions-cell">
+                            <button type="button" class="btn btn-sm btn-save" (click)="cancelEditPipeline()">✔ OK</button>
+                            <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPipeline()">Annuler</button>
+                          </td>
+                        </tr>
+                      } @else {
+                        <tr>
+                          <td>{{ repo.name }}</td>
+                          <td>{{ repo.project }}</td>
+                          <td>{{ repo.repo }}</td>
+                          <td>{{ repo.branch || '—' }}</td>
+                          <td class="actions-cell">
+                            <button type="button" class="btn btn-sm btn-edit" (click)="startEditPipeline(i)" title="Modifier">✏️</button>
+                            <button type="button" class="btn btn-sm btn-delete" (click)="deletePipelineRepo(i)" title="Supprimer">🗑️</button>
+                          </td>
+                        </tr>
+                      }
+                    }
+
+                    <!-- Add new row -->
+                    @if (pipelineAddingNew()) {
+                      <tr class="row-editing">
+                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().name" placeholder="Nom *" /></td>
+                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().project" placeholder="Project *" /></td>
+                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().repo" placeholder="Repo *" /></td>
+                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().branch" placeholder="main" /></td>
+                        <td class="actions-cell">
+                          <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPipelineRepo()">✔ Ajouter</button>
+                          <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPipeline()">Annuler</button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" class="btn btn-add-row" (click)="startAddPipelineRepo()">
+                <span aria-hidden="true">＋</span> Ajouter un repository
+              </button>
+            </div>
+
+            <!-- Save button -->
+            <div class="admin-footer">
+              <button type="button" class="btn btn-primary" (click)="savePipelineConfig()" [disabled]="pipelineSaving()">
+                {{ pipelineSaving() ? '⏳ Sauvegarde...' : '💾 Sauvegarder repositories.json' }}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="loadPipelineConfig()">
+                🔄 Recharger
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ============================== PACKAGES TAB ============================== -->
+      @if (activeTab() === 'packages') {
+        <div class="tab-content" role="tabpanel">
+
+          @if (packageLoading()) {
+            <div class="loading-msg"><span aria-hidden="true">⏳</span> Chargement...</div>
+          }
+          @if (packageError(); as err) {
+            <div class="error-msg">
+              <span aria-hidden="true">⚠️</span>
+              {{ err }}
+              @if (err.includes('npm start')) {
+                <code class="inline-cmd">npm start</code>
+              }
+              <button type="button" class="btn btn-sm btn-cancel" (click)="loadPackageConfig()" style="margin-left: 8px">Réessayer</button>
+            </div>
+          }
+          @if (packageSuccess()) {
+            <div class="success-msg"><span aria-hidden="true">✅</span> Sauvegardé avec succès !</div>
+          }
+
+          @if (packageConfig(); as cfg) {
+            <!-- FilePath setting -->
+            <div class="settings-row">
+              <label class="settings-label" for="package-filepath">Chemin du fichier :</label>
+              <input
+                id="package-filepath"
+                class="settings-input"
+                type="text"
+                [ngModel]="cfg.filePath"
+                (ngModelChange)="updatePackageFilePath($event)"
+                placeholder="package.json"
+              />
+            </div>
+
+            <!-- Package names (tags) -->
+            <div class="settings-section">
+              <div class="settings-section-title">Packages surveillés :</div>
+              <div class="tags-list">
+                @for (name of cfg.packageNames; track name; let i = $index) {
+                  <span class="tag">
+                    {{ name }}
+                    <button type="button" class="tag-remove" (click)="removePackageName(i)" title="Supprimer">×</button>
+                  </span>
+                }
+                <div class="tag-add-row">
+                  <input
+                    class="tag-input"
+                    type="text"
+                    placeholder="@scope/package…"
+                    [ngModel]="newPackageName()"
+                    (ngModelChange)="newPackageName.set($event)"
+                    (keydown.enter)="addPackageName()"
+                  />
+                  <button type="button" class="btn btn-sm btn-add" (click)="addPackageName()">+ Ajouter</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Repositories table -->
+            <div class="settings-section">
+              <div class="settings-section-title">Repositories :</div>
+              <div class="table-wrapper">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Plateforme</th>
+                      <th>Project</th>
+                      <th>Repo</th>
+                      <th>Path</th>
+                      <th>Collection</th>
+                      <th>Branche</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (repo of cfg.repositories; track repo.repo; let i = $index) {
+                      @if (packageEditingIndex() === i) {
+                        <tr class="row-editing">
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].name" placeholder="Nom" /></td>
+                          <td>
+                            <select class="td-input" [(ngModel)]="cfg.repositories[i].platform">
+                              <option value="azure">azure</option>
+                              <option value="bitbucket">bitbucket</option>
+                            </select>
+                          </td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].project" placeholder="Project" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].repo" placeholder="Repo" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].path" placeholder="package.json" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].collection" placeholder="DefaultCollection" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" placeholder="main" /></td>
+                          <td class="actions-cell">
+                            <button type="button" class="btn btn-sm btn-save" (click)="cancelEditPackage()">✔ OK</button>
+                            <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPackage()">Annuler</button>
+                          </td>
+                        </tr>
+                      } @else {
+                        <tr>
+                          <td>{{ repo.name }}</td>
+                          <td>
+                            <span class="platform-pill" [class.azure]="repo.platform === 'azure'" [class.bitbucket]="repo.platform === 'bitbucket'">
+                              {{ repo.platform }}
+                            </span>
+                          </td>
+                          <td>{{ repo.project }}</td>
+                          <td>{{ repo.repo }}</td>
+                          <td class="path-cell">{{ repo.path }}</td>
+                          <td>{{ repo.collection || '—' }}</td>
+                          <td>{{ repo.branch || '—' }}</td>
+                          <td class="actions-cell">
+                            <button type="button" class="btn btn-sm btn-edit" (click)="startEditPackage(i)" title="Modifier">✏️</button>
+                            <button type="button" class="btn btn-sm btn-delete" (click)="deletePackageRepo(i)" title="Supprimer">🗑️</button>
+                          </td>
+                        </tr>
+                      }
+                    }
+
+                    <!-- Add new row -->
+                    @if (packageAddingNew()) {
+                      <tr class="row-editing">
+                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().name" placeholder="Nom *" /></td>
+                        <td>
+                          <select class="td-input" [(ngModel)]="packageNewRepo().platform">
+                            <option value="azure">azure</option>
+                            <option value="bitbucket">bitbucket</option>
+                          </select>
+                        </td>
+                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().project" placeholder="Project *" /></td>
+                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().repo" placeholder="Repo *" /></td>
+                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().path" placeholder="package.json *" /></td>
+                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().collection" placeholder="DefaultCollection" /></td>
+                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().branch" placeholder="main" /></td>
+                        <td class="actions-cell">
+                          <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPackageRepo()">✔ Ajouter</button>
+                          <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPackage()">Annuler</button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" class="btn btn-add-row" (click)="startAddPackageRepo()">
+                <span aria-hidden="true">＋</span> Ajouter un repository
+              </button>
+            </div>
+
+            <!-- Save button -->
+            <div class="admin-footer">
+              <button type="button" class="btn btn-primary" (click)="savePackageConfig()" [disabled]="packageSaving()">
+                {{ packageSaving() ? '⏳ Sauvegarde...' : '💾 Sauvegarder package-repositories.json' }}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="loadPackageConfig()">
+                🔄 Recharger
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  }
+</div>
+

@@ -1,6 +1,11 @@
 {
   "filePath": "pipeline/Chart.yaml",
-  "pipelineNames": ["commons-pipeline", "angular-pipeline", "cd-pipelines", "dotnet-pipeline"],
+  "pipelineNames": [
+    "commons-pipeline",
+    "angular-pipeline",
+    "cd-pipelines",
+    "dotnet-pipeline"
+  ],
   "repositories": [
     {
       "project": "GEOSI",
@@ -22,32 +27,6 @@
       "project": "FEDPOLPWA",
       "repo": "fedpol-pwa-app-gitops",
       "name": "FEDPOL PWA"
-    },
-    {
-      "project": "ALMA",
-      "repo": "nb-ab-alma-gitops",
-      "name": "NB AB ALMA"
-    },
-    {
-      "project": "SECONLR",
-      "repo": "seco-nlr-gitops",
-      "name": "SECO NLR"
-    },
-    {
-      "project": "SEM",
-      "repo": "sem_wis_gitops",
-      "name": "SEM WIS"
-    },
-    {
-      "project": "LOGIB",
-      "repo": "ebg-logib-gitops",
-      "name": "EBG LOGIB"
-    },
-    {
-      "project": "FMZ",
-      "repo": "bit_fmz_app-gitops",
-      "name": "BIT FMZ APP"
     }
   ]
 }
-
