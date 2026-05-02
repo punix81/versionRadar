@@ -1,14 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, interval, switchMap, startWith, forkJoin } from 'rxjs';
+import { Observable, interval, switchMap, startWith, forkJoin, tap, catchError, finalize, map, of } from 'rxjs';
 
-export interface PackageVersions {
-  [key: string]: string | null;
-}
+export type PackageVersions = Record<string, string | null>;
 
-export interface PipelineVersions {
-  [key: string]: string | null;
-}
+export type PipelineVersions = Record<string, string | null>;
 
 export interface RepositoryResult {
   name: string;
@@ -65,54 +61,50 @@ export class VersionMonitoringService {
   readonly error = this.errorSignal.asReadonly();
 
   /**
-   * Charger les données depuis les fichiers de configuration
-   * (simulation - en production, vous appelleriez une API backend)
+   * Charger les données depuis les fichiers de configuration.
+   * Retourne un Observable<void> — pas de Promise.
    */
-  async loadVersionData(): Promise<void> {
+  loadVersionData(): Observable<void> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    try {
-      const [repositories, pipelines] = await new Promise<[RepositoryResult[], PipelineResult[]]>(
-        (resolve, reject) => {
-          forkJoin([
-            this.http.get<RepositoryResult[]>('assets/data/repositories.json'),
-            this.http.get<PipelineResult[]>('assets/data/pipelines.json')
-          ]).subscribe({ next: resolve, error: reject });
+    return forkJoin({
+      repositories: this.http.get<RepositoryResult[]>('assets/data/repositories.json'),
+      pipelines: this.http.get<PipelineResult[]>('assets/data/pipelines.json')
+    }).pipe(
+      tap(({ repositories, pipelines }) => {
+        if (repositories.length === 0 && pipelines.length === 0) {
+          this.errorSignal.set(
+            'Aucune donnée disponible. Lancez la commande "npm run fetch-all" pour récupérer les versions depuis Azure DevOps et Bitbucket.'
+          );
+          this.dataSignal.set(null);
+          return;
         }
-      );
 
-      if (repositories.length === 0 && pipelines.length === 0) {
-        this.errorSignal.set(
-          'Aucune donnée disponible. Lancez la commande "npm run fetch-all" pour récupérer les versions depuis Azure DevOps et Bitbucket.'
-        );
-        this.dataSignal.set(null);
-        return;
-      }
-
-      const versionData: VersionData = {
-        repositories,
-        pipelines,
-        timestamp: new Date(),
-        stats: {
-          total: repositories.length,
-          success: repositories.filter(r => r.status === 'success').length,
-          errors: repositories.filter(r => r.status === 'error').length
-        },
-        pipelineStats: {
-          total: pipelines.length,
-          success: pipelines.filter(r => r.status === 'success').length,
-          errors: pipelines.filter(r => r.status === 'error').length
-        }
-      };
-
-      this.dataSignal.set(versionData);
-    } catch (error) {
-      this.errorSignal.set('Erreur lors du chargement des données. Lancez npm run fetch-all pour récupérer les données.');
-      console.error('Error loading version data:', error);
-    } finally {
-      this.loadingSignal.set(false);
-    }
+        this.dataSignal.set({
+          repositories,
+          pipelines,
+          timestamp: new Date(),
+          stats: {
+            total: repositories.length,
+            success: repositories.filter(r => r.status === 'success').length,
+            errors: repositories.filter(r => r.status === 'error').length
+          },
+          pipelineStats: {
+            total: pipelines.length,
+            success: pipelines.filter(r => r.status === 'success').length,
+            errors: pipelines.filter(r => r.status === 'error').length
+          }
+        });
+      }),
+      catchError(error => {
+        this.errorSignal.set('Erreur lors du chargement des données. Lancez npm run fetch-all pour récupérer les données.');
+        console.error('Error loading version data:', error);
+        return of(null);
+      }),
+      finalize(() => this.loadingSignal.set(false)),
+      map(() => void 0)
+    );
   }
 
   /**
@@ -121,10 +113,8 @@ export class VersionMonitoringService {
   startAutoRefresh(intervalMs = 300000): Observable<VersionData | null> {
     return interval(intervalMs).pipe(
       startWith(0),
-      switchMap(async () => {
-        await this.loadVersionData();
-        return this.data();
-      })
+      switchMap(() => this.loadVersionData()),
+      map(() => this.data())
     );
   }
 

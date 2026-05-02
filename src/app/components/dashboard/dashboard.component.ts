@@ -1,4 +1,5 @@
-import { Component, OnInit, effect } from '@angular/core';
+import { Component, OnInit, effect, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
@@ -27,6 +28,8 @@ export class DashboardComponent implements OnInit {
 
   currentLang = 'fr';
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(
     private versionService: VersionMonitoringService,
     private translate: TranslateService
@@ -48,8 +51,10 @@ export class DashboardComponent implements OnInit {
     this.loadData();
   }
 
-  async loadData(): Promise<void> {
-    await this.versionService.loadVersionData();
+  loadData(): void {
+    this.versionService.loadVersionData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   refresh(): void {

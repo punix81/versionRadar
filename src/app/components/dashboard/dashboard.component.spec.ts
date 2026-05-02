@@ -5,6 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 
 import { DashboardComponent } from './dashboard.component';
 import { VersionMonitoringService, RepositoryResult, PipelineResult, VersionData } from '../../services/version-monitoring.service';
@@ -72,7 +73,7 @@ function buildMockVersionService(initial: VersionData | null = null) {
     data: dataSig.asReadonly(),
     loading: loadingSig.asReadonly(),
     error: errorSig.asReadonly(),
-    loadVersionData: vi.fn(async () => {}),
+    loadVersionData: vi.fn(() => of(undefined as void)),
     _dataSig: dataSig,
     _loadingSig: loadingSig,
     _errorSig: errorSig,

@@ -1,6 +1,7 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { lastValueFrom } from 'rxjs';
 
 import {
   VersionMonitoringService,
@@ -95,27 +96,27 @@ describe('VersionMonitoringService', () => {
   describe('loadVersionData() – loading flag', () => {
     it('should set loading to true while fetching', () => {
       const { service, http } = setup();
-      service.loadVersionData();
+      service.loadVersionData().subscribe();
       expect(service.loading()).toBe(true);
       flushLoad(http, [makeRepo()], [makePipeline()]);
     });
 
     it('should set loading to false after success', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [makeRepo()], [makePipeline()]);
-      await promise;
+      await done;
       expect(service.loading()).toBe(false);
     });
 
     it('should set loading to false after HTTP error', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       // forkJoin unsubscribes (cancels) the sibling when one errors
       http.expectOne('assets/data/repositories.json').error(new ProgressEvent('error'));
       // absorb the cancelled sibling request
       http.match('assets/data/pipelines.json');
-      await promise;
+      await done;
       expect(service.loading()).toBe(false);
     });
   });
@@ -126,9 +127,9 @@ describe('VersionMonitoringService', () => {
       const { service, http } = setup();
       const repos = [makeRepo({ name: 'app-a' }), makeRepo({ name: 'app-b' })];
       const pipes = [makePipeline({ name: 'pipe-a' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, pipes);
-      await promise;
+      await done;
 
       const data = service.data();
       expect(data).not.toBeNull();
@@ -139,63 +140,63 @@ describe('VersionMonitoringService', () => {
     it('should compute stats.total as the number of repositories', async () => {
       const { service, http } = setup();
       const repos = [makeRepo(), makeRepo({ name: 'app-b' }), makeRepo({ name: 'app-c' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       expect(service.data()!.stats.total).toBe(3);
     });
 
     it('should compute stats.success correctly', async () => {
       const { service, http } = setup();
       const repos = [makeRepo({ status: 'success' }), makeRepo({ name: 'app-b', status: 'error' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       expect(service.data()!.stats.success).toBe(1);
     });
 
     it('should compute stats.errors correctly', async () => {
       const { service, http } = setup();
       const repos = [makeRepo({ status: 'error' }), makeRepo({ name: 'app-b', status: 'error' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       expect(service.data()!.stats.errors).toBe(2);
     });
 
     it('should compute pipelineStats.total correctly', async () => {
       const { service, http } = setup();
       const pipes = [makePipeline(), makePipeline({ name: 'p-b' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [], pipes);
-      await promise;
+      await done;
       expect(service.data()!.pipelineStats.total).toBe(2);
     });
 
     it('should compute pipelineStats.success correctly', async () => {
       const { service, http } = setup();
       const pipes = [makePipeline({ status: 'success' }), makePipeline({ name: 'p-b', status: 'error' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [], pipes);
-      await promise;
+      await done;
       expect(service.data()!.pipelineStats.success).toBe(1);
     });
 
     it('should compute pipelineStats.errors correctly', async () => {
       const { service, http } = setup();
       const pipes = [makePipeline({ status: 'error' }), makePipeline({ name: 'p-b', status: 'error' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [], pipes);
-      await promise;
+      await done;
       expect(service.data()!.pipelineStats.errors).toBe(2);
     });
 
     it('should set a timestamp on the data', async () => {
       const { service, http } = setup();
       const before = new Date();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [makeRepo()], []);
-      await promise;
+      await done;
       const after = new Date();
       const ts = service.data()!.timestamp;
       expect(ts.getTime()).toBeGreaterThanOrEqual(before.getTime());
@@ -205,16 +206,16 @@ describe('VersionMonitoringService', () => {
     it('should clear error() on successful load', async () => {
       const { service, http } = setup();
       // First trigger an error (forkJoin cancels sibling)
-      const p1 = service.loadVersionData();
+      const done1 = lastValueFrom(service.loadVersionData());
       http.expectOne('assets/data/repositories.json').error(new ProgressEvent('error'));
       http.match('assets/data/pipelines.json'); // absorb cancelled sibling
-      await p1;
+      await done1;
       expect(service.error()).not.toBeNull();
 
       // Then load successfully
-      const p2 = service.loadVersionData();
+      const done2 = lastValueFrom(service.loadVersionData());
       flushLoad(http, [makeRepo()], []);
-      await p2;
+      await done2;
       expect(service.error()).toBeNull();
     });
   });
@@ -223,26 +224,26 @@ describe('VersionMonitoringService', () => {
   describe('loadVersionData() – empty data', () => {
     it('should set an error when both arrays are empty', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [], []);
-      await promise;
+      await done;
       expect(service.error()).not.toBeNull();
       expect(service.data()).toBeNull();
     });
 
     it('should still succeed when only repositories is empty', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [], [makePipeline()]);
-      await promise;
+      await done;
       expect(service.data()).not.toBeNull();
     });
 
     it('should still succeed when only pipelines is empty', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [makeRepo()], []);
-      await promise;
+      await done;
       expect(service.data()).not.toBeNull();
     });
   });
@@ -251,19 +252,19 @@ describe('VersionMonitoringService', () => {
   describe('loadVersionData() – error path', () => {
     it('should set error() on HTTP failure', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       http.expectOne('assets/data/repositories.json').error(new ProgressEvent('network error'));
       http.match('assets/data/pipelines.json'); // absorb cancelled sibling
-      await promise;
+      await done;
       expect(service.error()).not.toBeNull();
     });
 
     it('should leave data() as null after HTTP failure', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       http.expectOne('assets/data/repositories.json').error(new ProgressEvent('network error'));
       http.match('assets/data/pipelines.json'); // absorb cancelled sibling
-      await promise;
+      await done;
       expect(service.data()).toBeNull();
     });
   });
@@ -278,26 +279,26 @@ describe('VersionMonitoringService', () => {
     it('should count azure repos correctly', async () => {
       const { service, http } = setup();
       const repos = [makeRepo({ platform: 'azure' }), makeRepo({ name: 'app-b', platform: 'azure' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       expect(service.getStatsByPlatform().azure).toBe(2);
     });
 
     it('should count bitbucket repos correctly', async () => {
       const { service, http } = setup();
       const repos = [makeRepo({ platform: 'bitbucket' }), makeRepo({ name: 'app-b', platform: 'azure' })];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       expect(service.getStatsByPlatform().bitbucket).toBe(1);
     });
 
     it('should return zeroes for both when repos have neither platform', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [makeRepo({ platform: 'github' })], []);
-      await promise;
+      await done;
       expect(service.getStatsByPlatform()).toEqual({ azure: 0, bitbucket: 0 });
     });
   });
@@ -316,9 +317,9 @@ describe('VersionMonitoringService', () => {
         makeRepo({ name: 'app-b', packageVersions: { '@oblique/oblique': '^11.0.0' } }),
         makeRepo({ name: 'app-c', packageVersions: { '@oblique/oblique': '^10.0.0' } }),
       ];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       const map = service.getVersionsForPackage('@oblique/oblique');
       expect(map.get('11.0.0')).toBe(2);
       expect(map.get('10.0.0')).toBe(1);
@@ -330,9 +331,9 @@ describe('VersionMonitoringService', () => {
         makeRepo({ packageVersions: { 'rxjs': '^7.8.0' } }),
         makeRepo({ name: 'app-b', packageVersions: { 'rxjs': '~7.8.0' } }),
       ];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       const map = service.getVersionsForPackage('rxjs');
       expect(map.has('^7.8.0')).toBe(false);
       expect(map.has('~7.8.0')).toBe(false);
@@ -345,9 +346,9 @@ describe('VersionMonitoringService', () => {
         makeRepo({ packageVersions: { '@oblique/oblique': '^11.0.0' } }),
         makeRepo({ name: 'app-b', packageVersions: {} }),
       ];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       const map = service.getVersionsForPackage('@oblique/oblique');
       expect(map.size).toBe(1);
     });
@@ -357,17 +358,17 @@ describe('VersionMonitoringService', () => {
       const repos = [
         makeRepo({ packageVersions: { 'pkg': null as any } }),
       ];
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);
-      await promise;
+      await done;
       expect(service.getVersionsForPackage('pkg').size).toBe(0);
     });
 
     it('should return empty Map for an unknown package name', async () => {
       const { service, http } = setup();
-      const promise = service.loadVersionData();
+      const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [makeRepo()], []);
-      await promise;
+      await done;
       expect(service.getVersionsForPackage('unknown-pkg').size).toBe(0);
     });
   });
