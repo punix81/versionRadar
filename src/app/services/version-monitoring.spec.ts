@@ -1,14 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { VersionMonitoring } from './version-monitoring';
 
-// ── Setup helper ──────────────────────────────────────────────────────────────
-
 function setup() {
   TestBed.configureTestingModule({});
   return TestBed.inject(VersionMonitoring);
 }
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('VersionMonitoring', () => {
 

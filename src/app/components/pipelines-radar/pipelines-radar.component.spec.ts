@@ -4,12 +4,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-
 import { PipelinesRadarComponent, PipelineStats } from './pipelines-radar.component';
 import { VersionDisplayService } from '../../services/version-display.service';
 import { PipelineResult } from '../../services/version-monitoring.service';
-
-// ── Factories ─────────────────────────────────────────────────────────────────
 
 function makePipeline(overrides: Partial<PipelineResult> = {}): PipelineResult {
   return {
@@ -28,8 +25,6 @@ function makePipeline(overrides: Partial<PipelineResult> = {}): PipelineResult {
 function makeStats(overrides: Partial<PipelineStats> = {}): PipelineStats {
   return { total: 0, success: 0, errors: 0, ...overrides };
 }
-
-// ── Setup helper ──────────────────────────────────────────────────────────────
 
 async function setup(
   pipelines: PipelineResult[] = [],
@@ -53,11 +48,8 @@ async function setup(
   return { fixture, component };
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
 describe('PipelinesRadarComponent', () => {
 
-  // ── Creation ─────────────────────────────────────────────────────────────────
   describe('component creation', () => {
     it('should be created', async () => {
       const { component } = await setup();
@@ -80,7 +72,6 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── @Input pipelines ──────────────────────────────────────────────────────────
   describe('@Input pipelines', () => {
     it('should accept a list of pipelines', async () => {
       const pipes = [makePipeline({ name: 'p-a' }), makePipeline({ name: 'p-b' })];
@@ -102,7 +93,6 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── @Input pipelineStats ──────────────────────────────────────────────────────
   describe('@Input pipelineStats', () => {
     it('should display the total count', async () => {
       const { fixture } = await setup([], makeStats({ total: 5, success: 3, errors: 2 }));
@@ -135,14 +125,11 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── Dynamic column headers ────────────────────────────────────────────────────
   describe('dynamic column headers', () => {
     it('should render one th per pipeline key from the first pipeline', async () => {
       const pipes = [makePipeline({ pipelineVersions: { 'p1': '1.0.0', 'p2': '2.0.0', 'p3': '3.0.0' } })];
       const { fixture } = await setup(pipes);
-      // Project | Chart | ...pipelineKeys | Status = 3 + N fixed
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      // 3 pipeline keys + 3 fixed = 6
       expect(headers).toHaveLength(6);
     });
 
@@ -159,12 +146,10 @@ describe('PipelinesRadarComponent', () => {
     it('should render only fixed headers when pipelines is empty', async () => {
       const { fixture } = await setup([]);
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      // Project | Chart | Status = 3 fixed
       expect(headers).toHaveLength(3);
     });
   });
 
-  // ── Version badges ────────────────────────────────────────────────────────────
   describe('version badges', () => {
     it('should render a link for each pipeline version', async () => {
       const { fixture } = await setup([makePipeline()]);
@@ -205,7 +190,6 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── Chart badge ───────────────────────────────────────────────────────────────
   describe('chart badge', () => {
     it('should display chartName and chartVersion when present', async () => {
       const { fixture } = await setup([
@@ -224,7 +208,7 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── Status row classes ────────────────────────────────────────────────────────
+
   describe('status row classes', () => {
     it('should apply status-success class on successful pipelines', async () => {
       const { fixture } = await setup([makePipeline({ status: 'success' })]);
@@ -239,7 +223,6 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── Status badges ─────────────────────────────────────────────────────────────
   describe('status badges', () => {
     it('should show a success badge for successful pipelines', async () => {
       const { fixture } = await setup([makePipeline({ status: 'success' })]);
@@ -258,7 +241,6 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── Project / repo display ────────────────────────────────────────────────────
   describe('project and repo display', () => {
     it('should display the pipeline name in bold', async () => {
       const { fixture } = await setup([makePipeline({ name: 'special-pipeline' })]);
@@ -274,7 +256,6 @@ describe('PipelinesRadarComponent', () => {
     });
   });
 
-  // ── VersionDisplayService delegation ─────────────────────────────────────────
   describe('VersionDisplayService delegation', () => {
     it('getPipelineNames returns keys from pipelineVersions', async () => {
       const { component } = await setup();

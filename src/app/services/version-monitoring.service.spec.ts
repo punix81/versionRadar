@@ -10,7 +10,6 @@ import {
   VersionData,
 } from './version-monitoring.service';
 
-// ── Factories ─────────────────────────────────────────────────────────────────
 
 function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
   return {
@@ -35,8 +34,6 @@ function makePipeline(overrides: Partial<PipelineResult> = {}): PipelineResult {
   };
 }
 
-// ── Setup helper ──────────────────────────────────────────────────────────────
-
 function setup() {
   TestBed.configureTestingModule({
     providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -55,13 +52,10 @@ function flushLoad(
   http.expectOne('assets/data/pipelines.json').flush(pipelines);
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
 describe('VersionMonitoringService', () => {
 
   afterEach(() => TestBed.inject(HttpTestingController).verify({ ignoreCancelled: true }));
 
-  // ── Injection ─────────────────────────────────────────────────────────────────
   describe('injection', () => {
     it('should be created', () => {
       const { service } = setup();
@@ -74,7 +68,7 @@ describe('VersionMonitoringService', () => {
     });
   });
 
-  // ── Initial signal state ──────────────────────────────────────────────────────
+
   describe('initial signal state', () => {
     it('data() should be null initially', () => {
       const { service } = setup();
@@ -92,7 +86,6 @@ describe('VersionMonitoringService', () => {
     });
   });
 
-  // ── loadVersionData – loading flag ────────────────────────────────────────────
   describe('loadVersionData() – loading flag', () => {
     it('should set loading to true while fetching', () => {
       const { service, http } = setup();
@@ -112,16 +105,13 @@ describe('VersionMonitoringService', () => {
     it('should set loading to false after HTTP error', async () => {
       const { service, http } = setup();
       const done = lastValueFrom(service.loadVersionData());
-      // forkJoin unsubscribes (cancels) the sibling when one errors
       http.expectOne('assets/data/repositories.json').error(new ProgressEvent('error'));
-      // absorb the cancelled sibling request
       http.match('assets/data/pipelines.json');
       await done;
       expect(service.loading()).toBe(false);
     });
   });
 
-  // ── loadVersionData – success path ────────────────────────────────────────────
   describe('loadVersionData() – success path', () => {
     it('should populate data() with repositories and pipelines', async () => {
       const { service, http } = setup();
@@ -220,7 +210,6 @@ describe('VersionMonitoringService', () => {
     });
   });
 
-  // ── loadVersionData – empty data ──────────────────────────────────────────────
   describe('loadVersionData() – empty data', () => {
     it('should set an error when both arrays are empty', async () => {
       const { service, http } = setup();
@@ -248,7 +237,6 @@ describe('VersionMonitoringService', () => {
     });
   });
 
-  // ── loadVersionData – error path ──────────────────────────────────────────────
   describe('loadVersionData() – error path', () => {
     it('should set error() on HTTP failure', async () => {
       const { service, http } = setup();
@@ -269,7 +257,6 @@ describe('VersionMonitoringService', () => {
     });
   });
 
-  // ── getStatsByPlatform ────────────────────────────────────────────────────────
   describe('getStatsByPlatform()', () => {
     it('should return zeroes when data is null', () => {
       const { service } = setup();
@@ -303,7 +290,6 @@ describe('VersionMonitoringService', () => {
     });
   });
 
-  // ── getVersionsForPackage ─────────────────────────────────────────────────────
   describe('getVersionsForPackage()', () => {
     it('should return empty Map when data is null', () => {
       const { service } = setup();

@@ -4,12 +4,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-
 import { PackagesRadarComponent } from './packages-radar.component';
 import { VersionDisplayService } from '../../services/version-display.service';
 import { RepositoryResult } from '../../services/version-monitoring.service';
 
-// ── Factories ─────────────────────────────────────────────────────────────────
 
 function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
   return {
@@ -25,8 +23,6 @@ function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
     ...overrides,
   };
 }
-
-// ── Setup helper ──────────────────────────────────────────────────────────────
 
 async function setup(repositories: RepositoryResult[] = []) {
   await TestBed.configureTestingModule({
@@ -46,11 +42,8 @@ async function setup(repositories: RepositoryResult[] = []) {
   return { fixture, component };
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
 describe('PackagesRadarComponent', () => {
 
-  // ── Creation ─────────────────────────────────────────────────────────────────
   describe('component creation', () => {
     it('should be created', async () => {
       const { component } = await setup();
@@ -68,7 +61,6 @@ describe('PackagesRadarComponent', () => {
     });
   });
 
-  // ── @Input repositories ───────────────────────────────────────────────────────
   describe('@Input repositories', () => {
     it('should accept a list of repositories', async () => {
       const repos = [makeRepo({ name: 'app-a' }), makeRepo({ name: 'app-b' })];
@@ -90,14 +82,11 @@ describe('PackagesRadarComponent', () => {
     });
   });
 
-  // ── Table headers (dynamic columns) ──────────────────────────────────────────
   describe('dynamic column headers', () => {
     it('should render one th per package key from the first repository', async () => {
       const repos = [makeRepo({ packageVersions: { '@oblique/oblique': '^11.0.0', '@angular/cdk': '^17.0.0', '@angular/core': '^17.0.0' } })];
       const { fixture } = await setup(repos);
-      // thead has: Repository | Platform | ...packageKeys | Status
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      // 3 package columns + 3 fixed (Repository | Platform | Status) = 6
       expect(headers).toHaveLength(6);
     });
 
@@ -114,12 +103,10 @@ describe('PackagesRadarComponent', () => {
     it('should not render package headers when repositories is empty', async () => {
       const { fixture } = await setup([]);
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      // Only Repository | Platform | Status = 3 fixed headers
       expect(headers).toHaveLength(3);
     });
   });
 
-  // ── Version badges ────────────────────────────────────────────────────────────
   describe('version badges', () => {
     it('should render a link for each package version', async () => {
       const { fixture } = await setup([makeRepo()]);
@@ -153,7 +140,6 @@ describe('PackagesRadarComponent', () => {
     });
   });
 
-  // ── Status row CSS classes ────────────────────────────────────────────────────
   describe('status row classes', () => {
     it('should apply status-success class on successful repos', async () => {
       const { fixture } = await setup([makeRepo({ status: 'success' })]);
@@ -168,7 +154,6 @@ describe('PackagesRadarComponent', () => {
     });
   });
 
-  // ── Platform badges ───────────────────────────────────────────────────────────
   describe('platform badges', () => {
     it('should apply "azure" CSS class for azure platform', async () => {
       const { fixture } = await setup([makeRepo({ platform: 'azure' })]);
@@ -193,7 +178,6 @@ describe('PackagesRadarComponent', () => {
     });
   });
 
-  // ── Status badges ─────────────────────────────────────────────────────────────
   describe('status badges', () => {
     it('should show a success badge for successful repos', async () => {
       const { fixture } = await setup([makeRepo({ status: 'success' })]);
@@ -214,7 +198,6 @@ describe('PackagesRadarComponent', () => {
     });
   });
 
-  // ── VersionDisplayService delegation ─────────────────────────────────────────
   describe('VersionDisplayService delegation', () => {
     it('getPackageNames should return keys from packageVersions', async () => {
       const { component } = await setup();

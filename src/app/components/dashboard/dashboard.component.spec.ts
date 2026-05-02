@@ -10,8 +10,6 @@ import { of } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { VersionMonitoringService, RepositoryResult, PipelineResult, VersionData } from '../../services/version-monitoring.service';
 
-// ── Factories ────────────────────────────────────────────────────────────────
-
 function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
   return {
     name: 'my-app',
@@ -62,8 +60,6 @@ function makeVersionData(
   };
 }
 
-// ── Mock service ──────────────────────────────────────────────────────────────
-
 function buildMockVersionService(initial: VersionData | null = null) {
   const dataSig = signal<VersionData | null>(initial);
   const loadingSig = signal<boolean>(false);
@@ -79,8 +75,6 @@ function buildMockVersionService(initial: VersionData | null = null) {
     _errorSig: errorSig,
   };
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function setup(mockService = buildMockVersionService()) {
   await TestBed.configureTestingModule({
@@ -100,10 +94,8 @@ async function setup(mockService = buildMockVersionService()) {
   return { fixture, component, mockService };
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
 describe('DashboardComponent', () => {
-  // ── Creation ────────────────────────────────────────────────────────────────
+
   describe('component creation', () => {
     it('should be created', async () => {
       const { component } = await setup();
@@ -122,7 +114,6 @@ describe('DashboardComponent', () => {
     });
   });
 
-  // ── Loading state ───────────────────────────────────────────────────────────
   describe('loading state', () => {
     it('should expose loading signal from service', async () => {
       const mockService = buildMockVersionService();
@@ -134,7 +125,7 @@ describe('DashboardComponent', () => {
     });
   });
 
-  // ── Error state ─────────────────────────────────────────────────────────────
+
   describe('error state', () => {
     it('should expose error signal from service', async () => {
       const mockService = buildMockVersionService();
@@ -146,7 +137,6 @@ describe('DashboardComponent', () => {
     });
   });
 
-  // ── Language switching ───────────────────────────────────────────────────────
   describe('switchLang()', () => {
     it('should update currentLang', async () => {
       const { component } = await setup();
@@ -163,7 +153,6 @@ describe('DashboardComponent', () => {
     });
   });
 
-  // ── Refresh ──────────────────────────────────────────────────────────────────
   describe('refresh()', () => {
     it('should call loadVersionData again', async () => {
       const mockService = buildMockVersionService();
@@ -173,7 +162,6 @@ describe('DashboardComponent', () => {
     });
   });
 
-  // ── Charts: no data ──────────────────────────────────────────────────────────
   describe('charts when no data', () => {
     it('should have empty packageChartOptions initially', async () => {
       const { component } = await setup(buildMockVersionService(null));
@@ -186,7 +174,6 @@ describe('DashboardComponent', () => {
     });
   });
 
-  // ── Charts: with data ────────────────────────────────────────────────────────
   describe('charts with data', () => {
     async function setupWithData() {
       const versionData = makeVersionData(
@@ -262,13 +249,11 @@ describe('DashboardComponent', () => {
       );
       const { component } = await setup(mockService);
       const barData: { value: number }[] = (component.pipelineChartOptions[0].option as any).series[0].data;
-      // Most common version first
       expect(barData[0].value).toBe(2);
       expect(barData[1].value).toBe(1);
     });
   });
 
-  // ── Effect: charts auto-update ───────────────────────────────────────────────
   describe('reactive effect', () => {
     it('should update charts when data signal changes', async () => {
       const mockService = buildMockVersionService(null);

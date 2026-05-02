@@ -2,8 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { VersionDisplayService } from './version-display.service';
 import { RepositoryResult, PipelineResult } from './version-monitoring.service';
 
-// ── Factories ─────────────────────────────────────────────────────────────────
-
 function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
   return {
     name: 'my-app',
@@ -33,18 +31,12 @@ function makePipeline(overrides: Partial<PipelineResult> = {}): PipelineResult {
   };
 }
 
-// ── Setup helper ──────────────────────────────────────────────────────────────
-
 function setup() {
   TestBed.configureTestingModule({});
   return TestBed.inject(VersionDisplayService);
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
 describe('VersionDisplayService', () => {
-
-  // ── Injection ─────────────────────────────────────────────────────────────────
   describe('injection', () => {
     it('should be created', () => {
       const service = setup();
@@ -57,7 +49,6 @@ describe('VersionDisplayService', () => {
     });
   });
 
-  // ── getPackageNames ───────────────────────────────────────────────────────────
   describe('getPackageNames()', () => {
     it('should return all keys of packageVersions', () => {
       const service = setup();
@@ -84,7 +75,6 @@ describe('VersionDisplayService', () => {
     });
   });
 
-  // ── getPipelineNames ──────────────────────────────────────────────────────────
   describe('getPipelineNames()', () => {
     it('should return all keys of pipelineVersions', () => {
       const service = setup();
@@ -105,7 +95,6 @@ describe('VersionDisplayService', () => {
     });
   });
 
-  // ── getPackageUrl ─────────────────────────────────────────────────────────────
   describe('getPackageUrl()', () => {
     it('should build a valid npmjs URL', () => {
       const service = setup();
@@ -143,7 +132,6 @@ describe('VersionDisplayService', () => {
     });
   });
 
-  // ── getPipelineUrl ────────────────────────────────────────────────────────────
   describe('getPipelineUrl()', () => {
     it('should build the Chart.yaml URL from project and repo', () => {
       const service = setup();
@@ -178,7 +166,6 @@ describe('VersionDisplayService', () => {
     });
   });
 
-  // ── getStatusClass ────────────────────────────────────────────────────────────
   describe('getStatusClass()', () => {
     it('should return "status-success" for status success', () => {
       const service = setup();
@@ -191,7 +178,6 @@ describe('VersionDisplayService', () => {
     });
   });
 
-  // ── getPlatformIcon ───────────────────────────────────────────────────────────
   describe('getPlatformIcon()', () => {
     it('should return ☁️ for azure platform', () => {
       const service = setup();
