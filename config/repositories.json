@@ -8,25 +8,9 @@
   ],
   "repositories": [
     {
-      "project": "GEOSI",
-      "repo": "astra-geosi-gitops",
-      "name": "ASTRA GEOSI",
-      "branch": "pipeline"
-    },
-    {
-      "project": "BJBOHREG",
+      "project": "bjbohreg",
       "repo": "bj_bo_hreg_gitops",
-      "name": "BJ BO HREG"
-    },
-    {
-      "project": "coin",
-      "repo": "coin-gitops",
-      "name": "VTG_COIN"
-    },
-    {
-      "project": "FEDPOLPWA",
-      "repo": "fedpol-pwa-app-gitops",
-      "name": "FEDPOL PWA"
+      "name": "bj bo"
     }
   ]
 }

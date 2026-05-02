@@ -43,6 +43,11 @@ export class ConfigAdminComponent implements OnInit {
   pipelineNewRepo = signal<PipelineRepository>(emptyPipelineRepo());
   newPipelineName = signal('');
 
+  // Pipeline URL add mode
+  pipelineUrlInput = signal('');
+  pipelineUrlParseError = signal<string | null>(null);
+  pipelineUrlParsed = signal(false);
+
   // Package state
   packageConfig = signal<PackageConfig | null>(null);
   packageLoading = signal(false);
@@ -129,6 +134,9 @@ export class ConfigAdminComponent implements OnInit {
     this.pipelineEditingIndex.set(null);
     this.pipelineAddingNew.set(false);
     this.pipelineNewRepo.set(emptyPipelineRepo());
+    this.pipelineUrlInput.set('');
+    this.pipelineUrlParsed.set(false);
+    this.pipelineUrlParseError.set(null);
   }
 
   deletePipelineRepo(index: number): void {
@@ -136,12 +144,65 @@ export class ConfigAdminComponent implements OnInit {
     if (!cfg) return;
     cfg.repositories = cfg.repositories.filter((_, i) => i !== index);
     this.pipelineConfig.set({ ...cfg });
+    this.autoSavePipeline();
+  }
+
+  /** Confirms inline edit and auto-saves */
+  confirmEditPipeline(): void {
+    this.pipelineEditingIndex.set(null);
+    this.autoSavePipeline();
   }
 
   startAddPipelineRepo(): void {
     this.pipelineNewRepo.set(emptyPipelineRepo());
+    this.pipelineUrlInput.set('');
+    this.pipelineUrlParseError.set(null);
+    this.pipelineUrlParsed.set(false);
     this.pipelineAddingNew.set(true);
     this.pipelineEditingIndex.set(null);
+  }
+
+  parsePipelineUrl(): void {
+    const raw = this.pipelineUrlInput().trim().replace(/\.git$/, '').replace(/\.$/, '').replace(/\/$/, '');
+    this.pipelineUrlParseError.set(null);
+
+    let project = '';
+    let repo = '';
+
+    // ssh://git@bitbucket.bit.admin.ch/{project}/{repo}
+    let m = raw.match(/ssh:\/\/[^/]+\/([^/]+)\/([^/\s]+)$/);
+    if (m) { project = m[1]; repo = m[2]; }
+
+    // git@bitbucket.bit.admin.ch:{project}/{repo}
+    if (!project) {
+      m = raw.match(/git@[^:]+:([^/]+)\/([^/\s]+)$/);
+      if (m) { project = m[1]; repo = m[2]; }
+    }
+
+    // https://bitbucket.../projects/{project}/repos/{repo}
+    if (!project) {
+      m = raw.match(/\/projects\/([^/]+)\/repos\/([^/\s]+)/);
+      if (m) { project = m[1]; repo = m[2]; }
+    }
+
+    // bare path: {project}/{repo}
+    if (!project) {
+      m = raw.match(/^([^/\s]+)\/([^/\s]+)$/);
+      if (m) { project = m[1]; repo = m[2]; }
+    }
+
+    if (!project || !repo) {
+      this.pipelineUrlParseError.set('URL non reconnue. Formats supportés : SSH, HTTPS Bitbucket ou project/repo');
+      return;
+    }
+
+    this.pipelineNewRepo.set({ project, repo, name: repo, branch: '' });
+    this.pipelineUrlParsed.set(true);
+  }
+
+  resetPipelineUrlParse(): void {
+    this.pipelineUrlParsed.set(false);
+    this.pipelineUrlParseError.set(null);
   }
 
   confirmAddPipelineRepo(): void {
@@ -153,6 +214,28 @@ export class ConfigAdminComponent implements OnInit {
     this.pipelineConfig.set({ ...cfg });
     this.pipelineAddingNew.set(false);
     this.pipelineNewRepo.set(emptyPipelineRepo());
+    this.pipelineUrlInput.set('');
+    this.pipelineUrlParsed.set(false);
+    this.autoSavePipeline();
+  }
+
+  private autoSavePipeline(): void {
+    const cfg = this.pipelineConfig();
+    if (!cfg) return;
+    this.pipelineSaving.set(true);
+    this.pipelineSuccess.set(false);
+    this.pipelineError.set(null);
+    this.configService.savePipelineConfig(cfg).subscribe({
+      next: () => {
+        this.pipelineSaving.set(false);
+        this.pipelineSuccess.set(true);
+        setTimeout(() => this.pipelineSuccess.set(false), 2500);
+      },
+      error: err => {
+        this.pipelineError.set('Erreur sauvegarde : ' + String(err?.message ?? err));
+        this.pipelineSaving.set(false);
+      },
+    });
   }
 
   // ─── Package methods ───────────────────────────────────────────────────────

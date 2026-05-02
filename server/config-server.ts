@@ -37,11 +37,17 @@ function syncPipelinesAsset(config: PipelineConfig): void {
   const assetPath = path.join(ASSETS_DIR, 'pipelines.json');
   if (!fs.existsSync(assetPath)) return;
 
-  const configKeys = new Set(config.repositories.map(r => `${r.project}::${r.repo}`));
+  // Case-insensitive key lookup: "project::repo" (lowercased)
+  const configKeyMap = new Map<string, PipelineConfigRepo>();
+  for (const r of config.repositories) {
+    configKeyMap.set(`${r.project.toLowerCase()}::${r.repo.toLowerCase()}`, r);
+  }
+
   const data = readJson<PipelineResult[]>(assetPath);
 
-  const filtered = data
-    .filter(r => configKeys.has(`${r.project}::${r.repo}`))
+  // Keep existing entries that still match, updating their pipelineVersions columns
+  const kept = data
+    .filter(r => configKeyMap.has(`${r.project.toLowerCase()}::${r.repo.toLowerCase()}`))
     .map(r => {
       const newVersions: Record<string, string | null> = {};
       for (const name of config.pipelineNames) {
@@ -50,8 +56,28 @@ function syncPipelinesAsset(config: PipelineConfig): void {
       return { ...r, pipelineVersions: newVersions };
     });
 
-  writeJson(assetPath, filtered);
-  console.log(`🔄 Synced pipelines.json: ${filtered.length}/${data.length} repos kept`);
+  // Keys already present in the asset
+  const keptKeys = new Set(kept.map(r => `${r.project.toLowerCase()}::${r.repo.toLowerCase()}`));
+
+  // Add stub entries for repos in config that have NO asset data yet
+  const stubs: PipelineResult[] = [];
+  for (const [key, cfgRepo] of configKeyMap) {
+    if (!keptKeys.has(key)) {
+      const stub: PipelineResult = {
+        name: cfgRepo.name,
+        project: cfgRepo.project,
+        repo: cfgRepo.repo,
+        status: 'pending',
+        pipelineVersions: Object.fromEntries(config.pipelineNames.map(n => [n, null])),
+      };
+      stubs.push(stub);
+      console.log(`  ➕ Stub added for new repo: ${cfgRepo.name}`);
+    }
+  }
+
+  const result = [...kept, ...stubs];
+  writeJson(assetPath, result);
+  console.log(`🔄 Synced pipelines.json: ${kept.length} kept + ${stubs.length} new stubs (was ${data.length})`);
 }
 
 // ── Sync: package config → assets/data/repositories.json ─────────────────────
@@ -60,11 +86,16 @@ function syncRepositoriesAsset(config: PackageConfig): void {
   const assetPath = path.join(ASSETS_DIR, 'repositories.json');
   if (!fs.existsSync(assetPath)) return;
 
-  const configNames = new Set(config.repositories.map(r => r.name));
+  // Case-insensitive match by name
+  const configNameMap = new Map<string, PackageConfigRepo>();
+  for (const r of config.repositories) {
+    configNameMap.set(r.name.toLowerCase(), r);
+  }
+
   const data = readJson<PackageResult[]>(assetPath);
 
-  const filtered = data
-    .filter(r => configNames.has(r.name))
+  const kept = data
+    .filter(r => configNameMap.has(r.name.toLowerCase()))
     .map(r => {
       const newVersions: Record<string, string | null> = {};
       for (const name of config.packageNames) {
@@ -73,8 +104,28 @@ function syncRepositoriesAsset(config: PackageConfig): void {
       return { ...r, packageVersions: newVersions };
     });
 
-  writeJson(assetPath, filtered);
-  console.log(`🔄 Synced repositories.json: ${filtered.length}/${data.length} repos kept`);
+  const keptNames = new Set(kept.map(r => r.name.toLowerCase()));
+
+  // Add stubs for new repos not yet in assets
+  const stubs: PackageResult[] = [];
+  for (const [key, cfgRepo] of configNameMap) {
+    if (!keptNames.has(key)) {
+      const stub: PackageResult = {
+        name: cfgRepo.name,
+        platform: cfgRepo.platform,
+        project: cfgRepo.project,
+        repo: cfgRepo.repo,
+        status: 'pending',
+        packageVersions: Object.fromEntries(config.packageNames.map(n => [n, null])),
+      };
+      stubs.push(stub);
+      console.log(`  ➕ Stub added for new repo: ${cfgRepo.name}`);
+    }
+  }
+
+  const result = [...kept, ...stubs];
+  writeJson(assetPath, result);
+  console.log(`🔄 Synced repositories.json: ${kept.length} kept + ${stubs.length} new stubs (was ${data.length})`);
 }
 
 // ── Routes ────────────────────────────────────────────────────────────────────

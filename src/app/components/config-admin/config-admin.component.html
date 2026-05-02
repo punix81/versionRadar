@@ -113,7 +113,7 @@
                           <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].repo" placeholder="Repo" /></td>
                           <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" placeholder="main" /></td>
                           <td class="actions-cell">
-                            <button type="button" class="btn btn-sm btn-save" (click)="cancelEditPipeline()">✔ OK</button>
+                            <button type="button" class="btn btn-sm btn-save" (click)="confirmEditPipeline()">✔ OK</button>
                             <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPipeline()">Annuler</button>
                           </td>
                         </tr>
@@ -131,18 +131,62 @@
                       }
                     }
 
-                    <!-- Add new row -->
+                    <!-- Add new row (URL mode) -->
                     @if (pipelineAddingNew()) {
-                      <tr class="row-editing">
-                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().name" placeholder="Nom *" /></td>
-                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().project" placeholder="Project *" /></td>
-                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().repo" placeholder="Repo *" /></td>
-                        <td><input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().branch" placeholder="main" /></td>
-                        <td class="actions-cell">
-                          <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPipelineRepo()">✔ Ajouter</button>
-                          <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPipeline()">Annuler</button>
-                        </td>
-                      </tr>
+                      @if (!pipelineUrlParsed()) {
+                        <!-- Step 1: URL input -->
+                        <tr class="row-editing row-url-input">
+                          <td colspan="5">
+                            <div class="url-parse-row">
+                              <span class="url-parse-label">🔗 URL du repo :</span>
+                              <input
+                                class="url-input"
+                                type="text"
+                                [ngModel]="pipelineUrlInput()"
+                                (ngModelChange)="pipelineUrlInput.set($event)"
+                                placeholder="ssh://git@bitbucket.bit.admin.ch/project/repo  ou  project/repo"
+                                (keydown.enter)="parsePipelineUrl()"
+                              />
+                              <button type="button" class="btn btn-sm btn-parse" (click)="parsePipelineUrl()">
+                                🔍 Analyser
+                              </button>
+                              <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPipeline()">
+                                Annuler
+                              </button>
+                            </div>
+                            @if (pipelineUrlParseError()) {
+                              <div class="url-parse-error">⚠️ {{ pipelineUrlParseError() }}</div>
+                            }
+                            <div class="url-parse-hint">
+                              Formats acceptés :
+                              <code>ssh://git@bitbucket.bit.admin.ch/project/repo</code> ·
+                              <code>https://bitbucket…/projects/PROJECT/repos/repo</code> ·
+                              <code>project/repo</code>
+                            </div>
+                          </td>
+                        </tr>
+                      } @else {
+                        <!-- Step 2: editable fields (pre-filled from URL) -->
+                        <tr class="row-editing">
+                          <td>
+                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().name" placeholder="Nom *" />
+                          </td>
+                          <td>
+                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().project" placeholder="Project *" />
+                          </td>
+                          <td>
+                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().repo" placeholder="Repo *" />
+                          </td>
+                          <td>
+                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().branch" placeholder="main" />
+                          </td>
+                          <td class="actions-cell">
+                            <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPipelineRepo()">✔ Ajouter</button>
+                            <button type="button" class="btn btn-sm btn-back" (click)="resetPipelineUrlParse()" title="Retour URL">← URL</button>
+                            <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPipeline()">Annuler</button>
+                          </td>
+                        </tr>
+                      }
                     }
                   </tbody>
                 </table>
@@ -152,11 +196,11 @@
               </button>
             </div>
 
-            <!-- Save button -->
+            <!-- Footer -->
             <div class="admin-footer">
-              <button type="button" class="btn btn-primary" (click)="savePipelineConfig()" [disabled]="pipelineSaving()">
-                {{ pipelineSaving() ? '⏳ Sauvegarde...' : '💾 Sauvegarder repositories.json' }}
-              </button>
+              @if (pipelineSaving()) {
+                <span class="saving-indicator">⏳ Enregistrement...</span>
+              }
               <button type="button" class="btn btn-secondary" (click)="loadPipelineConfig()">
                 🔄 Recharger
               </button>

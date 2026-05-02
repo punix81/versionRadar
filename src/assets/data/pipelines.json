@@ -1,28 +1,7 @@
 [
   {
-    "name": "ASTRA GEOSI",
-    "project": "GEOSI",
-    "repo": "astra-geosi-gitops",
-    "status": "success",
-    "pipelineVersions": {
-      "commons-pipeline": null,
-      "angular-pipeline": null,
-      "cd-pipelines": null,
-      "dotnet-pipeline": null
-    },
-    "chartName": "geosi-pipeline",
-    "chartVersion": "1.0.0",
-    "allDependencies": [
-      {
-        "name": "generic-application-pipeline",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
-        "version": "6.x"
-      }
-    ]
-  },
-  {
-    "name": "BJ BO HREG",
-    "project": "BJBOHREG",
+    "name": "bj_bo_hreg_gitops",
+    "project": "bjbohreg",
     "repo": "bj_bo_hreg_gitops",
     "status": "success",
     "pipelineVersions": {
@@ -53,73 +32,6 @@
         "name": "dotnet-pipelines",
         "version": "1.0.6-beta.5",
         "repository": "file://../dotnet-pipeline"
-      }
-    ]
-  },
-  {
-    "name": "VTG_COIN",
-    "project": "coin",
-    "repo": "coin-gitops",
-    "status": "success",
-    "pipelineVersions": {
-      "commons-pipeline": "2.0.2",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "8.1.0",
-      "dotnet-pipeline": null
-    },
-    "chartName": "coin-pipeline",
-    "chartVersion": "1.0.0",
-    "allDependencies": [
-      {
-        "name": "commons-pipeline",
-        "version": "2.0.2",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "angular-pipeline",
-        "version": "2.2.1",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "cd-pipelines",
-        "version": "8.1.0",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      }
-    ]
-  },
-  {
-    "name": "FEDPOL PWA",
-    "project": "FEDPOLPWA",
-    "repo": "fedpol-pwa-app-gitops",
-    "status": "success",
-    "pipelineVersions": {
-      "commons-pipeline": "2.0.2",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "7.10.0",
-      "dotnet-pipeline": "2.1.0"
-    },
-    "chartName": "angular-fedpol-pwa-app",
-    "chartVersion": "1.1.1",
-    "allDependencies": [
-      {
-        "name": "commons-pipeline",
-        "version": "2.0.2",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "angular-pipeline",
-        "version": "2.2.1",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "cd-pipelines",
-        "version": "7.10.0",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "dotnet-pipeline",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
-        "version": "2.1.0"
       }
     ]
   }
