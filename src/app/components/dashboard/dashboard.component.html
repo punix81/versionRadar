@@ -72,13 +72,15 @@
         </div>
       </div>
 
-       <!-- Repositories Table -->
-      <app-packages-radar [repositories]="data()!.repositories" />
-
       <!-- Pipelines Table -->
       <app-pipelines-radar
         [pipelines]="data()!.pipelines"
         [pipelineStats]="data()!.pipelineStats" />
+
+
+       <!-- Repositories Table -->
+      <app-packages-radar [repositories]="data()!.repositories" />
+
 
     </div>
   }

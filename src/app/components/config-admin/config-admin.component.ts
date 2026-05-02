@@ -32,7 +32,7 @@ export class ConfigAdminComponent implements OnInit {
   isOpen = signal(false);
   activeTab = signal<Tab>('pipelines');
 
-  // Pipeline state
+  // ── Pipeline state ─────────────────────────────────────────────────────────
   pipelineConfig = signal<PipelineConfig | null>(null);
   pipelineLoading = signal(false);
   pipelineSaving = signal(false);
@@ -42,13 +42,11 @@ export class ConfigAdminComponent implements OnInit {
   pipelineAddingNew = signal(false);
   pipelineNewRepo = signal<PipelineRepository>(emptyPipelineRepo());
   newPipelineName = signal('');
-
-  // Pipeline URL add mode
   pipelineUrlInput = signal('');
   pipelineUrlParseError = signal<string | null>(null);
   pipelineUrlParsed = signal(false);
 
-  // Package state
+  // ── Package state ──────────────────────────────────────────────────────────
   packageConfig = signal<PackageConfig | null>(null);
   packageLoading = signal(false);
   packageSaving = signal(false);
@@ -58,53 +56,26 @@ export class ConfigAdminComponent implements OnInit {
   packageAddingNew = signal(false);
   packageNewRepo = signal<PackageRepository>(emptyPackageRepo());
   newPackageName = signal('');
+  packageUrlInput = signal('');
+  packageUrlParseError = signal<string | null>(null);
+  packageUrlParsed = signal(false);
 
   ngOnInit(): void {
     this.loadPipelineConfig();
     this.loadPackageConfig();
   }
 
-  togglePanel(): void {
-    this.isOpen.update(v => !v);
-  }
+  togglePanel(): void { this.isOpen.update(v => !v); }
+  setTab(tab: Tab): void { this.activeTab.set(tab); }
 
-  setTab(tab: Tab): void {
-    this.activeTab.set(tab);
-  }
-
-  // ─── Pipeline methods ──────────────────────────────────────────────────────
+  // ── Pipeline methods ────────────────────────────────────────────────────────
 
   loadPipelineConfig(): void {
     this.pipelineLoading.set(true);
     this.pipelineError.set(null);
     this.configService.getPipelineConfig().subscribe({
-      next: cfg => {
-        this.pipelineConfig.set(JSON.parse(JSON.stringify(cfg)));
-        this.pipelineLoading.set(false);
-      },
-      error: err => {
-        this.pipelineError.set('Erreur chargement : ' + String(err?.message ?? err));
-        this.pipelineLoading.set(false);
-      },
-    });
-  }
-
-  savePipelineConfig(): void {
-    const cfg = this.pipelineConfig();
-    if (!cfg) return;
-    this.pipelineSaving.set(true);
-    this.pipelineSuccess.set(false);
-    this.pipelineError.set(null);
-    this.configService.savePipelineConfig(cfg).subscribe({
-      next: () => {
-        this.pipelineSaving.set(false);
-        this.pipelineSuccess.set(true);
-        setTimeout(() => this.pipelineSuccess.set(false), 3000);
-      },
-      error: err => {
-        this.pipelineError.set('Erreur sauvegarde : ' + String(err?.message ?? err));
-        this.pipelineSaving.set(false);
-      },
+      next: cfg => { this.pipelineConfig.set(JSON.parse(JSON.stringify(cfg))); this.pipelineLoading.set(false); },
+      error: err => { this.pipelineError.set('Erreur chargement : ' + String(err?.message ?? err)); this.pipelineLoading.set(false); },
     });
   }
 
@@ -125,10 +96,7 @@ export class ConfigAdminComponent implements OnInit {
     this.pipelineConfig.set({ ...cfg });
   }
 
-  startEditPipeline(index: number): void {
-    this.pipelineEditingIndex.set(index);
-    this.pipelineAddingNew.set(false);
-  }
+  startEditPipeline(index: number): void { this.pipelineEditingIndex.set(index); this.pipelineAddingNew.set(false); }
 
   cancelEditPipeline(): void {
     this.pipelineEditingIndex.set(null);
@@ -139,17 +107,13 @@ export class ConfigAdminComponent implements OnInit {
     this.pipelineUrlParseError.set(null);
   }
 
+  confirmEditPipeline(): void { this.pipelineEditingIndex.set(null); this.autoSavePipeline(); }
+
   deletePipelineRepo(index: number): void {
     const cfg = this.pipelineConfig();
     if (!cfg) return;
     cfg.repositories = cfg.repositories.filter((_, i) => i !== index);
     this.pipelineConfig.set({ ...cfg });
-    this.autoSavePipeline();
-  }
-
-  /** Confirms inline edit and auto-saves */
-  confirmEditPipeline(): void {
-    this.pipelineEditingIndex.set(null);
     this.autoSavePipeline();
   }
 
@@ -165,45 +129,18 @@ export class ConfigAdminComponent implements OnInit {
   parsePipelineUrl(): void {
     const raw = this.pipelineUrlInput().trim().replace(/\.git$/, '').replace(/\.$/, '').replace(/\/$/, '');
     this.pipelineUrlParseError.set(null);
-
-    let project = '';
-    let repo = '';
-
-    // ssh://git@bitbucket.bit.admin.ch/{project}/{repo}
+    let project = ''; let repo = '';
     let m = raw.match(/ssh:\/\/[^/]+\/([^/]+)\/([^/\s]+)$/);
     if (m) { project = m[1]; repo = m[2]; }
-
-    // git@bitbucket.bit.admin.ch:{project}/{repo}
-    if (!project) {
-      m = raw.match(/git@[^:]+:([^/]+)\/([^/\s]+)$/);
-      if (m) { project = m[1]; repo = m[2]; }
-    }
-
-    // https://bitbucket.../projects/{project}/repos/{repo}
-    if (!project) {
-      m = raw.match(/\/projects\/([^/]+)\/repos\/([^/\s]+)/);
-      if (m) { project = m[1]; repo = m[2]; }
-    }
-
-    // bare path: {project}/{repo}
-    if (!project) {
-      m = raw.match(/^([^/\s]+)\/([^/\s]+)$/);
-      if (m) { project = m[1]; repo = m[2]; }
-    }
-
-    if (!project || !repo) {
-      this.pipelineUrlParseError.set('URL non reconnue. Formats supportés : SSH, HTTPS Bitbucket ou project/repo');
-      return;
-    }
-
+    if (!project) { m = raw.match(/git@[^:]+:([^/]+)\/([^/\s]+)$/); if (m) { project = m[1]; repo = m[2]; } }
+    if (!project) { m = raw.match(/\/projects\/([^/]+)\/repos\/([^/\s]+)/); if (m) { project = m[1]; repo = m[2]; } }
+    if (!project) { m = raw.match(/^([^/\s]+)\/([^/\s]+)$/); if (m) { project = m[1]; repo = m[2]; } }
+    if (!project || !repo) { this.pipelineUrlParseError.set('URL non reconnue. Formats supportés : SSH, HTTPS Bitbucket ou project/repo'); return; }
     this.pipelineNewRepo.set({ project, repo, name: repo, branch: '' });
     this.pipelineUrlParsed.set(true);
   }
 
-  resetPipelineUrlParse(): void {
-    this.pipelineUrlParsed.set(false);
-    this.pipelineUrlParseError.set(null);
-  }
+  resetPipelineUrlParse(): void { this.pipelineUrlParsed.set(false); this.pipelineUrlParseError.set(null); }
 
   confirmAddPipelineRepo(): void {
     const cfg = this.pipelineConfig();
@@ -226,51 +163,19 @@ export class ConfigAdminComponent implements OnInit {
     this.pipelineSuccess.set(false);
     this.pipelineError.set(null);
     this.configService.savePipelineConfig(cfg).subscribe({
-      next: () => {
-        this.pipelineSaving.set(false);
-        this.pipelineSuccess.set(true);
-        setTimeout(() => this.pipelineSuccess.set(false), 2500);
-      },
-      error: err => {
-        this.pipelineError.set('Erreur sauvegarde : ' + String(err?.message ?? err));
-        this.pipelineSaving.set(false);
-      },
+      next: () => { this.pipelineSaving.set(false); this.pipelineSuccess.set(true); setTimeout(() => this.pipelineSuccess.set(false), 2500); },
+      error: err => { this.pipelineError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.pipelineSaving.set(false); },
     });
   }
 
-  // ─── Package methods ───────────────────────────────────────────────────────
+  // ── Package methods ────────────────────────────────────────────────────────
 
   loadPackageConfig(): void {
     this.packageLoading.set(true);
     this.packageError.set(null);
     this.configService.getPackageConfig().subscribe({
-      next: cfg => {
-        this.packageConfig.set(JSON.parse(JSON.stringify(cfg)));
-        this.packageLoading.set(false);
-      },
-      error: err => {
-        this.packageError.set('Erreur chargement : ' + String(err?.message ?? err));
-        this.packageLoading.set(false);
-      },
-    });
-  }
-
-  savePackageConfig(): void {
-    const cfg = this.packageConfig();
-    if (!cfg) return;
-    this.packageSaving.set(true);
-    this.packageSuccess.set(false);
-    this.packageError.set(null);
-    this.configService.savePackageConfig(cfg).subscribe({
-      next: () => {
-        this.packageSaving.set(false);
-        this.packageSuccess.set(true);
-        setTimeout(() => this.packageSuccess.set(false), 3000);
-      },
-      error: err => {
-        this.packageError.set('Erreur sauvegarde : ' + String(err?.message ?? err));
-        this.packageSaving.set(false);
-      },
+      next: cfg => { this.packageConfig.set(JSON.parse(JSON.stringify(cfg))); this.packageLoading.set(false); },
+      error: err => { this.packageError.set('Erreur chargement : ' + String(err?.message ?? err)); this.packageLoading.set(false); },
     });
   }
 
@@ -291,29 +196,82 @@ export class ConfigAdminComponent implements OnInit {
     this.packageConfig.set({ ...cfg });
   }
 
-  startEditPackage(index: number): void {
-    this.packageEditingIndex.set(index);
-    this.packageAddingNew.set(false);
-  }
+  startEditPackage(index: number): void { this.packageEditingIndex.set(index); this.packageAddingNew.set(false); }
 
   cancelEditPackage(): void {
     this.packageEditingIndex.set(null);
     this.packageAddingNew.set(false);
     this.packageNewRepo.set(emptyPackageRepo());
+    this.packageUrlInput.set('');
+    this.packageUrlParsed.set(false);
+    this.packageUrlParseError.set(null);
   }
+
+  confirmEditPackage(): void { this.packageEditingIndex.set(null); this.autoSavePackage(); }
 
   deletePackageRepo(index: number): void {
     const cfg = this.packageConfig();
     if (!cfg) return;
     cfg.repositories = cfg.repositories.filter((_, i) => i !== index);
     this.packageConfig.set({ ...cfg });
+    this.autoSavePackage();
   }
 
   startAddPackageRepo(): void {
     this.packageNewRepo.set(emptyPackageRepo());
+    this.packageUrlInput.set('');
+    this.packageUrlParseError.set(null);
+    this.packageUrlParsed.set(false);
     this.packageAddingNew.set(true);
     this.packageEditingIndex.set(null);
   }
+
+  parsePackageUrl(): void {
+    const raw = this.packageUrlInput().trim();
+    this.packageUrlParseError.set(null);
+    let parsed: Partial<PackageRepository> | null = null;
+
+    // Bitbucket HTTPS: /projects/{project}/repos/{repo}/browse/{path}
+    let m = raw.match(/\/projects\/([^/]+)\/repos\/([^/]+)\/browse\/(.+?)(?:\?.*)?$/);
+    if (m) {
+      parsed = { platform: 'bitbucket', project: m[1], repo: m[2], name: m[2], path: m[3], collection: '' };
+    }
+
+    // Azure DevOps — with project: /{collection}/{project}/_git/{repo}?path=...
+    if (!parsed) {
+      m = raw.match(/\/([^/]+)\/([^/]+)\/_git\/([^?/]+)/);
+      if (m) {
+        const pathParam = this.extractPathParam(raw);
+        parsed = { platform: 'azure', collection: m[1], project: m[2], repo: m[3], name: m[3], path: pathParam };
+      }
+    }
+
+    // Azure DevOps — without project: /{collection}/_git/{repo}?path=...
+    if (!parsed) {
+      m = raw.match(/\/([^/]+)\/_git\/([^?/]+)/);
+      if (m) {
+        const pathParam = this.extractPathParam(raw);
+        parsed = { platform: 'azure', collection: m[1], project: m[2], repo: m[2], name: m[2], path: pathParam };
+      }
+    }
+
+    if (!parsed) {
+      this.packageUrlParseError.set('URL non reconnue. Formats supportés : HTTPS Bitbucket ou Azure DevOps');
+      return;
+    }
+
+    this.packageNewRepo.set({ ...emptyPackageRepo(), ...parsed });
+    this.packageUrlParsed.set(true);
+  }
+
+  private extractPathParam(url: string): string {
+    const match = url.match(/[?&]path=([^&]+)/);
+    if (!match) return 'package.json';
+    const raw = decodeURIComponent(match[1]);
+    return raw.startsWith('/') ? raw.slice(1) : raw;
+  }
+
+  resetPackageUrlParse(): void { this.packageUrlParsed.set(false); this.packageUrlParseError.set(null); }
 
   confirmAddPackageRepo(): void {
     const cfg = this.packageConfig();
@@ -325,6 +283,21 @@ export class ConfigAdminComponent implements OnInit {
     this.packageConfig.set({ ...cfg });
     this.packageAddingNew.set(false);
     this.packageNewRepo.set(emptyPackageRepo());
+    this.packageUrlInput.set('');
+    this.packageUrlParsed.set(false);
+    this.autoSavePackage();
+  }
+
+  private autoSavePackage(): void {
+    const cfg = this.packageConfig();
+    if (!cfg) return;
+    this.packageSaving.set(true);
+    this.packageSuccess.set(false);
+    this.packageError.set(null);
+    this.configService.savePackageConfig(cfg).subscribe({
+      next: () => { this.packageSaving.set(false); this.packageSuccess.set(true); setTimeout(() => this.packageSuccess.set(false), 2500); },
+      error: err => { this.packageError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.packageSaving.set(false); },
+    });
   }
 
   updatePipelineFilePath(value: string): void {

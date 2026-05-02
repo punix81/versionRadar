@@ -302,7 +302,7 @@
                           <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].collection" placeholder="DefaultCollection" /></td>
                           <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" placeholder="main" /></td>
                           <td class="actions-cell">
-                            <button type="button" class="btn btn-sm btn-save" (click)="cancelEditPackage()">✔ OK</button>
+                            <button type="button" class="btn btn-sm btn-save" (click)="confirmEditPackage()">✔ OK</button>
                             <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPackage()">Annuler</button>
                           </td>
                         </tr>
@@ -327,26 +327,60 @@
                       }
                     }
 
-                    <!-- Add new row -->
+                    <!-- Add new row (URL mode) -->
                     @if (packageAddingNew()) {
-                      <tr class="row-editing">
-                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().name" placeholder="Nom *" /></td>
-                        <td>
-                          <select class="td-input" [(ngModel)]="packageNewRepo().platform">
-                            <option value="azure">azure</option>
-                            <option value="bitbucket">bitbucket</option>
-                          </select>
-                        </td>
-                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().project" placeholder="Project *" /></td>
-                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().repo" placeholder="Repo *" /></td>
-                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().path" placeholder="package.json *" /></td>
-                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().collection" placeholder="DefaultCollection" /></td>
-                        <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().branch" placeholder="main" /></td>
-                        <td class="actions-cell">
-                          <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPackageRepo()">✔ Ajouter</button>
-                          <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPackage()">Annuler</button>
-                        </td>
-                      </tr>
+                      @if (!packageUrlParsed()) {
+                        <!-- Step 1: URL input -->
+                        <tr class="row-editing row-url-input">
+                          <td colspan="8">
+                            <div class="url-parse-row">
+                              <span class="url-parse-label">🔗 URL du repo :</span>
+                              <input
+                                class="url-input"
+                                type="text"
+                                [ngModel]="packageUrlInput()"
+                                (ngModelChange)="packageUrlInput.set($event)"
+                                placeholder="https://bitbucket…/projects/PRJ/repos/repo/browse/package.json  ou  Azure DevOps URL"
+                                (keydown.enter)="parsePackageUrl()"
+                              />
+                              <button type="button" class="btn btn-sm btn-parse" (click)="parsePackageUrl()">
+                                🔍 Analyser
+                              </button>
+                              <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPackage()">
+                                Annuler
+                              </button>
+                            </div>
+                            @if (packageUrlParseError()) {
+                              <div class="url-parse-error">⚠️ {{ packageUrlParseError() }}</div>
+                            }
+                            <div class="url-parse-hint">
+                              Bitbucket : <code>https://bitbucket.bit.admin.ch/projects/PRJ/repos/repo/browse/package.json</code><br/>
+                              Azure DevOps : <code>https://devops-server.admin.ch/Collection/Project/_git/Repo?path=/path/package.json</code>
+                            </div>
+                          </td>
+                        </tr>
+                      } @else {
+                        <!-- Step 2: editable pre-filled fields -->
+                        <tr class="row-editing">
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().name" placeholder="Nom *" /></td>
+                          <td>
+                            <select class="td-input" [(ngModel)]="packageNewRepo().platform">
+                              <option value="azure">azure</option>
+                              <option value="bitbucket">bitbucket</option>
+                            </select>
+                          </td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().project" placeholder="Project *" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().repo" placeholder="Repo *" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().path" placeholder="package.json *" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().collection" placeholder="DefaultCollection" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().branch" placeholder="main" /></td>
+                          <td class="actions-cell">
+                            <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPackageRepo()">✔ Ajouter</button>
+                            <button type="button" class="btn btn-sm btn-back" (click)="resetPackageUrlParse()" title="Retour URL">← URL</button>
+                            <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPackage()">Annuler</button>
+                          </td>
+                        </tr>
+                      }
                     }
                   </tbody>
                 </table>
@@ -356,11 +390,11 @@
               </button>
             </div>
 
-            <!-- Save button -->
+            <!-- Footer -->
             <div class="admin-footer">
-              <button type="button" class="btn btn-primary" (click)="savePackageConfig()" [disabled]="packageSaving()">
-                {{ packageSaving() ? '⏳ Sauvegarde...' : '💾 Sauvegarder package-repositories.json' }}
-              </button>
+              @if (packageSaving()) {
+                <span class="saving-indicator">⏳ Enregistrement...</span>
+              }
               <button type="button" class="btn btn-secondary" (click)="loadPackageConfig()">
                 🔄 Recharger
               </button>
