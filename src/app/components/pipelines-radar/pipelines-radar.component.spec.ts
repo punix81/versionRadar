@@ -176,7 +176,7 @@ describe('PipelinesRadarComponent', () => {
 
     it('should show a dash when a pipeline version is missing', async () => {
       const { fixture } = await setup([
-        makePipeline({ pipelineVersions: { 'commons-pipeline': null as any } }),
+        makePipeline({ pipelineVersions: { 'commons-pipeline': null } }),
       ]);
       const dash = fixture.debugElement.query(By.css('td.version .no-version'));
       expect(dash).not.toBeNull();

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { PipelineResult } from '../../services/version-monitoring.service';
@@ -21,6 +21,5 @@ export class PipelinesRadarComponent {
   @Input() pipelines: PipelineResult[] = [];
   @Input() pipelineStats: PipelineStats = { total: 0, success: 0, errors: 0 };
 
-  constructor(public display: VersionDisplayService) {}
+  readonly display = inject(VersionDisplayService);
 }
-

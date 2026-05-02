@@ -64,7 +64,7 @@ describe('VersionDisplayService', () => {
 
     it('should include keys with null values', () => {
       const service = setup();
-      const repo = makeRepo({ packageVersions: { 'pkg-a': null as any, 'pkg-b': '1.0.0' } });
+      const repo = makeRepo({ packageVersions: { 'pkg-a': null as unknown as string, 'pkg-b': '1.0.0' } });
       expect(service.getPackageNames(repo)).toContain('pkg-a');
     });
 
@@ -90,7 +90,7 @@ describe('VersionDisplayService', () => {
 
     it('should include keys with null values', () => {
       const service = setup();
-      const pipeline = makePipeline({ pipelineVersions: { 'commons-pipeline': null as any } });
+      const pipeline = makePipeline({ pipelineVersions: { 'commons-pipeline': null as unknown as string } });
       expect(service.getPipelineNames(pipeline)).toContain('commons-pipeline');
     });
   });

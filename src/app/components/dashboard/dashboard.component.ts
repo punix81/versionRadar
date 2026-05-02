@@ -29,11 +29,10 @@ export class DashboardComponent implements OnInit {
   currentLang = 'fr';
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly versionService = inject(VersionMonitoringService);
+  private readonly translate = inject(TranslateService);
 
-  constructor(
-    private versionService: VersionMonitoringService,
-    private translate: TranslateService
-  ) {
+  constructor() {
     this.data = this.versionService.data;
     this.loading = this.versionService.loading;
     this.error = this.versionService.error;

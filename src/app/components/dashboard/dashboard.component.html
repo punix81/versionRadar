@@ -9,11 +9,11 @@
     <div class="header-actions">
       <!-- Language switcher -->
       <div class="lang-switcher">
-        <button [class.active]="currentLang === 'fr'" (click)="switchLang('fr')">FR</button>
-        <button [class.active]="currentLang === 'en'" (click)="switchLang('en')">EN</button>
+        <button type="button" [class.active]="currentLang === 'fr'" (click)="switchLang('fr')">FR</button>
+        <button type="button" [class.active]="currentLang === 'en'" (click)="switchLang('en')">EN</button>
       </div>
-      <button class="refresh-btn" (click)="refresh()" [disabled]="loading()">
-        <span class="icon"></span>
+      <button type="button" class="refresh-btn" (click)="refresh()" [disabled]="loading()">
+        <span class="icon" aria-hidden="true"></span>
         <span>{{ 'dashboard.refresh' | translate }}</span>
       </button>
       @if (data()) {
@@ -37,7 +37,7 @@
     <div class="error-container">
       <span class="error-icon">⚠️</span>
       <p>{{ error() }}</p>
-      <button (click)="refresh()">{{ 'dashboard.retry' | translate }}</button>
+      <button type="button" (click)="refresh()">{{ 'dashboard.retry' | translate }}</button>
     </div>
   }
 
@@ -47,21 +47,21 @@
       <!-- Stats Cards -->
       <div class="stats-grid">
         <div class="stat-card total">
-          <div class="stat-icon"></div>
+          <div class="stat-icon" aria-hidden="true"></div>
           <div class="stat-content">
             <div class="stat-value">{{ data()!.stats.total }}</div>
             <div class="stat-label">{{ 'dashboard.total_repos' | translate }}</div>
           </div>
         </div>
         <div class="stat-card success">
-          <div class="stat-icon">✅</div>
+          <div class="stat-icon" aria-hidden="true">✅</div>
           <div class="stat-content">
             <div class="stat-value">{{ data()!.stats.success }}</div>
             <div class="stat-label">{{ 'dashboard.success' | translate }}</div>
           </div>
         </div>
         <div class="stat-card error">
-          <div class="stat-icon">❌</div>
+          <div class="stat-icon" aria-hidden="true">❌</div>
           <div class="stat-content">
             <div class="stat-value">{{ data()!.stats.errors }}</div>
             <div class="stat-label">{{ 'dashboard.errors' | translate }}</div>

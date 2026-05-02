@@ -132,7 +132,7 @@ describe('PackagesRadarComponent', () => {
 
     it('should show a dash when a package version is missing', async () => {
       const { fixture } = await setup([
-        makeRepo({ packageVersions: { '@oblique/oblique': null as any } }),
+        makeRepo({ packageVersions: { '@oblique/oblique': null } }),
       ]);
       const noDash = fixture.debugElement.query(By.css('.no-version'));
       expect(noDash).not.toBeNull();

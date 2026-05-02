@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
@@ -204,6 +204,7 @@ describe('DashboardComponent', () => {
 
     it('should populate statsChartOption series data', async () => {
       const { component } = await setupWithData();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const series = (component.statsChartOption as any).series[0].data as { value: number; name: string }[];
       const success = series.find(d => d.name === 'Succès');
       const errors = series.find(d => d.name === 'Erreurs');
@@ -219,6 +220,7 @@ describe('DashboardComponent', () => {
         ]),
       );
       const { component } = await setup(mockService);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const series = (component.platformChartOption as any).series[0].data as { value: number; name: string }[];
       expect(series.find(d => d.name === 'Azure DevOps')?.value).toBe(1);
       expect(series.find(d => d.name === 'Bitbucket')?.value).toBe(1);
@@ -231,6 +233,7 @@ describe('DashboardComponent', () => {
         ]),
       );
       const { component } = await setup(mockService);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const xData: string[] = (component.packageChartOptions[0].option as any).xAxis.data;
       expect(xData).toContain('11.0.0');
       expect(xData.some(v => v.startsWith('^') || v.startsWith('~'))).toBe(false);
@@ -248,7 +251,9 @@ describe('DashboardComponent', () => {
         ),
       );
       const { component } = await setup(mockService);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const barData: { value: number }[] = (component.pipelineChartOptions[0].option as any).series[0].data;
+      // Most common version first
       expect(barData[0].value).toBe(2);
       expect(barData[1].value).toBe(1);
     });

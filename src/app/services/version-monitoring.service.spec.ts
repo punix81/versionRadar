@@ -7,7 +7,6 @@ import {
   VersionMonitoringService,
   RepositoryResult,
   PipelineResult,
-  VersionData,
 } from './version-monitoring.service';
 
 
@@ -342,7 +341,7 @@ describe('VersionMonitoringService', () => {
     it('should ignore repos where the package version is null', async () => {
       const { service, http } = setup();
       const repos = [
-        makeRepo({ packageVersions: { 'pkg': null as any } }),
+        makeRepo({ packageVersions: { 'pkg': null } }),
       ];
       const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, repos, []);

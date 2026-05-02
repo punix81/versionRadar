@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, interval, switchMap, startWith, forkJoin, tap, catchError, finalize, map, of } from 'rxjs';
+import { Observable, forkJoin, tap, catchError, finalize, map, of } from 'rxjs';
 
 export type PackageVersions = Record<string, string | null>;
 
@@ -103,14 +103,9 @@ export class VersionMonitoringService {
     );
   }
 
-  startAutoRefresh(intervalMs = 300000): Observable<VersionData | null> {
-    return interval(intervalMs).pipe(
-      startWith(0),
-      switchMap(() => this.loadVersionData()),
-      map(() => this.data())
-    );
-  }
-
+  /**
+   * Obtenir les statistiques par plateforme
+   */
   getStatsByPlatform(): { azure: number; bitbucket: number } {
     const data = this.data();
     if (!data) return { azure: 0, bitbucket: 0 };
