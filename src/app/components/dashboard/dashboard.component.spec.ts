@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 
 import { DashboardComponent } from './dashboard.component';
 import { VersionMonitoringService, RepositoryResult, PipelineResult, VersionData } from '../../services/version-monitoring.service';
+import { ConfigService } from '../../services/config.service';
 
 function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
   return {
@@ -76,7 +77,21 @@ function buildMockVersionService(initial: VersionData | null = null) {
   };
 }
 
-async function setup(mockService = buildMockVersionService()) {
+function buildMockConfigService(streamEvents: object[] = []) {
+  const savedVersionSig = signal(0);
+  return {
+    savedVersion: savedVersionSig.asReadonly(),
+    streamFetch: vi.fn(() => of(...streamEvents)),
+    getPipelineConfig: vi.fn(() => of({ filePath: '', pipelineNames: [], repositories: [] })),
+    getPackageConfig: vi.fn(() => of({ filePath: '', packageNames: [], repositories: [] })),
+    savePipelineConfig: vi.fn(() => of({ success: true })),
+    savePackageConfig: vi.fn(() => of({ success: true })),
+    getEnvConfig: vi.fn(() => of({})),
+    saveEnvConfig: vi.fn(() => of({ success: true })),
+  };
+}
+
+async function setup(mockService = buildMockVersionService(), mockConfig = buildMockConfigService()) {
   await TestBed.configureTestingModule({
     imports: [DashboardComponent],
     providers: [
@@ -85,13 +100,14 @@ async function setup(mockService = buildMockVersionService()) {
       provideTranslateService({ fallbackLang: 'fr' }),
       ...provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' }),
       { provide: VersionMonitoringService, useValue: mockService },
+      { provide: ConfigService, useValue: mockConfig },
     ],
   }).compileComponents();
 
   const fixture = TestBed.createComponent(DashboardComponent);
   const component = fixture.componentInstance;
   fixture.detectChanges();
-  return { fixture, component, mockService };
+  return { fixture, component, mockService, mockConfig };
 }
 
 describe('DashboardComponent', () => {
@@ -154,9 +170,18 @@ describe('DashboardComponent', () => {
   });
 
   describe('refresh()', () => {
-    it('should call loadVersionData again', async () => {
+    it('should open the fetch dialog and call streamFetch', async () => {
+      const mockConfig = buildMockConfigService();
+      const { component } = await setup(buildMockVersionService(), mockConfig);
+      component.refresh();
+      expect(component.fetchDialogOpen()).toBe(true);
+      expect(mockConfig.streamFetch).toHaveBeenCalledWith('all');
+    });
+
+    it('should call loadVersionData after a successful stream', async () => {
       const mockService = buildMockVersionService();
-      const { component } = await setup(mockService);
+      const mockConfig = buildMockConfigService([{ type: 'done', success: true }]);
+      const { component } = await setup(mockService, mockConfig);
       component.refresh();
       expect(mockService.loadVersionData).toHaveBeenCalledTimes(2);
     });

@@ -53,7 +53,7 @@
               @if (err.includes('npm start')) {
                 <code class="inline-cmd">npm start</code>
               }
-              <button type="button" class="btn btn-sm btn-cancel" (click)="loadPipelineConfig()" style="margin-left: 8px">{{ 'dashboard.retry' | translate }}</button>
+              <button type="button" class="btn btn-sm btn-cancel btn-reload-retry" (click)="loadPipelineConfig()">{{ 'dashboard.retry' | translate }}</button>
             </div>
           }
           @if (pipelineSuccess()) {
@@ -231,7 +231,7 @@
               @if (err.includes('npm start')) {
                 <code class="inline-cmd">npm start</code>
               }
-              <button type="button" class="btn btn-sm btn-cancel" (click)="loadPackageConfig()" style="margin-left: 8px">{{ 'dashboard.retry' | translate }}</button>
+              <button type="button" class="btn btn-sm btn-cancel btn-reload-retry" (click)="loadPackageConfig()">{{ 'dashboard.retry' | translate }}</button>
             </div>
           }
           @if (packageSuccess()) {
@@ -421,7 +421,7 @@
           @if (envError(); as err) {
             <div class="error-msg">
               <span aria-hidden="true">⚠️</span> {{ err }}
-              <button type="button" class="btn btn-sm btn-cancel" (click)="loadEnvConfig()" style="margin-left:8px">{{ 'dashboard.retry' | translate }}</button>
+              <button type="button" class="btn btn-sm btn-cancel btn-reload-retry" (click)="loadEnvConfig()">{{ 'dashboard.retry' | translate }}</button>
             </div>
           }
           @if (envSuccess()) {
@@ -528,7 +528,7 @@
                 <label class="settings-label" for="env-timeout">{{ 'admin.timeout_label' | translate }}</label>
                 <input
                   id="env-timeout"
-                  class="settings-input"
+                  class="settings-input settings-input--narrow"
                   type="number"
                   min="1000"
                   max="120000"
@@ -536,7 +536,6 @@
                   [ngModel]="cfg.REQUEST_TIMEOUT_MS"
                   (ngModelChange)="updateEnvField('REQUEST_TIMEOUT_MS', $event)"
                   placeholder="30000"
-                  style="max-width: 160px"
                 />
               </div>
 
@@ -544,8 +543,7 @@
                 <label class="settings-label" for="env-locale">{{ 'admin.locale_label' | translate }}</label>
                 <select
                   id="env-locale"
-                  class="settings-input"
-                  style="max-width: 160px"
+                  class="settings-input settings-input--narrow"
                   [ngModel]="cfg.DATE_LOCALE"
                   (ngModelChange)="updateEnvField('DATE_LOCALE', $event)"
                 >

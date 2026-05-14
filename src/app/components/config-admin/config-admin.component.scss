@@ -100,6 +100,7 @@
   color: var.$text-primary;
   background: var.$background-white;
   &:focus { outline: none; border-color: var.$primary-color; box-shadow: 0 0 0 2px var.$primary-light; }
+  &--narrow { max-width: 160px; flex: none; }
 }
 
 .settings-section { margin-bottom: var.$spacing-xl; }
@@ -244,6 +245,7 @@
 .btn-delete { background: var.$error-light; color: var.$error-color; border-color: #fecaca; }
 .btn-save   { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
 .btn-cancel { background: var.$background-light; color: var.$text-secondary; }
+.btn-reload-retry { margin-left: 8px; }
 
 .btn-add-row {
   margin-top: var.$spacing-sm;

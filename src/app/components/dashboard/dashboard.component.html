@@ -2,7 +2,7 @@
   <!-- Header -->
   <header class="dashboard-header">
     <div class="header-content">
-      <img src="assets/icons/versionradar_logo_with_text.png" alt="VersionRadar Logo" class="logo" style="height: 60px; margin-bottom: 0.5rem;" />
+      <img src="assets/icons/versionradar_logo_with_text.png" alt="VersionRadar Logo" class="logo" />
       <h1>VersionRadar Dashboard</h1>
       <p class="subtitle">{{ 'dashboard.subtitle' | translate }}</p>
     </div>
@@ -31,8 +31,18 @@
 
   <!-- ── Fetch Console Dialog ────────────────────────────────────────────── -->
   @if (fetchDialogOpen()) {
-    <div class="fetch-overlay" (click)="!fetchRunning() && closeFetchDialog()">
-      <div class="fetch-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="'fetch.aria_label' | translate">
+    <div class="fetch-overlay"
+         (click)="!fetchRunning() && closeFetchDialog()"
+         (keydown.escape)="!fetchRunning() && closeFetchDialog()"
+         tabindex="0"
+         role="presentation">
+      <div class="fetch-dialog"
+           (click)="$event.stopPropagation()"
+           (keydown)="$event.stopPropagation()"
+           role="dialog"
+           aria-modal="true"
+           tabindex="-1"
+           [attr.aria-label]="'fetch.aria_label' | translate">
 
         <div class="fetch-dialog-header">
           <span class="fetch-dialog-title">
