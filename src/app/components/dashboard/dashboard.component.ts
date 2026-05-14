@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, effect, inject, DestroyRef, ViewChild, ElementRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
@@ -9,6 +9,11 @@ import { PackagesRadarComponent } from '../packages-radar/packages-radar.compone
 import { PipelinesRadarComponent } from '../pipelines-radar/pipelines-radar.component';
 import { ConfigAdminComponent } from '../config-admin/config-admin.component';
 import { ConfigService } from '../../services/config.service';
+
+interface FetchLogLine {
+  type: 'stdout' | 'stderr' | 'info' | 'success' | 'error';
+  text: string;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -30,6 +35,15 @@ export class DashboardComponent implements OnInit {
 
   currentLang = 'fr';
 
+  // ── Fetch dialog state ─────────────────────────────────────────────────────
+  fetchDialogOpen = signal(false);
+  fetchRunning = signal(false);
+  fetchDone = signal(false);
+  fetchSuccess = signal(false);
+  fetchLines = signal<FetchLogLine[]>([]);
+
+  @ViewChild('consoleOutput') consoleOutput?: ElementRef<HTMLDivElement>;
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly versionService = inject(VersionMonitoringService);
   private readonly translate = inject(TranslateService);
@@ -45,6 +59,17 @@ export class DashboardComponent implements OnInit {
       if (currentData) {
         this.updateCharts(currentData.repositories);
         this.updatePipelineCharts(currentData.pipelines);
+      }
+    });
+
+    effect(() => {
+      const lines = this.fetchLines();
+      if (lines.length) {
+        setTimeout(() => {
+          if (this.consoleOutput) {
+            this.consoleOutput.nativeElement.scrollTop = this.consoleOutput.nativeElement.scrollHeight;
+          }
+        }, 0);
       }
     });
 
@@ -67,7 +92,40 @@ export class DashboardComponent implements OnInit {
   }
 
   refresh(): void {
-    this.loadData();
+    this.fetchDialogOpen.set(true);
+    this.fetchRunning.set(true);
+    this.fetchDone.set(false);
+    this.fetchSuccess.set(false);
+    this.fetchLines.set([]);
+
+    this.configService.streamFetch('all').subscribe({
+      next: event => {
+        if (event.type === 'done') {
+          this.fetchRunning.set(false);
+          this.fetchDone.set(true);
+          this.fetchSuccess.set(event.success ?? false);
+          if (event.success) this.loadData();
+        } else if (event.line) {
+          this.fetchLines.update(lines => [
+            ...lines,
+            { type: event.type as FetchLogLine['type'], text: event.line! }
+          ]);
+        }
+      },
+      error: err => {
+        this.fetchRunning.set(false);
+        this.fetchDone.set(true);
+        this.fetchSuccess.set(false);
+        this.fetchLines.update(lines => [
+          ...lines,
+          { type: 'error', text: String((err as Error).message) }
+        ]);
+      }
+    });
+  }
+
+  closeFetchDialog(): void {
+    this.fetchDialogOpen.set(false);
   }
 
   switchLang(lang: string): void {

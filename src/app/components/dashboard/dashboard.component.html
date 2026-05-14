@@ -27,6 +27,49 @@
   <!-- Admin Config Panel -->
   <app-config-admin />
 
+  <!-- ── Fetch Console Dialog ────────────────────────────────────────────── -->
+  @if (fetchDialogOpen()) {
+    <div class="fetch-overlay" (click)="!fetchRunning() && closeFetchDialog()">
+      <div class="fetch-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Rafraîchissement des données">
+
+        <div class="fetch-dialog-header">
+          <span class="fetch-dialog-title">
+            @if (fetchRunning()) { <span class="fetch-spinner" aria-hidden="true"></span> }
+            @if (!fetchRunning() && fetchSuccess()) { <span aria-hidden="true">✅</span> }
+            @if (!fetchRunning() && !fetchSuccess() && fetchDone()) { <span aria-hidden="true">❌</span> }
+            Récupération des versions
+          </span>
+          <button type="button" class="fetch-close-btn" (click)="closeFetchDialog()" [disabled]="fetchRunning()" title="Fermer">✕</button>
+        </div>
+
+        <div class="fetch-console" #consoleOutput>
+          @for (line of fetchLines(); track $index) {
+            <div class="fetch-line" [class]="'line-' + line.type">{{ line.text }}</div>
+          }
+          @if (fetchRunning() && fetchLines().length === 0) {
+            <div class="fetch-line line-info">⏳ Démarrage du script…</div>
+          }
+        </div>
+
+        <div class="fetch-dialog-footer">
+          @if (fetchRunning()) {
+            <span class="fetch-status-running">⏳ Script en cours d'exécution…</span>
+          }
+          @if (fetchDone() && fetchSuccess()) {
+            <span class="fetch-status-success">✅ Données mises à jour avec succès — dashboard rechargé</span>
+          }
+          @if (fetchDone() && !fetchSuccess()) {
+            <span class="fetch-status-error">❌ Erreur lors de la récupération — vérifiez vos tokens dans l'onglet ⚙️</span>
+          }
+          <button type="button" class="btn-close-dialog" (click)="closeFetchDialog()" [disabled]="fetchRunning()">
+            Fermer
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
   <!-- Loading State -->
   @if (loading()) {
     <div class="loading-container">

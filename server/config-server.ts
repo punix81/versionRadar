@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import * as fs from 'fs';
 import * as path from 'path';
+import { spawn } from 'child_process';
 
 const app = express();
 const PORT = 3001;
@@ -214,6 +215,56 @@ app.put('/api/config/env', (req: Request, res: Response) => {
     fs.writeFileSync(ENV_PATH, serializeEnv(data), 'utf-8');
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: String(err) }); }
+});
+
+app.get('/api/fetch/stream', (req: Request, res: Response) => {
+  const type = (req.query['type'] as string) || 'all';
+  const rootDir = path.join(__dirname, '..');
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = (evtType: string, line: string) => {
+    res.write(`data: ${JSON.stringify({ type: evtType, line })}\n\n`);
+  };
+
+  const runScript = (scriptPath: string): Promise<number> =>
+    new Promise(resolve => {
+      const proc = spawn(
+        'npx',
+        ['ts-node', '--project', 'tsconfig.scripts.json', scriptPath],
+        { cwd: rootDir, env: { ...process.env }, shell: false }
+      );
+      proc.stdout?.on('data', (chunk: Buffer) =>
+        chunk.toString().split('\n').filter(Boolean).forEach(l => send('stdout', l))
+      );
+      proc.stderr?.on('data', (chunk: Buffer) =>
+        chunk.toString().split('\n').filter(Boolean).forEach(l => send('stderr', l))
+      );
+      proc.on('close', code => resolve(code ?? 0));
+    });
+
+  const scripts: string[] = [];
+  if (type === 'all' || type === 'packages')  scripts.push('scripts/fetch-package-versions.ts');
+  if (type === 'all' || type === 'pipelines') scripts.push('scripts/fetch-pipeline-versions.ts');
+
+  (async () => {
+    let allSuccess = true;
+    for (const script of scripts) {
+      send('info', `▶ Lancement de ${path.basename(script)}…`);
+      const code = await runScript(script);
+      if (code !== 0) { allSuccess = false; send('error', `✗ Terminé avec code ${code}`); }
+      else { send('success', `✓ ${path.basename(script)} terminé avec succès`); }
+    }
+    res.write(`data: ${JSON.stringify({ type: 'done', success: allSuccess })}\n\n`);
+    res.end();
+  })().catch(err => {
+    send('error', String(err));
+    res.write(`data: ${JSON.stringify({ type: 'done', success: false })}\n\n`);
+    res.end();
+  });
 });
 
 app.listen(PORT, () => {

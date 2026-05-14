@@ -31,6 +31,12 @@ export interface PackageConfig {
   repositories: PackageRepository[];
 }
 
+export interface FetchStreamEvent {
+  type: 'stdout' | 'stderr' | 'info' | 'success' | 'error' | 'done';
+  line?: string;
+  success?: boolean;
+}
+
 export interface EnvConfig {
   AZUREDEVOPS_TOKEN: string;
   AZUREDEVOPS_USER: string;
@@ -94,6 +100,22 @@ export class ConfigService {
     return this.http.put<{ success: boolean }>('/api/config/env', config).pipe(
       catchError(e => this.handleError(e))
     );
+  }
+
+  streamFetch(type: 'all' | 'packages' | 'pipelines' = 'all'): Observable<FetchStreamEvent> {
+    return new Observable(observer => {
+      const source = new EventSource(`/api/fetch/stream?type=${type}`);
+      source.onmessage = (e: MessageEvent) => {
+        const data = JSON.parse(e.data as string) as FetchStreamEvent;
+        observer.next(data);
+        if (data.type === 'done') { source.close(); observer.complete(); }
+      };
+      source.onerror = () => {
+        source.close();
+        observer.error(new Error('Erreur de connexion au serveur de fetch'));
+      };
+      return () => source.close();
+    });
   }
 }
 
