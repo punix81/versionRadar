@@ -7,6 +7,7 @@ const app = express();
 const PORT = 3001;
 const CONFIG_DIR = path.join(__dirname, '..', 'config');
 const ASSETS_DIR = path.join(__dirname, '..', 'src', 'assets', 'data');
+const ENV_PATH = path.join(__dirname, '..', '.env');
 
 app.use(cors());
 app.use(express.json());
@@ -128,6 +129,48 @@ function syncRepositoriesAsset(config: PackageConfig): void {
   console.log(`🔄 Synced repositories.json: ${kept.length} kept + ${stubs.length} new stubs (was ${data.length})`);
 }
 
+// ── .env helpers ─────────────────────────────────────────────────────────────
+
+type EnvConfig = Record<string, string>;
+
+function parseEnv(raw: string): EnvConfig {
+  const result: EnvConfig = {};
+  for (const line of raw.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const idx = trimmed.indexOf('=');
+    if (idx === -1) continue;
+    result[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+  }
+  return result;
+}
+
+function serializeEnv(data: EnvConfig): string {
+  const azureKeys   = ['AZUREDEVOPS_TOKEN', 'AZUREDEVOPS_USER'];
+  const bitbucketKeys = ['BITBUCKET_USER', 'BITBUCKET_TOKEN', 'BITBUCKET_BASE_URL'];
+  const settingsKeys = ['REQUEST_TIMEOUT_MS', 'DATE_LOCALE'];
+
+  const lines: string[] = [];
+  lines.push('# Azure DevOps');
+  for (const k of azureKeys) if (k in data) lines.push(`${k}=${data[k]}`);
+  lines.push('');
+  lines.push('# Bitbucket');
+  for (const k of bitbucketKeys) if (k in data) lines.push(`${k}=${data[k]}`);
+  lines.push('');
+  lines.push('# Script settings');
+  for (const k of settingsKeys) if (k in data) lines.push(`${k}=${data[k]}`);
+  // preserve any extra keys not in the known groups
+  const known = new Set([...azureKeys, ...bitbucketKeys, ...settingsKeys]);
+  const extra = Object.keys(data).filter(k => !known.has(k));
+  if (extra.length) {
+    lines.push('');
+    lines.push('# Other');
+    for (const k of extra) lines.push(`${k}=${data[k]}`);
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 
 app.get('/api/config/repositories', (_req: Request, res: Response) => {
@@ -154,6 +197,21 @@ app.put('/api/config/package-repositories', (req: Request, res: Response) => {
     const config = req.body as PackageConfig;
     writeJson(path.join(CONFIG_DIR, 'package-repositories.json'), config);
     syncRepositoriesAsset(config);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: String(err) }); }
+});
+
+app.get('/api/config/env', (_req: Request, res: Response) => {
+  try {
+    const raw = fs.existsSync(ENV_PATH) ? fs.readFileSync(ENV_PATH, 'utf-8') : '';
+    res.json(parseEnv(raw));
+  } catch (err) { res.status(500).json({ error: String(err) }); }
+});
+
+app.put('/api/config/env', (req: Request, res: Response) => {
+  try {
+    const data = req.body as EnvConfig;
+    fs.writeFileSync(ENV_PATH, serializeEnv(data), 'utf-8');
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: String(err) }); }
 });

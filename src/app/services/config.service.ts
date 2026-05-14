@@ -31,6 +31,17 @@ export interface PackageConfig {
   repositories: PackageRepository[];
 }
 
+export interface EnvConfig {
+  AZUREDEVOPS_TOKEN: string;
+  AZUREDEVOPS_USER: string;
+  BITBUCKET_USER: string;
+  BITBUCKET_TOKEN: string;
+  BITBUCKET_BASE_URL: string;
+  REQUEST_TIMEOUT_MS: string;
+  DATE_LOCALE: string;
+  [key: string]: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ConfigService {
   private readonly http = inject(HttpClient);
@@ -69,6 +80,18 @@ export class ConfigService {
   savePackageConfig(config: PackageConfig): Observable<{ success: boolean }> {
     return this.http.put<{ success: boolean }>('/api/config/package-repositories', config).pipe(
       tap(() => this.savedVersion.update(v => v + 1)),
+      catchError(e => this.handleError(e))
+    );
+  }
+
+  getEnvConfig(): Observable<EnvConfig> {
+    return this.http.get<EnvConfig>('/api/config/env').pipe(
+      catchError(e => this.handleError(e))
+    );
+  }
+
+  saveEnvConfig(config: EnvConfig): Observable<{ success: boolean }> {
+    return this.http.put<{ success: boolean }>('/api/config/env', config).pipe(
       catchError(e => this.handleError(e))
     );
   }

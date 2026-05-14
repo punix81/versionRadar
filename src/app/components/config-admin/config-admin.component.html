@@ -29,6 +29,14 @@
         >
           <span aria-hidden="true">📦</span> Package Repositories
         </button>
+        <button
+          type="button"
+          role="tab"
+          [class.active]="activeTab() === 'env'"
+          (click)="setTab('env')"
+        >
+          <span aria-hidden="true">🔑</span> Tokens &amp; Paramètres
+        </button>
       </div>
 
       <!-- ============================== PIPELINE TAB ============================== -->
@@ -396,6 +404,168 @@
                 <span class="saving-indicator">⏳ Enregistrement...</span>
               }
               <button type="button" class="btn btn-secondary" (click)="loadPackageConfig()">
+                🔄 Recharger
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ============================== ENV TAB ============================== -->
+      @if (activeTab() === 'env') {
+        <div class="tab-content" role="tabpanel">
+
+          @if (envLoading()) {
+            <div class="loading-msg"><span aria-hidden="true">⏳</span> Chargement...</div>
+          }
+          @if (envError(); as err) {
+            <div class="error-msg">
+              <span aria-hidden="true">⚠️</span> {{ err }}
+              <button type="button" class="btn btn-sm btn-cancel" (click)="loadEnvConfig()" style="margin-left:8px">Réessayer</button>
+            </div>
+          }
+          @if (envSuccess()) {
+            <div class="success-msg"><span aria-hidden="true">✅</span> .env sauvegardé avec succès !</div>
+          }
+
+          @if (envConfig(); as cfg) {
+            <div class="env-warning">
+              <span aria-hidden="true">⚠️</span>
+              Les tokens sont des données sensibles. Ne partagez pas ce fichier.
+            </div>
+
+            <!-- Azure DevOps -->
+            <div class="settings-section">
+              <div class="settings-section-title">Azure DevOps</div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-az-user">Utilisateur :</label>
+                <input
+                  id="env-az-user"
+                  class="settings-input"
+                  type="text"
+                  [ngModel]="cfg.AZUREDEVOPS_USER"
+                  (ngModelChange)="updateEnvField('AZUREDEVOPS_USER', $event)"
+                  placeholder="u80795574"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-az-token">Token (PAT) :</label>
+                <div class="token-field">
+                  <input
+                    id="env-az-token"
+                    class="settings-input"
+                    [type]="showAzureToken() ? 'text' : 'password'"
+                    [ngModel]="cfg.AZUREDEVOPS_TOKEN"
+                    (ngModelChange)="updateEnvField('AZUREDEVOPS_TOKEN', $event)"
+                    placeholder="Collez votre PAT Azure DevOps"
+                    autocomplete="off"
+                  />
+                  <button type="button" class="btn btn-sm btn-secondary token-toggle" (click)="showAzureToken.set(!showAzureToken())"
+                    [title]="showAzureToken() ? 'Masquer' : 'Afficher'">
+                    {{ showAzureToken() ? '🙈' : '👁️' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bitbucket -->
+            <div class="settings-section">
+              <div class="settings-section-title">Bitbucket</div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-bb-user">Utilisateur :</label>
+                <input
+                  id="env-bb-user"
+                  class="settings-input"
+                  type="text"
+                  [ngModel]="cfg.BITBUCKET_USER"
+                  (ngModelChange)="updateEnvField('BITBUCKET_USER', $event)"
+                  placeholder="u80795574"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-bb-token">Token (PAT) :</label>
+                <div class="token-field">
+                  <input
+                    id="env-bb-token"
+                    class="settings-input"
+                    [type]="showBitbucketToken() ? 'text' : 'password'"
+                    [ngModel]="cfg.BITBUCKET_TOKEN"
+                    (ngModelChange)="updateEnvField('BITBUCKET_TOKEN', $event)"
+                    placeholder="BBDC-..."
+                    autocomplete="off"
+                  />
+                  <button type="button" class="btn btn-sm btn-secondary token-toggle" (click)="showBitbucketToken.set(!showBitbucketToken())"
+                    [title]="showBitbucketToken() ? 'Masquer' : 'Afficher'">
+                    {{ showBitbucketToken() ? '🙈' : '👁️' }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-bb-url">Base URL :</label>
+                <input
+                  id="env-bb-url"
+                  class="settings-input"
+                  type="text"
+                  [ngModel]="cfg.BITBUCKET_BASE_URL"
+                  (ngModelChange)="updateEnvField('BITBUCKET_BASE_URL', $event)"
+                  placeholder="https://bitbucket.bit.admin.ch"
+                />
+              </div>
+            </div>
+
+            <!-- Script Settings -->
+            <div class="settings-section">
+              <div class="settings-section-title">Paramètres des scripts</div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-timeout">Timeout requêtes (ms) :</label>
+                <input
+                  id="env-timeout"
+                  class="settings-input"
+                  type="number"
+                  min="1000"
+                  max="120000"
+                  step="1000"
+                  [ngModel]="cfg.REQUEST_TIMEOUT_MS"
+                  (ngModelChange)="updateEnvField('REQUEST_TIMEOUT_MS', $event)"
+                  placeholder="30000"
+                  style="max-width: 160px"
+                />
+              </div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-locale">Locale (dates) :</label>
+                <select
+                  id="env-locale"
+                  class="settings-input"
+                  style="max-width: 160px"
+                  [ngModel]="cfg.DATE_LOCALE"
+                  (ngModelChange)="updateEnvField('DATE_LOCALE', $event)"
+                >
+                  <option value="fr-CH">fr-CH</option>
+                  <option value="fr-FR">fr-FR</option>
+                  <option value="en-US">en-US</option>
+                  <option value="de-CH">de-CH</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="admin-footer">
+              @if (envSaving()) {
+                <span class="saving-indicator">⏳ Sauvegarde...</span>
+              }
+              <button type="button" class="btn btn-primary" (click)="saveEnvConfig()" [disabled]="envSaving()">
+                💾 Sauvegarder .env
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="loadEnvConfig()">
                 🔄 Recharger
               </button>
             </div>

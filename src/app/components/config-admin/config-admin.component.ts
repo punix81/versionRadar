@@ -7,9 +7,10 @@ import {
   PipelineRepository,
   PackageConfig,
   PackageRepository,
+  EnvConfig,
 } from '../../services/config.service';
 
-type Tab = 'pipelines' | 'packages';
+type Tab = 'pipelines' | 'packages' | 'env';
 
 function emptyPipelineRepo(): PipelineRepository {
   return { project: '', repo: '', name: '', branch: '' };
@@ -60,9 +61,19 @@ export class ConfigAdminComponent implements OnInit {
   packageUrlParseError = signal<string | null>(null);
   packageUrlParsed = signal(false);
 
+  // ── Env state ──────────────────────────────────────────────────────────────
+  envConfig = signal<EnvConfig | null>(null);
+  envLoading = signal(false);
+  envSaving = signal(false);
+  envError = signal<string | null>(null);
+  envSuccess = signal(false);
+  showAzureToken = signal(false);
+  showBitbucketToken = signal(false);
+
   ngOnInit(): void {
     this.loadPipelineConfig();
     this.loadPackageConfig();
+    this.loadEnvConfig();
   }
 
   togglePanel(): void { this.isOpen.update(v => !v); }
@@ -308,6 +319,34 @@ export class ConfigAdminComponent implements OnInit {
   updatePackageFilePath(value: string): void {
     const cfg = this.packageConfig();
     if (cfg) this.packageConfig.set({ ...cfg, filePath: value });
+  }
+
+  // ── Env methods ────────────────────────────────────────────────────────────
+
+  loadEnvConfig(): void {
+    this.envLoading.set(true);
+    this.envError.set(null);
+    this.configService.getEnvConfig().subscribe({
+      next: cfg => { this.envConfig.set({ ...cfg }); this.envLoading.set(false); },
+      error: err => { this.envError.set('Erreur chargement : ' + String(err?.message ?? err)); this.envLoading.set(false); },
+    });
+  }
+
+  updateEnvField(key: keyof EnvConfig, value: string): void {
+    const cfg = this.envConfig();
+    if (cfg) this.envConfig.set({ ...cfg, [key]: value });
+  }
+
+  saveEnvConfig(): void {
+    const cfg = this.envConfig();
+    if (!cfg) return;
+    this.envSaving.set(true);
+    this.envSuccess.set(false);
+    this.envError.set(null);
+    this.configService.saveEnvConfig(cfg).subscribe({
+      next: () => { this.envSaving.set(false); this.envSuccess.set(true); setTimeout(() => this.envSuccess.set(false), 3000); },
+      error: err => { this.envError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.envSaving.set(false); },
+    });
   }
 }
 

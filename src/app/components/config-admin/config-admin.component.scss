@@ -350,3 +350,34 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
+
+// ── Env tab ───────────────────────────────────────────────────────────────────
+.env-warning {
+  display: flex;
+  align-items: center;
+  gap: var.$spacing-xs;
+  background: var.$warning-light;
+  border: 1px solid #fde68a;
+  color: var.$warning-color;
+  border-radius: var.$border-radius-sm;
+  padding: var.$spacing-xs var.$spacing-md;
+  font-size: var.$font-size-xs;
+  font-weight: 600;
+  margin-bottom: var.$spacing-xl;
+}
+
+.token-field {
+  display: flex;
+  align-items: center;
+  gap: var.$spacing-xs;
+  flex: 1;
+
+  .settings-input { flex: 1; }
+
+  .token-toggle {
+    flex-shrink: 0;
+    font-size: var.$font-size-base;
+    padding: 2px 6px;
+    line-height: 1;
+  }
+}
