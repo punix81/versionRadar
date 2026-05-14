@@ -1,20 +1,20 @@
 @use 'variables' as var;
-@use 'sass:color';
 
+// ─── Layout ───────────────────────────────────────────────────────────────────
 .dashboard-container {
   min-height: 100vh;
-  background: var.$gradient-background;
+  background: var.$background-light;
   padding: var.$spacing-xl;
   font-family: var.$font-family;
 }
 
-
+// ─── Header ───────────────────────────────────────────────────────────────────
 .dashboard-header {
   background: var.$background-white;
+  border: 1px solid var.$border-color;
   border-radius: var.$border-radius-xl;
-  padding: var.$spacing-xl;
+  padding: var.$spacing-lg var.$spacing-xl;
   margin-bottom: var.$spacing-xl;
-  box-shadow: var.$shadow-md;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -23,255 +23,221 @@
 
   h1 {
     margin: 0;
-    font-size: var.$font-size-4xl;
-    background: var.$gradient-primary;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: var.$font-size-2xl;
+    font-weight: 700;
+    color: var.$text-primary;
+    letter-spacing: -0.02em;
   }
 
   .subtitle {
     margin: var.$spacing-xs 0 0 0;
     color: var.$text-secondary;
-    font-size: var.$font-size-lg;
+    font-size: var.$font-size-sm;
   }
 
   .header-actions {
     display: flex;
     align-items: center;
-    gap: var.$spacing-md;
+    gap: var.$spacing-sm;
   }
 
   .refresh-btn {
-    background: var.$gradient-primary;
+    background: var.$primary-color;
     color: var.$background-white;
     border: none;
-    padding: var.$spacing-sm var.$spacing-lg;
+    padding: var.$spacing-xs var.$spacing-md;
     border-radius: var.$border-radius-md;
     cursor: pointer;
-    font-size: var.$font-size-base;
+    font-size: var.$font-size-sm;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: var.$spacing-xs;
-    transition: transform var.$transition-fast, box-shadow var.$transition-fast;
+    transition: background var.$transition-fast;
 
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: var.$shadow-lg;
-    }
+    &:hover:not(:disabled) { background: var.$primary-dark; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .icon {
-      font-size: 1.2rem;
-    }
+    .icon { font-size: 1rem; }
   }
 
   .last-update {
-    font-size: var.$font-size-sm;
-    color: var.$text-secondary;
-    padding: var.$spacing-xs var.$spacing-md;
-    background: var.$primary-light;
+    font-size: var.$font-size-xs;
+    color: var.$text-muted;
+    padding: var.$spacing-xs var.$spacing-sm;
+    background: var.$background-light;
+    border: 1px solid var.$border-color;
     border-radius: var.$border-radius-sm;
   }
 
   .logo {
-    height: 60px;
-    margin-bottom: 0.5rem;
+    height: 48px;
     display: block;
   }
 
   .lang-switcher {
     display: flex;
-    gap: var.$spacing-xs;
+    gap: 2px;
+    background: var.$background-light;
+    border: 1px solid var.$border-color;
+    border-radius: var.$border-radius-md;
+    padding: 3px;
 
     button {
       background: transparent;
-      border: 2px solid var.$primary-color;
-      color: var.$primary-color;
-      padding: var.$spacing-xs var.$spacing-sm;
-      border-radius: var.$border-radius-sm;
+      border: none;
+      padding: 2px 10px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: var.$font-size-sm;
+      font-size: var.$font-size-xs;
       font-weight: 600;
+      color: var.$text-secondary;
       transition: background var.$transition-fast, color var.$transition-fast;
 
-      &.active,
-      &:hover {
-        background: var.$primary-color;
-        color: var.$background-white;
+      &.active {
+        background: var.$background-white;
+        color: var.$text-primary;
+        box-shadow: var.$shadow-sm;
       }
+      &:hover:not(.active) { color: var.$text-primary; }
     }
   }
 }
 
-// Loading & Error States
+// ─── Loading & Error ──────────────────────────────────────────────────────────
 .loading-container,
 .error-container {
   background: var.$background-white;
+  border: 1px solid var.$border-color;
   border-radius: var.$border-radius-xl;
   padding: 4rem 2rem;
   text-align: center;
-  box-shadow: var.$shadow-md;
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid var.$primary-light;
+  width: 36px;
+  height: 36px;
+  border: 3px solid var.$border-color;
   border-top-color: var.$primary-color;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
   margin: 0 auto 1rem;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .error-container {
-  .error-icon {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 1rem;
-  }
+  .error-icon { font-size: 2.5rem; display: block; margin-bottom: 1rem; }
 
   button {
-      background: var.$gradient-error;
-      color: var.$background-white;
-      border: none;
-      padding: var.$spacing-sm var.$spacing-lg;
-      border-radius: var.$border-radius-md;
-      cursor: pointer;
-      margin-top: var.$spacing-md;
-      font-size: var.$font-size-base;
-      transition: background var.$transition-fast;
-
-      &:hover {
-        background: color.adjust(var.$error-color, $lightness: -10%);
-      }
+    background: var.$error-color;
+    color: var.$background-white;
+    border: none;
+    padding: var.$spacing-xs var.$spacing-lg;
+    border-radius: var.$border-radius-md;
+    cursor: pointer;
+    margin-top: var.$spacing-md;
+    font-size: var.$font-size-sm;
+    font-weight: 600;
+    transition: opacity var.$transition-fast;
+    &:hover { opacity: 0.85; }
   }
 }
 
-// Dashboard Content
+// ─── Content ──────────────────────────────────────────────────────────────────
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: var.$spacing-xl;
+  gap: var.$spacing-lg;
 }
 
-// Stats Grid
+// ─── Stats Grid ───────────────────────────────────────────────────────────────
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var.$spacing-lg;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var.$spacing-md;
 }
 
 .stat-card {
   background: var.$background-white;
+  border: 1px solid var.$border-color;
   border-radius: var.$border-radius-lg;
   padding: var.$spacing-lg;
   display: flex;
   align-items: center;
   gap: var.$spacing-md;
-  box-shadow: var.$shadow-md;
-  transition: transform var.$transition-fast, box-shadow var.$transition-fast;
+  border-left: 4px solid var.$border-color;
+  transition: box-shadow var.$transition-fast;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var.$shadow-lg;
-  }
+  &:hover { box-shadow: var.$shadow-lg; }
+
+  &.total   { border-left-color: var.$primary-color; }
+  &.success { border-left-color: var.$success-color; }
+  &.error   { border-left-color: var.$error-color; }
 
   .stat-icon {
-    font-size: 3rem;
-    width: 70px;
-    height: 70px;
+    font-size: 1.75rem;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var.$border-radius-md;
+    background: var.$background-light;
+    flex-shrink: 0;
   }
 
-  &.total .stat-icon {
-    background: var.$gradient-primary;
-    color: var.$background-white;
-  }
-
-  &.success .stat-icon {
-    background: var.$gradient-success;
-    color: var.$background-white;
-  }
-
-  &.error .stat-icon {
-    background: var.$gradient-error;
-    color: var.$background-white;
-  }
-
-  .stat-content {
-    flex: 1;
-  }
+  .stat-content { flex: 1; }
 
   .stat-value {
     font-size: var.$font-size-3xl;
-    font-weight: bold;
-    color: var.$primary-color;
+    font-weight: 700;
+    color: var.$text-primary;
+    line-height: 1;
   }
 
   .stat-label {
-    font-size: var.$font-size-base;
+    font-size: var.$font-size-sm;
     color: var.$text-secondary;
-    margin-top: var.$spacing-xs;
+    margin-top: 4px;
   }
 }
 
-// Charts Grid
+// ─── Charts Grid ─────────────────────────────────────────────────────────────
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var.$spacing-lg;
+  gap: var.$spacing-md;
 }
 
 .chart-card {
   background: var.$background-white;
+  border: 1px solid var.$border-color;
   border-radius: var.$border-radius-lg;
   padding: var.$spacing-lg;
-  box-shadow: var.$shadow-md;
 
-  &.wide {
-    grid-column: span 1;
-  }
-
-  &.full-width {
-    grid-column: span 2;
-  }
-
-  .chart {
-    height: 350px;
-    width: 100%;
-  }
+  &.full-width { grid-column: span 2; }
+  .chart { height: 300px; width: 100%; }
 }
 
-// Table
+// ─── Table containers ──────────────────────────────────────────────────────────
 .table-container {
   background: var.$background-white;
+  border: 1px solid var.$border-color;
   border-radius: var.$border-radius-lg;
   padding: var.$spacing-xl;
-  box-shadow: var.$shadow-md;
 
   h2 {
     margin: 0 0 var.$spacing-lg 0;
-    font-size: var.$font-size-2xl;
-    color: var.$primary-dark;
+    font-size: var.$font-size-xl;
+    font-weight: 700;
+    color: var.$text-primary;
   }
 }
 
 .pipeline-stats {
   display: flex;
-  gap: var.$spacing-lg;
+  gap: var.$spacing-sm;
   margin-bottom: var.$spacing-lg;
   flex-wrap: wrap;
 
@@ -279,57 +245,40 @@
     display: inline-flex;
     align-items: center;
     gap: var.$spacing-xs;
-    padding: var.$spacing-xs var.$spacing-md;
-    border-radius: var.$border-radius-md;
+    padding: 3px var.$spacing-sm;
+    border-radius: var.$border-radius-sm;
     font-weight: 600;
-    font-size: var.$font-size-base;
-    background: var.$primary-light;
-    color: var.$primary-dark;
+    font-size: var.$font-size-sm;
+    background: var.$background-light;
+    color: var.$text-secondary;
+    border: 1px solid var.$border-color;
 
-    &.success {
-      background: var.$success-light;
-      color: var.$success-color;
-    }
-
-    &.error {
-      background: var.$error-light;
-      color: var.$error-color;
-    }
+    &.success { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
+    &.error   { background: var.$error-light;   color: var.$error-color;   border-color: #fecaca; }
   }
 }
 
-.pipelines-table {
-  .chart-info {
-    min-width: 150px;
-  }
-}
+.table-wrapper { overflow-x: auto; }
 
-.table-wrapper {
-  overflow-x: auto;
-}
-
+// ─── Shared table styles ──────────────────────────────────────────────────────
 .repositories-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var.$font-size-base;
+  font-size: var.$font-size-sm;
 
   thead {
-    background: var.$gradient-primary;
-    color: var.$background-white;
+    background: #1e293b;
+    color: #fff;
 
     th {
-      padding: var.$spacing-md;
+      padding: var.$spacing-sm var.$spacing-md;
       text-align: left;
       font-weight: 600;
+      font-size: var.$font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       border: none;
-
-      &:first-child {
-        border-radius: var.$border-radius-sm 0 0 0;
-      }
-
-      &:last-child {
-        border-radius: 0 var.$border-radius-sm 0 0;
-      }
+      white-space: nowrap;
     }
   }
 
@@ -338,197 +287,114 @@
       border-bottom: 1px solid var.$border-color;
       transition: background var.$transition-fast;
 
-      &:hover {
-        background: var.$primary-light;
-      }
-
-      &.status-success {
-        border-left: 4px solid var.$success-color;
-      }
-
-      &.status-error {
-        border-left: 4px solid var.$error-color;
-      }
+      &:last-child { border-bottom: none; }
+      &:hover { background: var.$background-light; }
+      &.status-success { border-left: 3px solid var.$success-color; }
+      &.status-error   { border-left: 3px solid var.$error-color; }
     }
 
-    td {
-      padding: var.$spacing-md;
-    }
+    td { padding: var.$spacing-sm var.$spacing-md; color: var.$text-primary; }
   }
 
-  .repo-name {
-    .repo-info {
-      display: flex;
-      flex-direction: column;
-      gap: var.$spacing-xs;
-
-      strong {
-        color: var.$primary-dark;
-      }
-
-      small {
-        color: var.$text-muted;
-        font-size: var.$font-size-sm;
-      }
-    }
+  .repo-name .repo-info {
+    display: flex; flex-direction: column; gap: 2px;
+    strong { color: var.$text-primary; font-weight: 600; }
+    small  { color: var.$text-muted; font-size: var.$font-size-xs; }
   }
 
   .platform-badge {
     display: inline-flex;
     align-items: center;
-    gap: var.$spacing-xs;
-    padding: var.$spacing-xs var.$spacing-md;
-    border-radius: var.$border-radius-full;
-    font-size: var.$font-size-sm;
+    gap: 4px;
+    padding: 2px var.$spacing-sm;
+    border-radius: var.$border-radius-sm;
+    font-size: var.$font-size-xs;
     font-weight: 600;
+    border: 1px solid;
 
-    &.azure {
-      background: rgba(var.$badge-azure, 0.1);
-      color: var.$badge-azure;
-    }
-
-    &.bitbucket {
-      background: rgba(var.$badge-bitbucket, 0.1);
-      color: var.$badge-bitbucket;
-    }
+    &.azure     { background: #eff6ff; color: var.$badge-azure;     border-color: #bfdbfe; }
+    &.bitbucket { background: #eef2ff; color: var.$badge-bitbucket; border-color: #c7d2fe; }
   }
 
   .version-badge {
     display: inline-block;
-    padding: var.$spacing-xs var.$spacing-md;
+    padding: 2px var.$spacing-sm;
     border-radius: var.$border-radius-sm;
     font-family: 'Courier New', monospace;
-    font-size: var.$font-size-base;
+    font-size: var.$font-size-xs;
     font-weight: 600;
     text-decoration: none;
     cursor: default;
+    border: 1px solid transparent;
 
     &[href] {
       cursor: pointer;
-      transition: opacity var.$transition-fast, transform var.$transition-fast;
-
-      &:hover {
-        opacity: 0.8;
-        transform: translateY(-1px);
-        text-decoration: none;
-      }
+      text-decoration: none;
+      transition: opacity var.$transition-fast;
+      &:hover { opacity: 0.75; text-decoration: underline; }
     }
 
-    &.oblique {
-      background: rgba(var.$badge-oblique, 0.1);
-      color: var.$badge-oblique;
-    }
-
-    &.angular {
-      background: rgba(var.$badge-angular, 0.1);
-      color: var.$badge-angular;
-    }
-
-    &.commons {
-      background: rgba(var.$badge-commons, 0.1);
-      color: var.$badge-commons;
-    }
-
-    &.angular-pipeline {
-      background: rgba(var.$badge-angular-pipeline, 0.1);
-      color: var.$badge-angular-pipeline;
-    }
-
-    &.pipeline-version {
-      background: rgba(var.$primary-color, 0.1);
-      color: var.$primary-dark;
-    }
-
-    &.package-version {
-      background: rgba(var.$badge-oblique, 0.1);
-      color: var.$badge-oblique;
-    }
-
+    &.oblique          { background: #eff6ff; color: var.$badge-oblique;          border-color: #bfdbfe; }
+    &.angular          { background: #fef2f2; color: var.$badge-angular;          border-color: #fecaca; }
+    &.commons          { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
+    &.angular-pipeline { background: var.$warning-light; color: var.$warning-color; border-color: #fde68a; }
+    &.pipeline-version { background: var.$background-light; color: var.$text-secondary; border-color: var.$border-color; }
+    &.package-version  { background: #eff6ff; color: var.$badge-oblique; border-color: #bfdbfe; }
   }
 
   .chart-badge {
     display: inline-block;
-    padding: var.$spacing-xs var.$spacing-md;
+    padding: 2px var.$spacing-sm;
     border-radius: var.$border-radius-sm;
     font-family: 'Courier New', monospace;
-    font-size: var.$font-size-sm;
+    font-size: var.$font-size-xs;
     font-weight: 600;
-    background: var.$primary-light;
-    color: var.$primary-dark;
+    background: var.$background-light;
+    color: var.$text-secondary;
+    border: 1px solid var.$border-color;
   }
 
-  .no-version {
-    color: var.$text-muted;
-  }
+  .no-version { color: var.$text-muted; font-size: var.$font-size-xs; }
 
   .status-badge {
     display: inline-block;
-    padding: var.$spacing-xs var.$spacing-md;
-    border-radius: var.$border-radius-full;
-    font-size: var.$font-size-sm;
+    padding: 2px var.$spacing-sm;
+    border-radius: var.$border-radius-sm;
+    font-size: var.$font-size-xs;
     font-weight: 600;
+    border: 1px solid;
 
-    &.success {
-      background: var.$success-light;
-      color: var.$success-color;
-    }
-
-    &.error {
-      background: var.$error-light;
-      color: var.$error-color;
-    }
+    &.success { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
+    &.error   { background: var.$error-light;   color: var.$error-color;   border-color: #fecaca; }
   }
 }
 
-// Responsive Design
+// ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 1200px) {
   .charts-grid {
     grid-template-columns: 1fr;
-
-    .chart-card {
-      &.wide,
-      &.full-width {
-        grid-column: span 1;
-      }
-    }
+    .chart-card.full-width { grid-column: span 1; }
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: var.$spacing-md;
-  }
+  .dashboard-container { padding: var.$spacing-md; }
 
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
 
-    h1 {
-      font-size: var.$font-size-2xl;
-    }
+    h1 { font-size: var.$font-size-xl; }
 
     .header-actions {
       width: 100%;
-      flex-direction: column;
-      align-items: stretch;
-
-      .refresh-btn {
-        width: 100%;
-        justify-content: center;
-      }
+      flex-wrap: wrap;
+      .refresh-btn { flex: 1; justify-content: center; }
     }
   }
 
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
 
-  .repositories-table {
-    font-size: var.$font-size-sm;
-
-    thead th,
-    tbody td {
-      padding: var.$spacing-sm var.$spacing-xs;
-    }
-  }
+  .repositories-table thead th,
+  .repositories-table tbody td { padding: var.$spacing-xs var.$spacing-sm; }
 }

@@ -8,14 +8,55 @@
   ],
   "repositories": [
     {
-      "project": "bjbohreg",
-      "repo": "bj_bo_hreg_gitops",
-      "name": "bj_bo_hreg_gitops"
+      "project": "GEOSI",
+      "repo": "astra-geosi-gitops",
+      "name": "ASTRA GEOSI",
+      "branch": "pipeline"
     },
     {
-      "project": "fmz",
+      "project": "BJBOHREG",
+      "repo": "bj_bo_hreg_gitops",
+      "name": "BJ BO HREG"
+    },
+    {
+      "project": "coin",
+      "repo": "coin-gitops",
+      "name": "VTG_COIN"
+    },
+    {
+      "project": "FEDPOLPWA",
+      "repo": "fedpol-pwa-app-gitops",
+      "name": "FEDPOL PWA"
+    },
+    {
+      "project": "ALMA",
+      "repo": "nb-ab-alma-gitops",
+      "name": "NB AB ALMA"
+    },
+    {
+      "project": "SECONLR",
+      "repo": "seco-nlr-gitops",
+      "name": "SECO NLR"
+    },
+    {
+      "project": "SEM",
+      "repo": "sem_wis_gitops",
+      "name": "SEM WIS"
+    },
+    {
+      "project": "LOGIB",
+      "repo": "ebg-logib-gitops",
+      "name": "EBG LOGIB"
+    },
+    {
+      "project": "FMZ",
       "repo": "bit_fmz_app-gitops",
-      "name": "bit_fmz_app-gitops"
+      "name": "BIT FMZ APP"
+    },
+    {
+      "project": "sem",
+      "repo": "sem_wis",
+      "name": "sem_wis"
     }
   ]
 }

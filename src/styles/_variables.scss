@@ -1,50 +1,50 @@
 // ==============================================
-// VersionRadar - Variables de thème
+// VersionRadar - Variables de thème (sobre)
 // ==============================================
 
-// Couleurs principales (extraites du logo)
-$primary-color: #009cff;          // Bleu clair/cyan
-$primary-dark: #004ebc;           // Bleu foncé
-$primary-light: #33b0ff;          // Bleu clair plus lumineux
+// Couleur d'accent unique — bleu ardoise discret
+$primary-color: #4361b8;
+$primary-dark:  #1e3a8a;
+$primary-light: #f0f4ff;
 
-// Couleurs secondaires
-$secondary-color: #00d4aa;        // Vert turquoise
-$secondary-dark: #00a88a;         // Vert turquoise foncé
+// Couleurs secondaires (inutilisées mais conservées)
+$secondary-color: #64748b;
+$secondary-dark:  #475569;
 
 // Couleurs d'état
-$success-color: #10b981;          // Vert succès
-$success-light: #d1fae5;
-$error-color: #ef4444;            // Rouge erreur
-$error-light: #fee2e2;
-$warning-color: #f59e0b;          // Orange avertissement
-$warning-light: #fef3c7;
+$success-color: #16a34a;
+$success-light: #f0fdf4;
+$error-color:   #dc2626;
+$error-light:   #fef2f2;
+$warning-color: #d97706;
+$warning-light: #fffbeb;
 
-// Couleurs neutres
-$text-primary: #1e293b;           // Texte principal
-$text-secondary: #64748b;         // Texte secondaire
-$text-muted: #94a3b8;             // Texte atténué
-$background-light: #f8fafc;       // Fond clair
+// Neutres
+$text-primary:    #0f172a;
+$text-secondary:  #64748b;
+$text-muted:      #94a3b8;
+$background-light: #f1f5f9;
 $background-white: #ffffff;
-$border-color: #e2e8f0;
+$border-color:     #e2e8f0;
 
-// Ombres
-$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+// Ombres très légères
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-md: 0 1px 4px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+$shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+$shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.08);
 
-// Gradients
-$gradient-primary: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
-$gradient-secondary: linear-gradient(135deg, $secondary-color 0%, $secondary-dark 100%);
-$gradient-success: linear-gradient(135deg, $success-color 0%, #059669 100%);
-$gradient-error: linear-gradient(135deg, $error-color 0%, #dc2626 100%);
-$gradient-background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+// Gradients — réduits au minimum, aucun fond coloré
+$gradient-primary:    linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+$gradient-secondary:  linear-gradient(135deg, $secondary-color 0%, $secondary-dark 100%);
+$gradient-success:    linear-gradient(135deg, $success-color 0%, #15803d 100%);
+$gradient-error:      linear-gradient(135deg, $error-color   0%, #b91c1c 100%);
+$gradient-background: $background-light; // plus de fond dégradé vif
 
-// Bordures arrondies
-$border-radius-sm: 6px;
-$border-radius-md: 12px;
-$border-radius-lg: 16px;
-$border-radius-xl: 20px;
+// Bordures
+$border-radius-sm:   4px;
+$border-radius-md:   8px;
+$border-radius-lg:   10px;
+$border-radius-xl:   12px;
 $border-radius-full: 9999px;
 
 // Espacements
@@ -55,26 +55,25 @@ $spacing-lg: 1.5rem;
 $spacing-xl: 2rem;
 
 // Typographie
-$font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-$font-size-xs: 0.75rem;
-$font-size-sm: 0.875rem;
+$font-family:    'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+$font-size-xs:   0.75rem;
+$font-size-sm:   0.875rem;
 $font-size-base: 1rem;
-$font-size-lg: 1.125rem;
-$font-size-xl: 1.25rem;
-$font-size-2xl: 1.5rem;
-$font-size-3xl: 1.875rem;
-$font-size-4xl: 2.25rem;
+$font-size-lg:   1.125rem;
+$font-size-xl:   1.25rem;
+$font-size-2xl:  1.5rem;
+$font-size-3xl:  1.875rem;
+$font-size-4xl:  2rem;
 
-// Couleurs spécifiques aux badges
-$badge-oblique: #009cff;
-$badge-angular: #dd0031;
-$badge-commons: $success-color;
+// Badges — couleurs fonctionnelles seulement
+$badge-oblique:          #4361b8;
+$badge-angular:          #b91c1c;
+$badge-commons:          $success-color;
 $badge-angular-pipeline: $warning-color;
-$badge-azure: #0078d4;
-$badge-bitbucket: #0052cc;
+$badge-azure:            #1d6fb8;
+$badge-bitbucket:        #0747a6;
 
 // Transitions
-$transition-fast: 0.15s ease;
+$transition-fast:   0.12s ease;
 $transition-normal: 0.2s ease;
-$transition-slow: 0.3s ease;
-
+$transition-slow:   0.3s ease;

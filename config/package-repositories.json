@@ -8,6 +8,37 @@
   ],
   "repositories": [
     {
+      "platform": "azure",
+      "collection": "DefaultCollection",
+      "project": "ASTRA_RIMA",
+      "repo": "ASTRA_GeoSI",
+      "name": "ASTRA GEOSI",
+      "path": "src/Astra.GeoSI.WebClient/package.json"
+    },
+    {
+      "platform": "bitbucket",
+      "project": "BJBOHREG",
+      "repo": "bj_bo_hreg_ui",
+      "name": "BJ BO HREG",
+      "path": "package.json"
+    },
+    {
+      "platform": "bitbucket",
+      "project": "coin",
+      "repo": "coin-ui",
+      "name": "VTG_COIN",
+      "path": "package.json",
+      "branch": "master"
+    },
+    {
+      "platform": "azure",
+      "collection": "DefaultCollection",
+      "project": "Fedpol_PWA_App",
+      "repo": "Fedpol_PWA_App_UI",
+      "name": "FEDPOL PWA",
+      "path": "package.json"
+    },
+    {
       "platform": "bitbucket",
       "project": "ALMA",
       "repo": "nb-ab-alma",
@@ -16,11 +47,35 @@
     },
     {
       "platform": "azure",
+      "collection": "DefaultCollection18",
+      "project": "Seco_NLR",
+      "repo": "Seco_NLR",
+      "name": "SECO NLR",
+      "path": "src/client/nlrApp/package.json"
+    },
+    {
+      "platform": "bitbucket",
+      "project": "SEM",
+      "repo": "sem_wis",
+      "name": "SEM WIS",
+      "path": "package.json",
+      "branch": "dev"
+    },
+    {
+      "platform": "azure",
+      "collection": "DefaultCollection",
+      "project": "EBG_TEMOSTA23",
+      "repo": "EBG_TEMOSTA23",
+      "name": "EBG LOGIB",
+      "path": "src/frontend/logib/package.json"
+    },
+    {
+      "platform": "azure",
+      "collection": "DefaultCollection",
       "project": "BIT_FMZ_APP",
       "repo": "BIT_FMZ_APP",
-      "name": "BIT_FMZ_APP",
-      "path": "src/frontend/pwa/package.json",
-      "collection": "DefaultCollection"
+      "name": "BIT FMZ APP",
+      "path": "src/frontend/pwa/package.json"
     }
   ]
 }

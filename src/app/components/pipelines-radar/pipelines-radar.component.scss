@@ -2,20 +2,21 @@
 
 .table-container {
   background: var.$background-white;
+  border: 1px solid var.$border-color;
   border-radius: var.$border-radius-lg;
   padding: var.$spacing-xl;
-  box-shadow: var.$shadow-md;
 
   h2 {
     margin: 0 0 var.$spacing-lg 0;
-    font-size: var.$font-size-2xl;
-    color: var.$primary-dark;
+    font-size: var.$font-size-xl;
+    font-weight: 700;
+    color: var.$text-primary;
   }
 }
 
 .pipeline-stats {
   display: flex;
-  gap: var.$spacing-lg;
+  gap: var.$spacing-sm;
   margin-bottom: var.$spacing-lg;
   flex-wrap: wrap;
 
@@ -23,39 +24,38 @@
     display: inline-flex;
     align-items: center;
     gap: var.$spacing-xs;
-    padding: var.$spacing-xs var.$spacing-md;
-    border-radius: var.$border-radius-md;
+    padding: 3px var.$spacing-sm;
+    border-radius: var.$border-radius-sm;
     font-weight: 600;
-    font-size: var.$font-size-base;
-    background: var.$primary-light;
-    color: var.$primary-dark;
+    font-size: var.$font-size-sm;
+    background: var.$background-light;
+    color: var.$text-secondary;
+    border: 1px solid var.$border-color;
 
-    &.success { background: var.$success-light; color: var.$success-color; }
-    &.error   { background: var.$error-light;   color: var.$error-color; }
+    &.success { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
+    &.error   { background: var.$error-light;   color: var.$error-color;   border-color: #fecaca; }
   }
 }
 
-.table-wrapper {
-  overflow-x: auto;
-}
+.table-wrapper { overflow-x: auto; }
 
 .repositories-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var.$font-size-base;
+  font-size: var.$font-size-sm;
 
   thead {
-    background: var.$gradient-primary;
-    color: var.$background-white;
-
+    background: #1e293b;
+    color: #fff;
     th {
-      padding: var.$spacing-md;
+      padding: var.$spacing-sm var.$spacing-md;
       text-align: left;
       font-weight: 600;
+      font-size: var.$font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       border: none;
-
-      &:first-child { border-radius: var.$border-radius-sm 0 0 0; }
-      &:last-child  { border-radius: 0 var.$border-radius-sm 0 0; }
+      white-space: nowrap;
     }
   }
 
@@ -63,77 +63,74 @@
     tr {
       border-bottom: 1px solid var.$border-color;
       transition: background var.$transition-fast;
-
-      &:hover { background: var.$primary-light; }
-      &.status-success { border-left: 4px solid var.$success-color; }
-      &.status-error   { border-left: 4px solid var.$error-color; }
+      &:last-child { border-bottom: none; }
+      &:hover { background: var.$background-light; }
+      &.status-success { border-left: 3px solid var.$success-color; }
+      &.status-error   { border-left: 3px solid var.$error-color; }
     }
-
-    td { padding: var.$spacing-md; }
+    td { padding: var.$spacing-sm var.$spacing-md; color: var.$text-primary; }
   }
 
   .repo-info {
-    display: flex;
-    flex-direction: column;
-    gap: var.$spacing-xs;
-
-    strong { color: var.$primary-dark; }
-    small  { color: var.$text-muted; font-size: var.$font-size-sm; }
+    display: flex; flex-direction: column; gap: 2px;
+    strong { color: var.$text-primary; font-weight: 600; }
+    small  { color: var.$text-muted; font-size: var.$font-size-xs; }
   }
 
-  .chart-info { min-width: 150px; }
+  .chart-info { min-width: 130px; }
 
   .chart-badge {
     display: inline-block;
-    padding: var.$spacing-xs var.$spacing-md;
+    padding: 2px var.$spacing-sm;
     border-radius: var.$border-radius-sm;
     font-family: 'Courier New', monospace;
-    font-size: var.$font-size-sm;
+    font-size: var.$font-size-xs;
     font-weight: 600;
-    background: var.$primary-light;
-    color: var.$primary-dark;
+    background: var.$background-light;
+    color: var.$text-secondary;
+    border: 1px solid var.$border-color;
   }
 
   .version-badge {
     display: inline-block;
-    padding: var.$spacing-xs var.$spacing-md;
+    padding: 2px var.$spacing-sm;
     border-radius: var.$border-radius-sm;
     font-family: 'Courier New', monospace;
-    font-size: var.$font-size-base;
+    font-size: var.$font-size-xs;
     font-weight: 600;
     text-decoration: none;
     cursor: default;
+    border: 1px solid transparent;
 
     &[href] {
       cursor: pointer;
-      transition: opacity var.$transition-fast, transform var.$transition-fast;
-      &:hover { opacity: 0.8; transform: translateY(-1px); }
+      transition: opacity var.$transition-fast;
+      &:hover { opacity: 0.75; text-decoration: underline; }
     }
 
-    &.pipeline-version {
-      background: rgba(var.$primary-color, 0.1);
-      color: var.$primary-dark;
-    }
+    &.pipeline-version { background: var.$background-light; color: var.$text-secondary; border-color: var.$border-color; }
+    &.commons          { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
+    &.angular-pipeline { background: var.$warning-light; color: var.$warning-color; border-color: #fde68a; }
+    &.angular          { background: #fef2f2; color: var.$badge-angular; border-color: #fecaca; }
   }
 
-  .no-version { color: var.$text-muted; }
+  .no-version { color: var.$text-muted; font-size: var.$font-size-xs; }
 
   .status-badge {
     display: inline-block;
-    padding: var.$spacing-xs var.$spacing-md;
-    border-radius: var.$border-radius-full;
-    font-size: var.$font-size-sm;
+    padding: 2px var.$spacing-sm;
+    border-radius: var.$border-radius-sm;
+    font-size: var.$font-size-xs;
     font-weight: 600;
-
-    &.success { background: var.$success-light; color: var.$success-color; }
-    &.error   { background: var.$error-light;   color: var.$error-color; }
+    border: 1px solid;
+    &.success { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
+    &.error   { background: var.$error-light;   color: var.$error-color;   border-color: #fecaca; }
   }
 }
 
 @media (max-width: 768px) {
   .repositories-table {
-    font-size: var.$font-size-sm;
-    thead th, tbody td { padding: var.$spacing-sm var.$spacing-xs; }
+    font-size: var.$font-size-xs;
+    thead th, tbody td { padding: var.$spacing-xs var.$spacing-sm; }
   }
 }
-
