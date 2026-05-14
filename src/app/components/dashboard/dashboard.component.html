@@ -11,6 +11,8 @@
       <div class="lang-switcher">
         <button type="button" [class.active]="currentLang === 'fr'" (click)="switchLang('fr')">FR</button>
         <button type="button" [class.active]="currentLang === 'en'" (click)="switchLang('en')">EN</button>
+        <button type="button" [class.active]="currentLang === 'de'" (click)="switchLang('de')">DE</button>
+        <button type="button" [class.active]="currentLang === 'it'" (click)="switchLang('it')">IT</button>
       </div>
       <button type="button" class="refresh-btn" (click)="refresh()" [disabled]="loading()">
         <span class="icon" aria-hidden="true"></span>
@@ -30,16 +32,16 @@
   <!-- ── Fetch Console Dialog ────────────────────────────────────────────── -->
   @if (fetchDialogOpen()) {
     <div class="fetch-overlay" (click)="!fetchRunning() && closeFetchDialog()">
-      <div class="fetch-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Rafraîchissement des données">
+      <div class="fetch-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="'fetch.aria_label' | translate">
 
         <div class="fetch-dialog-header">
           <span class="fetch-dialog-title">
             @if (fetchRunning()) { <span class="fetch-spinner" aria-hidden="true"></span> }
             @if (!fetchRunning() && fetchSuccess()) { <span aria-hidden="true">✅</span> }
             @if (!fetchRunning() && !fetchSuccess() && fetchDone()) { <span aria-hidden="true">❌</span> }
-            Récupération des versions
+            {{ 'fetch.title' | translate }}
           </span>
-          <button type="button" class="fetch-close-btn" (click)="closeFetchDialog()" [disabled]="fetchRunning()" title="Fermer">✕</button>
+          <button type="button" class="fetch-close-btn" (click)="closeFetchDialog()" [disabled]="fetchRunning()" [title]="'fetch.close' | translate">✕</button>
         </div>
 
         <div class="fetch-console" #consoleOutput>
@@ -47,22 +49,22 @@
             <div class="fetch-line" [class]="'line-' + line.type">{{ line.text }}</div>
           }
           @if (fetchRunning() && fetchLines().length === 0) {
-            <div class="fetch-line line-info">⏳ Démarrage du script…</div>
+            <div class="fetch-line line-info">{{ 'fetch.starting' | translate }}</div>
           }
         </div>
 
         <div class="fetch-dialog-footer">
           @if (fetchRunning()) {
-            <span class="fetch-status-running">⏳ Script en cours d'exécution…</span>
+            <span class="fetch-status-running">{{ 'fetch.running' | translate }}</span>
           }
           @if (fetchDone() && fetchSuccess()) {
-            <span class="fetch-status-success">✅ Données mises à jour avec succès — dashboard rechargé</span>
+            <span class="fetch-status-success">{{ 'fetch.success' | translate }}</span>
           }
           @if (fetchDone() && !fetchSuccess()) {
-            <span class="fetch-status-error">❌ Erreur lors de la récupération — vérifiez vos tokens dans l'onglet ⚙️</span>
+            <span class="fetch-status-error">{{ 'fetch.error' | translate }}</span>
           }
           <button type="button" class="btn-close-dialog" (click)="closeFetchDialog()" [disabled]="fetchRunning()">
-            Fermer
+            {{ 'fetch.close' | translate }}
           </button>
         </div>
 
