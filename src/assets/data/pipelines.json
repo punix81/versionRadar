@@ -16,7 +16,7 @@
       {
         "name": "generic-application-pipeline",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
-        "version": "6.x"
+        "version": "8.x"
       }
     ]
   },
@@ -26,33 +26,33 @@
     "repo": "bj_bo_hreg_gitops",
     "status": "success",
     "pipelineVersions": {
-      "commons-pipeline": "2.0.1",
-      "angular-pipeline": "2.2.0",
-      "cd-pipelines": "7.4.3",
-      "dotnet-pipeline": null
+      "commons-pipeline": "2.x",
+      "angular-pipeline": "2.x",
+      "cd-pipelines": "10.x",
+      "dotnet-pipeline": "3.2.0"
     },
     "chartName": "bj-bof-pipeline",
     "chartVersion": "1.0.0",
     "allDependencies": [
       {
         "name": "commons-pipeline",
-        "version": "2.0.1",
+        "version": "2.x",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "angular-pipeline",
-        "version": "2.2.0",
+        "version": "2.x",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "cd-pipelines",
-        "version": "7.4.3",
+        "version": "10.x",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
-        "name": "dotnet-pipelines",
-        "version": "1.0.6-beta.5",
-        "repository": "file://../dotnet-pipeline"
+        "name": "dotnet-pipeline",
+        "version": "3.2.0",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       }
     ]
   },
@@ -62,64 +62,33 @@
     "repo": "coin-gitops",
     "status": "success",
     "pipelineVersions": {
-      "commons-pipeline": "2.0.2",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "8.1.0",
-      "dotnet-pipeline": null
+      "commons-pipeline": "2.x",
+      "angular-pipeline": "2.x",
+      "cd-pipelines": "10.x",
+      "dotnet-pipeline": "3.x"
     },
     "chartName": "coin-pipeline",
     "chartVersion": "1.0.0",
     "allDependencies": [
       {
         "name": "commons-pipeline",
-        "version": "2.0.2",
+        "version": "2.x",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "angular-pipeline",
-        "version": "2.2.1",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "cd-pipelines",
-        "version": "8.1.0",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      }
-    ]
-  },
-  {
-    "name": "FEDPOL PWA",
-    "project": "FEDPOLPWA",
-    "repo": "fedpol-pwa-app-gitops",
-    "status": "success",
-    "pipelineVersions": {
-      "commons-pipeline": "2.0.2",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "7.10.0",
-      "dotnet-pipeline": "2.1.0"
-    },
-    "chartName": "angular-fedpol-pwa-app",
-    "chartVersion": "1.1.1",
-    "allDependencies": [
-      {
-        "name": "commons-pipeline",
-        "version": "2.0.2",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "angular-pipeline",
-        "version": "2.2.1",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
-      },
-      {
-        "name": "cd-pipelines",
-        "version": "7.10.0",
+        "version": "2.x",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "dotnet-pipeline",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
-        "version": "2.1.0"
+        "version": "3.x"
+      },
+      {
+        "name": "cd-pipelines",
+        "version": "10.x",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       }
     ]
   },
@@ -165,33 +134,33 @@
     "repo": "seco-nlr-gitops",
     "status": "success",
     "pipelineVersions": {
-      "commons-pipeline": "2.0.2",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "7.9.0",
-      "dotnet-pipeline": "2.0.0"
+      "commons-pipeline": "2.2.0",
+      "angular-pipeline": "2.3.0",
+      "cd-pipelines": "10.1.0",
+      "dotnet-pipeline": "3.1.5"
     },
     "chartName": "seco-nlr-pipeline",
     "chartVersion": "1.1.1",
     "allDependencies": [
       {
         "name": "commons-pipeline",
-        "version": "2.0.2",
+        "version": "2.2.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "angular-pipeline",
-        "version": "2.2.1",
+        "version": "2.3.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "cd-pipelines",
-        "version": "7.9.0",
+        "version": "10.1.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "dotnet-pipeline",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
-        "version": "2.0.0"
+        "version": "3.1.5",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       }
     ]
   },
@@ -201,9 +170,9 @@
     "repo": "sem_wis_gitops",
     "status": "success",
     "pipelineVersions": {
-      "commons-pipeline": "2.0.2",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "7.10.0",
+      "commons-pipeline": "2.2.0",
+      "angular-pipeline": "2.3.0",
+      "cd-pipelines": "10.1.0",
       "dotnet-pipeline": null
     },
     "chartName": "angular-sem-wis",
@@ -211,17 +180,17 @@
     "allDependencies": [
       {
         "name": "commons-pipeline",
-        "version": "2.0.2",
+        "version": "2.2.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "angular-pipeline",
-        "version": "2.2.1",
+        "version": "2.3.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "cd-pipelines",
-        "version": "7.10.0",
+        "version": "10.1.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       }
     ]
@@ -232,38 +201,38 @@
     "repo": "ebg-logib-gitops",
     "status": "success",
     "pipelineVersions": {
-      "commons-pipeline": "2.0.1",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "7.4.3",
-      "dotnet-pipeline": "1.4.0-Beta-17"
+      "commons-pipeline": "2.2.0",
+      "angular-pipeline": "2.3.0",
+      "cd-pipelines": "9.3.0",
+      "dotnet-pipeline": "3.1.3"
     },
-    "chartName": "ebg-logib-pipelie",
+    "chartName": "ebg-logib-pipeline",
     "chartVersion": "1.0.0",
     "allDependencies": [
       {
         "name": "commons-pipeline",
-        "version": "2.0.1",
+        "version": "2.2.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "angular-pipeline",
-        "version": "2.2.1",
+        "version": "2.3.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "cd-pipelines",
-        "version": "7.4.3",
+        "version": "9.3.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "generic-application-pipeline",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
-        "version": "6.4.0"
+        "version": "9.3.0"
       },
       {
         "name": "dotnet-pipeline",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
-        "version": "1.4.0-Beta-17"
+        "version": "3.1.3"
       }
     ]
   },
@@ -273,27 +242,27 @@
     "repo": "bit_fmz_app-gitops",
     "status": "success",
     "pipelineVersions": {
-      "commons-pipeline": "2.0.2",
-      "angular-pipeline": "2.2.1",
-      "cd-pipelines": "7.10.0",
-      "dotnet-pipeline": "1.4.0-ResourceNamings-40"
+      "commons-pipeline": "2.2.0",
+      "angular-pipeline": "2.3.0",
+      "cd-pipelines": "10.1.0",
+      "dotnet-pipeline": "3.3.2"
     },
     "chartName": "bit-journey-app-pipeline",
-    "chartVersion": "1.1.1",
+    "chartVersion": "1.0.0",
     "allDependencies": [
       {
         "name": "commons-pipeline",
-        "version": "2.0.2",
+        "version": "2.2.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "angular-pipeline",
-        "version": "2.2.1",
+        "version": "2.3.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
         "name": "cd-pipelines",
-        "version": "7.10.0",
+        "version": "10.1.0",
         "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
       },
       {
@@ -303,28 +272,45 @@
       },
       {
         "name": "dotnet-pipeline",
-        "version": "1.2.2-9",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted-test"
-      },
-      {
-        "name": "dotnet-pipeline",
-        "alias": "dotnet-pipeline-new",
-        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted-test",
-        "version": "1.4.0-ResourceNamings-40"
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted",
+        "version": "3.3.2"
       }
     ]
   },
   {
-    "name": "sem_wis",
-    "project": "sem",
-    "repo": "sem_wis",
-    "status": "error",
-    "error": "HTTP 404",
+    "name": "HR-SUITE",
+    "project": "hs",
+    "repo": "hr-suite-gitops",
+    "status": "success",
     "pipelineVersions": {
-      "commons-pipeline": null,
-      "angular-pipeline": null,
-      "cd-pipelines": null,
-      "dotnet-pipeline": null
-    }
+      "commons-pipeline": "2.2.0",
+      "angular-pipeline": "2.3.0",
+      "cd-pipelines": "10.1.0",
+      "dotnet-pipeline": "3.3.1"
+    },
+    "chartName": "angular-hr-suite-ui",
+    "chartVersion": "1.0.0",
+    "allDependencies": [
+      {
+        "name": "commons-pipeline",
+        "version": "2.2.0",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "angular-pipeline",
+        "version": "2.3.0",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "cd-pipelines",
+        "version": "10.1.0",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      },
+      {
+        "name": "dotnet-pipeline",
+        "version": "3.3.1",
+        "repository": "https://nexus.bit.admin.ch/repository/bit-pipelines-helm-hosted"
+      }
+    ]
   }
 ]

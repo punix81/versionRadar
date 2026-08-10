@@ -147,9 +147,9 @@ function parseEnv(raw: string): EnvConfig {
 }
 
 function serializeEnv(data: EnvConfig): string {
-  const azureKeys   = ['AZUREDEVOPS_TOKEN', 'AZUREDEVOPS_USER'];
-  const bitbucketKeys = ['BITBUCKET_USER', 'BITBUCKET_TOKEN', 'BITBUCKET_BASE_URL'];
-  const settingsKeys = ['REQUEST_TIMEOUT_MS', 'DATE_LOCALE'];
+  const azureKeys = ['AZUREDEVOPS_TOKEN', 'AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18', 'AZUREDEVOPS_USER'];
+  const bitbucketKeys = ['BITBUCKET_USER', 'BITBUCKET_TOKEN', 'BITBUCKET_BASE_URL', 'BITBUCKET_AUTH_SCHEME'];
+  const settingsKeys = ['REQUEST_TIMEOUT_MS', 'DATE_LOCALE', 'HOST_IP_OVERRIDES'];
 
   const lines: string[] = [];
   lines.push('# Azure DevOps');
@@ -270,4 +270,3 @@ app.get('/api/fetch/stream', (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`✅ Config server running on http://localhost:${PORT}`);
 });
-

@@ -1,304 +1,260 @@
 # VersionRadar
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+VersionRadar is an Angular dashboard for monitoring package, pipeline, and NPM lockfile security data across Azure DevOps and Bitbucket repositories.
 
-## 🚀 VersionRadar Scripts
+## Features
 
-VersionRadar provides two types of scripts to monitor your repositories:
+- Fetch pipeline versions from Bitbucket `Chart.yaml` files.
+- Fetch package versions and dependencies from Azure DevOps and Bitbucket `package.json` files.
+- Fetch `package-lock.json` dependencies when available.
+- Scan lockfile packages against a CSV list of confirmed malicious NPM packages.
+- Show NPM Worm scan results by project:
+  - project name
+  - total packages found in `package-lock.json`
+  - contaminated package count
+  - secure / not secure status
+- Manage repositories, tokens, script settings, and the malicious package CSV from the dashboard admin panel.
 
-### 1. Fetch Pipeline Versions (Chart.yaml)
+## Quick Start
 
-Automatically fetch pipeline versions (e.g., `commons-pipeline`, `angular-pipeline`) from `Chart.yaml` files across multiple Bitbucket Server repositories.
+Install dependencies:
 
-**Available Implementations:**
-- **TypeScript/Node.js** - `scripts/fetch-pipeline-versions.ts`
-- **Python 3** - `scripts/fetch_pipeline_versions.py`
-
-**Configuration:** `config/repositories.json`
-
-### 2. Fetch Package Versions (package.json) 🆕
-
-Automatically fetch **@oblique/oblique** and **@angular/cdk** versions from `package.json` files across Azure DevOps and Bitbucket repositories.
-
-**Available Implementations:**
-- **TypeScript/Node.js** - `scripts/fetch-package-versions.ts`
-- **Python 3** - `scripts/fetch_package_versions.py`
-
-**Configuration:** `config/package-repositories.json`
-
-## Prerequisites
-
-- **For TypeScript:** Node.js 18+ installed
-- **For Python:** Python 3.10+ installed
-- Access to Bitbucket Server with credentials
-- Configuration files properly set up
-
-### Installation
-
-#### TypeScript/Node.js
-
-1. **Install dependencies:**
 ```bash
 npm install
 ```
 
-2. **Create a `.env` file** in the project root with your credentials:
-```bash
-# Bitbucket Server
-BITBUCKET_BASE_URL=https://bitbucket.bit.admin.ch
-BITBUCKET_USER=your_username
-BITBUCKET_TOKEN=your_token_or_password
+Create `.env` from `.env.example` and fill in the credentials:
 
+```bash
+cp .env.example .env
+```
+
+Start the local config server and Angular app:
+
+```bash
+npm start
+```
+
+Open:
+
+```text
+http://localhost:4200/
+```
+
+## Configuration
+
+Most configuration can be edited in the dashboard under `Configuration Administration`.
+
+### Tokens & Settings
+
+The app uses `.env` for credentials and runtime settings:
+
+```bash
 # Azure DevOps
+AZUREDEVOPS_TOKEN=your_azure_devops_token_here
+AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18=your_defaultcollection18_azure_devops_token_here
 AZUREDEVOPS_USER=your_azure_username
-AZUREDEVOPS_TOKEN=your_azure_pat_token
+
+# Bitbucket
+BITBUCKET_USER=your_bitbucket_username
+BITBUCKET_TOKEN=your_bitbucket_token_here
+BITBUCKET_BASE_URL=https://bitbucket.bit.admin.ch
+BITBUCKET_AUTH_SCHEME=bearer
 
 # Script settings
 REQUEST_TIMEOUT_MS=30000
 DATE_LOCALE=fr-CH
+HOST_IP_OVERRIDES=bitbucket.bit.admin.ch=10.176.71.49,devops-server.admin.ch=10.222.11.225
 ```
 
-**⚠️ Security Warning:** Never commit `.env` to version control. Add it to `.gitignore`.
+`AZUREDEVOPS_TOKEN` is used for normal Azure DevOps collections such as `DefaultCollection`.
 
-3. **Configure repositories** in `config/repositories.json`:
+`AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18` is used automatically for Azure repositories configured with:
+
+```json
+"collection": "DefaultCollection18"
+```
+
+`BITBUCKET_AUTH_SCHEME=bearer` is the default for current Bitbucket tokens. Set it to `basic` only if your Bitbucket token explicitly requires Basic Auth.
+
+`HOST_IP_OVERRIDES` is optional but useful in environments where Node.js cannot resolve internal DNS names reliably. It keeps the real host name for TLS and HTTP headers while connecting to the configured IP.
+
+Never commit `.env`.
+
+### Package Repositories
+
+Package repositories are configured in:
+
+```text
+config/package-repositories.json
+```
+
+The package fetch script reads each configured `package.json` and, when present, the sibling `package-lock.json`.
+
+Example Azure repository:
+
 ```json
 {
-  "filePath": "pipeline/Chart.yaml",
-  "pipelineNames": ["commons-pipeline", "angular-pipeline"],
-  "repositories": [
-    {
-      "project": "PROJECT_KEY",
-      "repo": "repository-slug",
-      "name": "Repository Display Name",
-      "branch": "main"
-    }
-  ]
+  "platform": "azure",
+  "collection": "DefaultCollection18",
+  "project": "Seco_NLR",
+  "repo": "Seco_NLR_UI",
+  "name": "Seco_NLR_UI",
+  "path": "package.json",
+  "branch": "dev"
 }
 ```
 
-#### Python 3
+Example Bitbucket repository:
 
-1. **Create a virtual environment (recommended):**
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+```json
+{
+  "platform": "bitbucket",
+  "project": "BJBOHREG",
+  "repo": "bj_bo_hreg_ui",
+  "name": "BJ BO HREG",
+  "path": "package.json"
+}
 ```
 
-2. **Install Python dependencies:**
-```bash
-pip install -r requirements.txt
+### Pipeline Repositories
+
+Pipeline repositories are configured in:
+
+```text
+config/repositories.json
 ```
 
-3. **Create a `.env` file** (same as TypeScript version):
-```bash
-BITBUCKET_BASE_URL=https://bitbucket.bit.admin.ch
-BITBUCKET_USER=your_username
-BITBUCKET_TOKEN=your_token_or_password
-REQUEST_TIMEOUT_MS=30000
-DATE_LOCALE=fr-CH
+The pipeline fetch script reads the configured `Chart.yaml` path and extracts configured pipeline dependency versions.
+
+## NPM Worm Security Scan
+
+The malicious package CSV is configured in the admin panel:
+
+```text
+Configuration Administration > Security
 ```
 
-**Note:** On Debian/Ubuntu, if you get an error about `python3-venv`, install it:
-```bash
-sudo apt install python3.12-venv
+Add the CSV file, for example:
+
+```text
+/home/punix81/Downloads/malicious-packages.csv
 ```
 
-### Usage
+Supported CSV columns:
 
-#### Fetch Pipeline Versions (Chart.yaml)
+- `package`, `package_name`, `name`, `npm_package`, or `npm`
+- `version`, `package_version`, `versions`, or `malicious_version`
 
-**TypeScript/Node.js:**
-```bash
-npm run fetch-pipelines
-# Or directly:
-npx ts-node scripts/fetch-pipeline-versions.ts
-```
+Comma and semicolon separators are supported.
 
-**Python 3:**
-```bash
-npm run fetch-pipelines:python
-# Or directly:
-python3 scripts/fetch_pipeline_versions.py
-```
+The scan compares the CSV against packages found in `package-lock.json` data. Results are shown by project with:
 
-#### Fetch Package Versions (package.json) 🆕
+- total lockfile packages found
+- contaminated packages
+- security status
 
-**TypeScript/Node.js:**
+The CSV is stored in browser `localStorage`, so it remains available after page reloads. Clear it from the `Security` admin tab when needed.
+
+## Running Fetch Scripts
+
+Fetch package and lockfile data:
+
 ```bash
 npm run fetch-packages
-# Or directly:
-npx ts-node scripts/fetch-package-versions.ts
 ```
 
-**Python 3:**
-```bash
-npm run fetch-packages:python
-# Or directly:
-python3 scripts/fetch_package_versions.py
-```
-
-### Output
-
-Both scripts will:
-- ✅ Fetch `Chart.yaml` from each configured repository
-- ✅ Extract pipeline versions
-- ✅ Display individual results for each repository
-- ✅ Show a summary table with all results
-- ✅ Display statistics (success/error counts)
-
-### Configuration Files
-
-- **`config/repositories.json`** - List of Bitbucket repositories and pipelines to monitor (for Chart.yaml)
-- **`config/package-repositories.json`** 🆕 - List of Azure DevOps and Bitbucket repositories to monitor (for package.json)
-- **`config/messages.json`** - Console messages and labels (customizable)
-- **`.env`** - Credentials and connection parameters (not tracked in git)
-- **`requirements.txt`** - Python dependencies (for Python version only)
-
-### How It Works
-
-#### TypeScript Version
-1. Uses Angular signals for reactive state management
-2. Repositories are processed **sequentially** using callbacks
-3. Each repository's `Chart.yaml` is fetched via HTTPS from Bitbucket Server
-4. Pipeline versions are extracted from YAML dependencies
-5. Results are aggregated and displayed in a formatted table
-
-#### Python Version
-1. Follows PEP 8 and PEP 484 conventions
-2. Uses type hints for better code clarity
-3. Repositories are processed **sequentially** with callbacks
-4. Each repository's `Chart.yaml` is fetched via HTTPS from Bitbucket Server
-5. Pipeline versions are extracted from YAML dependencies
-6. Results are aggregated and displayed in a formatted table
-
-### Error Handling
-
-- Connection timeouts are handled with a configurable timeout (default: 30s)
-- Failed repositories show error messages without exposing sensitive data
-- All credentials are kept secure in `.env` and never logged to console
-
-### Example Output
-
-```
-🚀 VersionRadar - Fetch Pipeline Versions (via Renovate approach)
-📅 Date: 17.02.2026
-📁 Fichier recherché: pipeline/Chart.yaml
-🔢 Nombre de repositories: 8
-
-⏳ Fetching [1/8] Repository Name...
-
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                          📊 Version Summary Report                           ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║ Repository         │ commons-pipeline  │ angular-pipeline  │ Status        ║
-╠──────────────────────────────────────────────────────────────────────────────╣
-║ Repository Name    │ 1.2.3             │ 2.1.0             │ ✅ Success    ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-📋 Summary: 7 success, 1 errors on 8 repositories
-```
-
-## Development server
-2. Repositories are processed **sequentially** using callbacks
-3. Each repository's `Chart.yaml` is fetched via HTTPS from Bitbucket Server
-4. Pipeline versions are extracted from YAML dependencies
-5. Results are aggregated and displayed in a formatted table
-
-### Error Handling
-
-- Connection timeouts are handled with a configurable timeout (default: 30s)
-- Failed repositories show error messages without exposing sensitive data
-- All credentials are kept secure in `.env` and never logged to console
-
-### Example Output
-
-```
-🚀 VersionRadar - Fetch Pipeline Versions (via Renovate approach)
-📅 Date: 17.02.2026
-📁 Fichier recherché: pipeline/Chart.yaml
-🔢 Nombre de repositories: 8
-
-⏳ Fetching [1/8] Repository Name...
-
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                          📊 Version Summary Report                           ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║ Repository         │ commons-pipeline  │ angular-pipeline  │ Status        ║
-╠──────────────────────────────────────────────────────────────────────────────╣
-║ Repository Name    │ 1.2.3             │ 2.1.0             │ ✅ Success    ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-📋 Summary: 7 success, 1 errors on 8 repositories
-```
-
-### Choosing Between TypeScript and Python
-
-Both implementations provide identical functionality. Here's a quick comparison:
-
-| Aspect | TypeScript | Python |
-|--------|-----------|--------|
-| **Startup** | ~1-2s | ~0.5s ⭐ |
-| **Memory** | ~50-100MB | ~30-50MB ⭐ |
-| **Type Safety** | ✅ Full | ✅ Type hints |
-| **Setup** | Simple | Needs venv |
-| **Best For** | Node.js environments | Standalone scripts |
-
-**See [TYPESCRIPT_VS_PYTHON.md](./TYPESCRIPT_VS_PYTHON.md) for detailed comparison.**
-
-## Installation & Quick Start
-
-For detailed installation instructions for both versions, see [INSTALLATION.md](./INSTALLATION.md)
-
-## Development server
+Fetch pipeline data:
 
 ```bash
-ng serve
+npm run fetch-pipelines
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Fetch both from the UI:
 
-## Code scaffolding
+```text
+Dashboard > Refresh
+```
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+The refresh button requires a malicious package CSV to be configured first, because the NPM Worm scan is part of the refresh workflow.
+
+## Output Files
+
+Fetched data is written to:
+
+```text
+src/assets/data/repositories.json
+src/assets/data/pipelines.json
+```
+
+The Angular dashboard reads these files to display package, pipeline, and NPM Worm scan results.
+
+## Troubleshooting
+
+### Bitbucket returns HTTP 401
+
+Check:
+
+- `BITBUCKET_TOKEN` is current.
+- `BITBUCKET_AUTH_SCHEME=bearer` for new bearer-style tokens.
+- The token has read access to the project and repository.
+
+### Azure DevOps returns HTTP 401
+
+Check:
+
+- `AZUREDEVOPS_TOKEN` has access to the collection/project/repo.
+- Repositories in `DefaultCollection18` require `AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18`.
+- The PAT has code read permissions.
+
+### Azure DevOps returns HTTP 404
+
+Check:
+
+- `collection`, `project`, `repo`, and `path` in `config/package-repositories.json`.
+- The repo or file path may be wrong.
+- Azure may also hide missing permissions as a not-found response in some cases.
+
+### Node.js DNS errors
+
+If scripts show `EAI_AGAIN` for internal hosts, configure:
 
 ```bash
-ng generate component component-name
+HOST_IP_OVERRIDES=bitbucket.bit.admin.ch=10.176.71.49,devops-server.admin.ch=10.222.11.225
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Update the IPs if the internal endpoints change.
+
+## Development
+
+Run the application:
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
-
-To build the project run:
+Run tests:
 
 ```bash
-ng build
+npm test -- --run
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Type-check the Angular app:
 
 ```bash
-ng test
+npx tsc --project tsconfig.app.json --noEmit
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Type-check scripts:
 
 ```bash
-ng e2e
+npx tsc --project tsconfig.scripts.json --noEmit
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Build:
 
-## Additional Resources
+```bash
+npm run build
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Note: the current production build may fail on Angular style budgets if existing component SCSS exceeds the configured budget.

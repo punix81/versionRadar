@@ -11,7 +11,7 @@ import {
   EnvConfig,
 } from '../../services/config.service';
 
-type Tab = 'pipelines' | 'packages' | 'env';
+type Tab = 'pipelines' | 'packages' | 'security' | 'env';
 
 function emptyPipelineRepo(): PipelineRepository {
   return { project: '', repo: '', name: '', branch: '' };
@@ -69,7 +69,13 @@ export class ConfigAdminComponent implements OnInit {
   envError = signal<string | null>(null);
   envSuccess = signal(false);
   showAzureToken = signal(false);
+  showAzureCollection18Token = signal(false);
   showBitbucketToken = signal(false);
+
+  readonly maliciousPackages = this.configService.maliciousPackages;
+  readonly maliciousCsvFileName = this.configService.maliciousCsvFileName;
+  readonly maliciousCsvSkippedRows = this.configService.maliciousCsvSkippedRows;
+  readonly maliciousCsvError = this.configService.maliciousCsvError;
 
   ngOnInit(): void {
     this.loadPipelineConfig();
@@ -349,5 +355,22 @@ export class ConfigAdminComponent implements OnInit {
       error: err => { this.envError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.envSaving.set(false); },
     });
   }
-}
 
+  async onMaliciousCsvSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      await this.configService.loadMaliciousPackagesCsvFile(file);
+    } catch {
+      this.configService.maliciousCsvError.set('npm_worm.error_read');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  clearMaliciousCsv(): void {
+    this.configService.clearMaliciousPackagesCsv();
+  }
+}

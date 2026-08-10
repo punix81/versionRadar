@@ -31,27 +31,11 @@
       "branch": "master"
     },
     {
-      "platform": "azure",
-      "collection": "DefaultCollection",
-      "project": "Fedpol_PWA_App",
-      "repo": "Fedpol_PWA_App_UI",
-      "name": "FEDPOL PWA",
-      "path": "package.json"
-    },
-    {
       "platform": "bitbucket",
       "project": "ALMA",
       "repo": "nb-ab-alma",
       "name": "nb-ab-alma",
       "path": "src/client/almaapp/package.json"
-    },
-    {
-      "platform": "azure",
-      "collection": "DefaultCollection18",
-      "project": "Seco_NLR",
-      "repo": "Seco_NLR",
-      "name": "SECO NLR",
-      "path": "src/client/nlrApp/package.json"
     },
     {
       "platform": "bitbucket",
@@ -76,6 +60,15 @@
       "repo": "BIT_FMZ_APP",
       "name": "BIT FMZ APP",
       "path": "src/frontend/pwa/package.json"
+    },
+    {
+      "platform": "azure",
+      "project": "Seco_NLR",
+      "repo": "Seco_NLR_UI",
+      "name": "Seco_NLR_UI",
+      "path": "package.json",
+      "collection": "DefaultCollection18",
+      "branch": "dev"
     }
   ]
 }

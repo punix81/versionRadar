@@ -132,6 +132,8 @@
         [pipelines]="data()!.pipelines"
         [pipelineStats]="data()!.pipelineStats" />
 
+      <!-- NPM Worm Scan -->
+      <app-npm-worm [repositories]="data()!.repositories" />
 
        <!-- Repositories Table -->
       <app-packages-radar [repositories]="data()!.repositories" />
@@ -140,4 +142,3 @@
     </div>
   }
 </div>
-

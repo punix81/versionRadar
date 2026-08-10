@@ -16,8 +16,11 @@
 
 import 'dotenv/config';
 import * as https from 'https';
+import * as http from 'http';
+import * as tls from 'tls';
 import * as fs from 'fs';
 import * as path from 'path';
+import type { Duplex } from 'stream';
 
 // Charger les fichiers de configuration
 const configDir = path.join(__dirname, '..', 'config');
@@ -43,6 +46,7 @@ interface Credentials {
   azure: {
     user: string;
     token: string;
+    collectionTokens: { [collection: string]: string };
   };
   bitbucket: {
     user: string;
@@ -61,11 +65,22 @@ interface PackageJson {
   devDependencies?: { [key: string]: string };
 }
 
+interface PackageLockDependency {
+  version?: string;
+  dependencies?: { [key: string]: PackageLockDependency };
+}
+
+interface PackageLockJson {
+  packages?: { [key: string]: { version?: string } };
+  dependencies?: { [key: string]: PackageLockDependency };
+}
+
 interface PackageInfo {
   packageName: string;
   packageVersion: string;
   packageVersions: PackageVersions;
   allDependencies: { [key: string]: string };
+  lockDependencies: { [key: string]: string };
 }
 
 interface RepositoryResult {
@@ -78,6 +93,7 @@ interface RepositoryResult {
   packageName?: string;
   packageVersion?: string;
   allDependencies?: { [key: string]: string };
+  lockDependencies?: { [key: string]: string };
   error?: string;
 }
 
@@ -86,11 +102,100 @@ const AZURE_BASE_URL = 'https://devops-server.admin.ch';
 const BITBUCKET_BASE_URL = process.env['BITBUCKET_BASE_URL'] || 'https://bitbucket.bit.admin.ch';
 const REQUEST_TIMEOUT_MS = parseInt(process.env['REQUEST_TIMEOUT_MS'] || '30000', 10);
 const DATE_LOCALE = process.env['DATE_LOCALE'] || 'fr-CH';
+const HTTPS_PROXY = process.env['HTTPS_PROXY'] || process.env['https_proxy'] || process.env['HTTP_PROXY'] || process.env['http_proxy'];
+const HOST_IP_OVERRIDES = parseHostIpOverrides(process.env['HOST_IP_OVERRIDES'] || '');
+const BITBUCKET_AUTH_SCHEME = (process.env['BITBUCKET_AUTH_SCHEME'] || 'bearer').toLowerCase();
 
 // Configuration depuis package-repositories.json
 const REPOSITORIES: Repository[] = repositoriesConfig.repositories;
 const FILE_PATH: string = repositoriesConfig.filePath;
 const PACKAGE_NAMES: string[] = repositoriesConfig.packageNames;
+
+class HttpsProxyAgent extends https.Agent {
+  constructor(private readonly proxyUrl: string) {
+    super();
+  }
+
+  override createConnection(
+    options: https.RequestOptions,
+    callback?: (err: Error | null, stream: Duplex) => void
+  ): Duplex | null | undefined {
+    const proxy = new URL(this.proxyUrl);
+    const targetHost = String(options.host || options.hostname);
+    const targetPort = options.port || 443;
+    let callbackDone = false;
+
+    const done = (err: Error | null, socket?: tls.TLSSocket) => {
+      if (callbackDone) return;
+      callbackDone = true;
+      if (callback) callback(err, socket as Duplex);
+    };
+
+    const connectReq = http.request({
+      hostname: proxy.hostname,
+      port: Number(proxy.port || 80),
+      method: 'CONNECT',
+      path: `${targetHost}:${targetPort}`,
+      headers: {
+        Host: `${targetHost}:${targetPort}`
+      }
+    });
+
+    connectReq.once('connect', (res, socket) => {
+      if (res.statusCode !== 200) {
+        socket.destroy();
+        done(new Error(`Proxy CONNECT HTTP ${res.statusCode}`));
+        return;
+      }
+
+      const tlsSocket = tls.connect({
+        socket,
+        servername: targetHost,
+        rejectUnauthorized: false
+      }, () => done(null, tlsSocket));
+
+      tlsSocket.once('error', error => done(error));
+    });
+
+    connectReq.once('error', error => done(error));
+    connectReq.end();
+
+    return undefined;
+  }
+}
+
+const proxyAgent = HTTPS_PROXY ? new HttpsProxyAgent(HTTPS_PROXY) : undefined;
+
+function createHttpsOptions(url: URL, headers: Record<string, string>): https.RequestOptions {
+  const hostIp = HOST_IP_OVERRIDES.get(url.hostname);
+
+  return {
+    hostname: hostIp || url.hostname,
+    port: 443,
+    path: url.pathname + url.search,
+    method: 'GET',
+    headers: {
+      Host: url.hostname,
+      ...headers
+    },
+    rejectUnauthorized: false,
+    servername: url.hostname,
+    agent: hostIp ? undefined : proxyAgent
+  };
+}
+
+function parseHostIpOverrides(raw: string): Map<string, string> {
+  const overrides = new Map<string, string>();
+
+  for (const entry of raw.split(',')) {
+    const [host, ip] = entry.split('=').map(part => part?.trim());
+    if (host && ip) {
+      overrides.set(host, ip);
+    }
+  }
+
+  return overrides;
+}
 
 /**
  * Récupérer les credentials depuis le fichier .env
@@ -98,6 +203,7 @@ const PACKAGE_NAMES: string[] = repositoriesConfig.packageNames;
 function getCredentials(): Credentials {
   const azureUser = process.env['AZUREDEVOPS_USER'];
   const azureToken = process.env['AZUREDEVOPS_TOKEN'];
+  const azureCollection18Token = process.env['AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18'];
   const bitbucketUser = process.env['BITBUCKET_USER'];
   const bitbucketToken = process.env['BITBUCKET_TOKEN'];
 
@@ -112,7 +218,13 @@ function getCredentials(): Credentials {
   }
 
   return {
-    azure: { user: azureUser, token: azureToken },
+    azure: {
+      user: azureUser,
+      token: azureToken,
+      collectionTokens: {
+        ...(azureCollection18Token ? { DefaultCollection18: azureCollection18Token } : {})
+      }
+    },
     bitbucket: { user: bitbucketUser, token: bitbucketToken }
   };
 }
@@ -123,6 +235,14 @@ function getCredentials(): Credentials {
 function createAuthHeader(username: string, token: string): string {
   const auth = Buffer.from(`${username}:${token}`).toString('base64');
   return `Basic ${auth}`;
+}
+
+function getAzureTokenForCollection(credentials: Credentials, collection: string): string {
+  return credentials.azure.collectionTokens[collection] || credentials.azure.token;
+}
+
+function createBitbucketAuthHeader(username: string, token: string): string {
+  return BITBUCKET_AUTH_SCHEME === 'basic' ? createAuthHeader(username, token) : `Bearer ${token}`;
 }
 
 /**
@@ -136,22 +256,16 @@ function fetchFromAzure(
 ): void {
   // Format de l'URL Azure DevOps
   const collection = repo.collection || 'DefaultCollection';
+  const token = getAzureTokenForCollection(credentials, collection);
   const apiUrl = `${AZURE_BASE_URL}/${collection}/${repo.project}/_apis/git/repositories/${repo.repo}/items?path=/${repo.path}&api-version=6.0`;
 
   const url = new URL(apiUrl);
 
-  const options: https.RequestOptions = {
-    hostname: url.hostname,
-    port: 443,
-    path: url.pathname + url.search,
-    method: 'GET',
-    headers: {
-      'Authorization': createAuthHeader(credentials.azure.user, credentials.azure.token),
+  const options = createHttpsOptions(url, {
+      'Authorization': createAuthHeader(credentials.azure.user, token),
       'Accept': 'text/plain',  // Important: demander le contenu brut
       'User-Agent': 'VersionRadar/1.0'
-    },
-    rejectUnauthorized: false
-  };
+    });
 
   const req = https.request(options, (res) => {
     let data = '';
@@ -169,8 +283,8 @@ function fetchFromAzure(
     });
   });
 
-  req.on('error', () => {
-    onComplete(null, messages.errors.timeout);
+  req.on('error', (error) => {
+    onComplete(null, `${messages.errors.timeout} (${error.message})`);
   });
 
   req.setTimeout(REQUEST_TIMEOUT_MS, () => {
@@ -198,19 +312,12 @@ function fetchFromBitbucket(
 
   const url = new URL(apiUrl);
 
-  const options: https.RequestOptions = {
-    hostname: url.hostname,
-    port: 443,
-    path: url.pathname + url.search,
-    method: 'GET',
-    headers: {
-      'Authorization': createAuthHeader(credentials.bitbucket.user, credentials.bitbucket.token),
+  const options = createHttpsOptions(url, {
+      'Authorization': createBitbucketAuthHeader(credentials.bitbucket.user, credentials.bitbucket.token),
       'Accept': 'application/json',
       'User-Agent': 'VersionRadar/1.0',
       'X-Atlassian-Token': 'no-check'
-    },
-    rejectUnauthorized: false
-  };
+    });
 
   const req = https.request(options, (res) => {
     let data = '';
@@ -227,8 +334,8 @@ function fetchFromBitbucket(
     });
   });
 
-  req.on('error', () => {
-    onComplete(null, messages.errors.timeout);
+  req.on('error', (error) => {
+    onComplete(null, `${messages.errors.timeout} (${error.message})`);
   });
 
   req.setTimeout(REQUEST_TIMEOUT_MS, () => {
@@ -242,22 +349,48 @@ function fetchFromBitbucket(
 /**
  * Récupérer le fichier package.json selon la plateforme
  */
+function fetchRepositoryFile(
+  repo: Repository,
+  credentials: Credentials,
+  filePath: string,
+  onComplete: (data: string | null, error: string | null) => void
+): void {
+  const fileRepo = { ...repo, path: filePath };
+
+  if (repo.platform === 'azure') {
+    fetchFromAzure(fileRepo, credentials, onComplete);
+  } else {
+    fetchFromBitbucket(fileRepo, credentials, onComplete);
+  }
+}
+
 function fetchPackageJson(
   repo: Repository,
   credentials: Credentials,
   onComplete: (data: string | null, error: string | null) => void
 ): void {
-  if (repo.platform === 'azure') {
-    fetchFromAzure(repo, credentials, onComplete);
-  } else {
-    fetchFromBitbucket(repo, credentials, onComplete);
-  }
+  fetchRepositoryFile(repo, credentials, repo.path, onComplete);
+}
+
+function fetchPackageLockJson(
+  repo: Repository,
+  credentials: Credentials,
+  onComplete: (data: string | null, error: string | null) => void
+): void {
+  fetchRepositoryFile(repo, credentials, getPackageLockPath(repo.path), onComplete);
+}
+
+function getPackageLockPath(packageJsonPath: string): string {
+  const slashIndex = packageJsonPath.lastIndexOf('/');
+  return slashIndex >= 0
+    ? `${packageJsonPath.slice(0, slashIndex + 1)}package-lock.json`
+    : 'package-lock.json';
 }
 
 /**
  * Parser le package.json et extraire les versions des packages
  */
-function extractPackageVersions(jsonContent: string): PackageInfo {
+function extractPackageVersions(jsonContent: string, lockContent: string | null = null): PackageInfo {
   try {
     const packageJson: PackageJson = JSON.parse(jsonContent);
 
@@ -276,10 +409,57 @@ function extractPackageVersions(jsonContent: string): PackageInfo {
       packageName: packageJson.name || 'N/A',
       packageVersion: packageJson.version || 'N/A',
       packageVersions,
-      allDependencies
+      allDependencies,
+      lockDependencies: lockContent ? extractPackageLockDependencies(lockContent) : {}
     };
   } catch (error) {
     throw new Error('Impossible de parser le fichier package.json');
+  }
+}
+
+function extractPackageLockDependencies(lockContent: string): { [key: string]: string } {
+  try {
+    const packageLock: PackageLockJson = JSON.parse(lockContent);
+    const dependencies: { [key: string]: string } = {};
+
+    if (packageLock.packages) {
+      for (const [lockPath, entry] of Object.entries(packageLock.packages)) {
+        if (!lockPath || !entry.version) continue;
+
+        const packageName = getPackageNameFromLockPath(lockPath);
+        if (packageName) {
+          dependencies[packageName] = entry.version;
+        }
+      }
+    }
+
+    if (Object.keys(dependencies).length === 0 && packageLock.dependencies) {
+      collectLegacyLockDependencies(packageLock.dependencies, dependencies);
+    }
+
+    return dependencies;
+  } catch {
+    return {};
+  }
+}
+
+function getPackageNameFromLockPath(lockPath: string): string | null {
+  const parts = lockPath.split('node_modules/');
+  return parts.length > 1 ? parts[parts.length - 1] : null;
+}
+
+function collectLegacyLockDependencies(
+  source: { [key: string]: PackageLockDependency },
+  target: { [key: string]: string }
+): void {
+  for (const [name, dependency] of Object.entries(source)) {
+    if (dependency.version) {
+      target[name] = dependency.version;
+    }
+
+    if (dependency.dependencies) {
+      collectLegacyLockDependencies(dependency.dependencies, target);
+    }
   }
 }
 
@@ -419,49 +599,60 @@ function main(): void {
           packageVersions: emptyVersions
         });
       } else if (data) {
-        try {
-          const info = extractPackageVersions(data);
-          displayRepoResults(repo, info, index);
+        fetchPackageLockJson(repo, credentials, (lockData, lockError) => {
+          try {
+            if (lockError) {
+              console.log(`   ⚠️  package-lock.json non disponible: ${lockError}`);
+            }
 
-          results.push({
-            name: repo.name,
-            platform: repo.platform,
-            project: repo.project,
-            repo: repo.repo,
-            status: 'success',
-            packageVersions: info.packageVersions,
-            packageName: info.packageName,
-            packageVersion: info.packageVersion,
-            allDependencies: info.allDependencies
-          });
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.log(`\n${status.error} Erreur pour ${repo.name}: ${errorMessage}`);
+            const info = extractPackageVersions(data, lockData);
+            displayRepoResults(repo, info, index);
 
-          // Debug: afficher les premières lignes du contenu reçu
-          if (data.length > 0) {
-            console.log(`   📝 Debug: Premières lignes du contenu reçu:`);
-            console.log(`   ${data.substring(0, 200)}...`);
+            results.push({
+              name: repo.name,
+              platform: repo.platform,
+              project: repo.project,
+              repo: repo.repo,
+              status: 'success',
+              packageVersions: info.packageVersions,
+              packageName: info.packageName,
+              packageVersion: info.packageVersion,
+              allDependencies: info.allDependencies,
+              lockDependencies: info.lockDependencies
+            });
+
+            processNextRepository(index + 1);
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.log(`\n${status.error} Erreur pour ${repo.name}: ${errorMessage}`);
+
+            // Debug: afficher les premières lignes du contenu reçu
+            if (data.length > 0) {
+              console.log(`   📝 Debug: Premières lignes du contenu reçu:`);
+              console.log(`   ${data.substring(0, 200)}...`);
+            }
+
+            const emptyVersions: PackageVersions = {};
+            for (const packageName of PACKAGE_NAMES) {
+              emptyVersions[packageName] = null;
+            }
+
+            results.push({
+              name: repo.name,
+              platform: repo.platform,
+              project: repo.project,
+              repo: repo.repo,
+              status: 'error',
+              error: errorMessage,
+              packageVersions: emptyVersions
+            });
+
+            processNextRepository(index + 1);
           }
-
-          const emptyVersions: PackageVersions = {};
-          for (const packageName of PACKAGE_NAMES) {
-            emptyVersions[packageName] = null;
-          }
-
-          results.push({
-            name: repo.name,
-            platform: repo.platform,
-            project: repo.project,
-            repo: repo.repo,
-            status: 'error',
-            error: errorMessage,
-            packageVersions: emptyVersions
-          });
-        }
+        });
+        return;
       }
 
-      // Passer au repository suivant
       processNextRepository(index + 1);
     });
   }
@@ -471,4 +662,3 @@ function main(): void {
 }
 
 main();
-

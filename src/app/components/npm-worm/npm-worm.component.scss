@@ -1,0 +1,225 @@
+@use 'variables' as var;
+
+.npm-worm {
+  background: var.$background-white;
+  border: 1px solid var.$border-color;
+  border-radius: var.$border-radius-lg;
+  padding: var.$spacing-xl;
+}
+
+.npm-worm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var.$spacing-md;
+  margin-bottom: var.$spacing-lg;
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+    font-size: var.$font-size-xl;
+    font-weight: 700;
+    color: var.$text-primary;
+  }
+
+  p {
+    margin: var.$spacing-xs 0 0;
+    color: var.$text-secondary;
+    font-size: var.$font-size-sm;
+  }
+}
+
+.npm-worm-actions {
+  display: flex;
+  gap: var.$spacing-sm;
+  flex-wrap: wrap;
+}
+
+.config-location {
+  border: 1px solid var.$border-color;
+  border-radius: var.$border-radius-md;
+  padding: var.$spacing-xs var.$spacing-md;
+  font-size: var.$font-size-sm;
+  font-weight: 600;
+  color: var.$text-secondary;
+  background: var.$background-light;
+}
+
+.npm-worm-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var.$spacing-md;
+  margin-bottom: var.$spacing-md;
+}
+
+.summary-item {
+  border: 1px solid var.$border-color;
+  border-left: 4px solid var.$border-color;
+  border-radius: var.$border-radius-md;
+  padding: var.$spacing-md;
+  background: var.$background-light;
+
+  &.success {
+    border-left-color: var.$success-color;
+  }
+
+  &.error {
+    border-left-color: var.$error-color;
+  }
+}
+
+.summary-value {
+  display: block;
+  font-size: var.$font-size-2xl;
+  line-height: 1;
+  font-weight: 700;
+  color: var.$text-primary;
+}
+
+.summary-label {
+  display: block;
+  margin-top: var.$spacing-xs;
+  color: var.$text-secondary;
+  font-size: var.$font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.file-info {
+  display: flex;
+  gap: var.$spacing-md;
+  flex-wrap: wrap;
+  color: var.$text-secondary;
+  font-size: var.$font-size-sm;
+  margin-bottom: var.$spacing-md;
+
+  &.muted {
+    color: var.$text-muted;
+  }
+}
+
+.scan-message {
+  border-radius: var.$border-radius-md;
+  padding: var.$spacing-sm var.$spacing-md;
+  font-size: var.$font-size-sm;
+  font-weight: 600;
+  margin-bottom: var.$spacing-md;
+
+  &.success {
+    background: var.$success-light;
+    color: var.$success-color;
+    border: 1px solid #bbf7d0;
+  }
+
+  &.error {
+    background: var.$error-light;
+    color: var.$error-color;
+    border: 1px solid #fecaca;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.worm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var.$font-size-sm;
+
+  thead {
+    background: #1e293b;
+    color: #fff;
+
+    th {
+      padding: var.$spacing-sm var.$spacing-md;
+      text-align: left;
+      font-weight: 600;
+      font-size: var.$font-size-xs;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid var.$border-color;
+      border-left: 3px solid var.$error-color;
+    }
+
+    td {
+      padding: var.$spacing-sm var.$spacing-md;
+      color: var.$text-primary;
+      vertical-align: top;
+    }
+
+    small {
+      display: block;
+      margin-top: 2px;
+      color: var.$text-muted;
+      font-size: var.$font-size-xs;
+    }
+  }
+}
+
+.project-cell {
+  font-weight: 700;
+  color: var.$text-primary;
+  white-space: nowrap;
+}
+
+.count-badge,
+.status-badge {
+  display: inline-block;
+  padding: 2px var.$spacing-sm;
+  border-radius: var.$border-radius-sm;
+  font-size: var.$font-size-xs;
+  font-weight: 600;
+  border: 1px solid var.$border-color;
+}
+
+.count-badge {
+  font-family: 'Courier New', monospace;
+  background: var.$background-light;
+  color: var.$text-secondary;
+
+  &.malicious {
+    background: var.$error-light;
+    color: var.$error-color;
+    border-color: #fecaca;
+  }
+}
+
+.status-badge {
+  &.secure {
+    background: var.$success-light;
+    color: var.$success-color;
+    border-color: #bbf7d0;
+  }
+
+  &.insecure {
+    background: var.$error-light;
+    color: var.$error-color;
+    border-color: #fecaca;
+  }
+}
+
+code {
+  font-family: 'Courier New', monospace;
+  font-size: var.$font-size-xs;
+}
+
+@media (max-width: 768px) {
+  .npm-worm {
+    padding: var.$spacing-lg;
+  }
+
+  .npm-worm-actions {
+    width: 100%;
+  }
+
+  .config-location {
+    flex: 1;
+    text-align: center;
+  }
+}

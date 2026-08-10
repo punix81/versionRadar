@@ -1,0 +1,85 @@
+<section class="npm-worm">
+  <div class="npm-worm-header">
+    <div>
+      <h2>{{ 'npm_worm.title' | translate }}</h2>
+      <p>{{ 'npm_worm.subtitle' | translate }}</p>
+    </div>
+
+    <div class="npm-worm-actions">
+      <span class="config-location">{{ 'npm_worm.config_location' | translate }}</span>
+    </div>
+  </div>
+
+  <div class="npm-worm-summary">
+    <div class="summary-item">
+      <span class="summary-value">{{ config.maliciousPackages().length }}</span>
+      <span class="summary-label">{{ 'npm_worm.loaded_packages' | translate }}</span>
+    </div>
+    <div class="summary-item" [class]="getMatchStatusClass()">
+      <span class="summary-value">{{ contaminatedPackageCount() }}</span>
+      <span class="summary-label">{{ 'npm_worm.matches' | translate }}</span>
+    </div>
+    <div class="summary-item" [class]="getMatchStatusClass()">
+      <span class="summary-value">{{ contaminatedProjectCount() }}</span>
+      <span class="summary-label">{{ 'npm_worm.affected_projects' | translate }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value">{{ repositories.length }}</span>
+      <span class="summary-label">{{ 'npm_worm.repositories_checked' | translate }}</span>
+    </div>
+  </div>
+
+  @if (config.maliciousCsvFileName()) {
+    <div class="file-info">
+      {{ 'npm_worm.file_loaded' | translate }}: <strong>{{ config.maliciousCsvFileName() }}</strong>
+      @if (config.maliciousCsvSkippedRows() > 0) {
+        <span>{{ 'npm_worm.skipped_rows' | translate }}: {{ config.maliciousCsvSkippedRows() }}</span>
+      }
+    </div>
+  } @else {
+    <div class="file-info muted">
+      {{ 'npm_worm.file_hint' | translate }}
+    </div>
+  }
+
+  @if (config.maliciousCsvError()) {
+    <div class="scan-message error">{{ config.maliciousCsvError()! | translate }}</div>
+  } @else if (config.maliciousCsvRequired()) {
+    <div class="scan-message error">{{ 'npm_worm.csv_required' | translate }}</div>
+  } @else if (config.maliciousPackages().length > 0 && contaminatedPackageCount() === 0) {
+    <div class="scan-message success">{{ 'npm_worm.no_matches' | translate }}</div>
+  } @else if (contaminatedPackageCount() > 0) {
+    <div class="scan-message error">{{ 'npm_worm.matches_found' | translate }}</div>
+  }
+
+  @if (projectResults().length > 0) {
+    <div class="table-wrapper">
+      <table class="worm-table">
+        <thead>
+          <tr>
+            <th>{{ 'table.project' | translate }}</th>
+            <th>{{ 'npm_worm.lock_packages_total' | translate }}</th>
+            <th>{{ 'npm_worm.contaminated_packages' | translate }}</th>
+            <th>{{ 'npm_worm.security_status' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (result of projectResults(); track result.project) {
+            <tr [class.status-secure]="result.isSecure" [class.status-insecure]="!result.isSecure">
+              <td class="project-cell">{{ result.project }}</td>
+              <td><span class="count-badge">{{ result.lockPackageCount }}</span></td>
+              <td><span class="count-badge" [class.malicious]="result.contaminatedPackageCount > 0">{{ result.contaminatedPackageCount }}</span></td>
+              <td>
+                @if (result.isSecure) {
+                  <span class="status-badge secure">{{ 'npm_worm.secure' | translate }}</span>
+                } @else {
+                  <span class="status-badge insecure">{{ 'npm_worm.not_secure' | translate }}</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

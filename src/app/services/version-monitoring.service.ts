@@ -16,6 +16,7 @@ export interface RepositoryResult {
   packageName?: string;
   packageVersion?: string;
   allDependencies?: Record<string, string>;
+  lockDependencies?: Record<string, string>;
   error?: string;
 }
 

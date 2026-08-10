@@ -37,6 +37,14 @@
         >
           <span aria-hidden="true">🔑</span> {{ 'admin.tab_env' | translate }}
         </button>
+        <button
+          type="button"
+          role="tab"
+          [class.active]="activeTab() === 'security'"
+          (click)="setTab('security')"
+        >
+          <span aria-hidden="true">🛡️</span> {{ 'admin.tab_security' | translate }}
+        </button>
       </div>
 
       <!-- ============================== PIPELINE TAB ============================== -->
@@ -411,6 +419,56 @@
         </div>
       }
 
+      <!-- ============================== SECURITY TAB ============================== -->
+      @if (activeTab() === 'security') {
+        <div class="tab-content" role="tabpanel">
+          <div class="settings-section">
+            <div class="settings-section-title">{{ 'admin.security_npm_worm_title' | translate }}</div>
+            <div class="security-csv-panel">
+              <div class="security-csv-main">
+                <label class="settings-label" for="malicious-csv">{{ 'admin.malicious_csv_label' | translate }}</label>
+                <label class="btn btn-primary csv-upload-btn" for="malicious-csv">
+                  {{ 'admin.malicious_csv_upload' | translate }}
+                </label>
+                <input
+                  id="malicious-csv"
+                  class="file-input-hidden"
+                  type="file"
+                  accept=".csv,text/csv"
+                  (change)="onMaliciousCsvSelected($event)"
+                />
+                @if (maliciousCsvFileName()) {
+                  <button type="button" class="btn btn-secondary" (click)="clearMaliciousCsv()">
+                    {{ 'admin.malicious_csv_clear' | translate }}
+                  </button>
+                }
+              </div>
+
+              @if (maliciousCsvError()) {
+                <div class="error-msg">
+                  <span aria-hidden="true">⚠️</span>
+                  {{ maliciousCsvError()! | translate }}
+                </div>
+              }
+
+              @if (maliciousCsvFileName()) {
+                <div class="csv-status">
+                  <span>{{ 'admin.malicious_csv_file' | translate }}: <strong>{{ maliciousCsvFileName() }}</strong></span>
+                  <span>{{ 'admin.malicious_csv_packages' | translate }}: <strong>{{ maliciousPackages().length }}</strong></span>
+                  @if (maliciousCsvSkippedRows() > 0) {
+                    <span>{{ 'npm_worm.skipped_rows' | translate }}: <strong>{{ maliciousCsvSkippedRows() }}</strong></span>
+                  }
+                </div>
+              } @else {
+                <div class="csv-status muted">
+                  {{ 'admin.malicious_csv_hint' | translate }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- ============================== ENV TAB ============================== -->
       @if (activeTab() === 'env') {
         <div class="tab-content" role="tabpanel">
@@ -466,6 +524,25 @@
                   <button type="button" class="btn btn-sm btn-secondary token-toggle" (click)="showAzureToken.set(!showAzureToken())"
                     [title]="showAzureToken() ? ('admin.hide' | translate) : ('admin.show' | translate)">
                     {{ showAzureToken() ? '🙈' : '👁️' }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-row">
+                <label class="settings-label" for="env-az-token-dc18">{{ 'admin.azure_dc18_token_label' | translate }}</label>
+                <div class="token-field">
+                  <input
+                    id="env-az-token-dc18"
+                    class="settings-input"
+                    [type]="showAzureCollection18Token() ? 'text' : 'password'"
+                    [ngModel]="cfg.AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18"
+                    (ngModelChange)="updateEnvField('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18', $event)"
+                    [placeholder]="'admin.paste_azure_dc18_pat' | translate"
+                    autocomplete="off"
+                  />
+                  <button type="button" class="btn btn-sm btn-secondary token-toggle" (click)="showAzureCollection18Token.set(!showAzureCollection18Token())"
+                    [title]="showAzureCollection18Token() ? ('admin.hide' | translate) : ('admin.show' | translate)">
+                    {{ showAzureCollection18Token() ? '🙈' : '👁️' }}
                   </button>
                 </div>
               </div>
@@ -574,4 +651,3 @@
     </div>
   }
 </div>
-

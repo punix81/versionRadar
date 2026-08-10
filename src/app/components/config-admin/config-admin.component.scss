@@ -338,6 +338,41 @@
   }
 }
 
+.security-csv-panel {
+  border: 1px solid var.$border-color;
+  border-radius: var.$border-radius-md;
+  padding: var.$spacing-md;
+  background: var.$background-light;
+}
+
+.security-csv-main {
+  display: flex;
+  align-items: center;
+  gap: var.$spacing-sm;
+  flex-wrap: wrap;
+  margin-bottom: var.$spacing-md;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.csv-upload-btn {
+  margin-left: auto;
+}
+
+.csv-status {
+  display: flex;
+  gap: var.$spacing-md;
+  flex-wrap: wrap;
+  color: var.$text-secondary;
+  font-size: var.$font-size-sm;
+
+  &.muted {
+    color: var.$text-muted;
+  }
+}
+
 .saving-indicator {
   display: inline-flex;
   align-items: center;

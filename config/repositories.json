@@ -24,11 +24,6 @@
       "name": "VTG_COIN"
     },
     {
-      "project": "FEDPOLPWA",
-      "repo": "fedpol-pwa-app-gitops",
-      "name": "FEDPOL PWA"
-    },
-    {
       "project": "ALMA",
       "repo": "nb-ab-alma-gitops",
       "name": "NB AB ALMA"
@@ -54,9 +49,9 @@
       "name": "BIT FMZ APP"
     },
     {
-      "project": "sem",
-      "repo": "sem_wis",
-      "name": "sem_wis"
+      "project": "hs",
+      "repo": "hr-suite-gitops",
+      "name": "HR-SUITE"
     }
   ]
 }

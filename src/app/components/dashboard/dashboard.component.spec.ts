@@ -79,8 +79,19 @@ function buildMockVersionService(initial: VersionData | null = null) {
 
 function buildMockConfigService(streamEvents: object[] = []) {
   const savedVersionSig = signal(0);
+  const maliciousPackagesSig = signal([{ name: 'bad-package', version: '1.0.0' }]);
+  const maliciousCsvFileNameSig = signal<string | null>('malicious.csv');
+  const maliciousCsvSkippedRowsSig = signal(0);
+  const maliciousCsvErrorSig = signal<string | null>(null);
+  const maliciousCsvRequiredSig = signal(false);
+
   return {
     savedVersion: savedVersionSig.asReadonly(),
+    maliciousPackages: maliciousPackagesSig.asReadonly(),
+    maliciousCsvFileName: maliciousCsvFileNameSig.asReadonly(),
+    maliciousCsvSkippedRows: maliciousCsvSkippedRowsSig.asReadonly(),
+    maliciousCsvError: maliciousCsvErrorSig.asReadonly(),
+    maliciousCsvRequired: maliciousCsvRequiredSig.asReadonly(),
     streamFetch: vi.fn(() => of(...streamEvents)),
     getPipelineConfig: vi.fn(() => of({ filePath: '', pipelineNames: [], repositories: [] })),
     getPackageConfig: vi.fn(() => of({ filePath: '', packageNames: [], repositories: [] })),
@@ -88,6 +99,16 @@ function buildMockConfigService(streamEvents: object[] = []) {
     savePackageConfig: vi.fn(() => of({ success: true })),
     getEnvConfig: vi.fn(() => of({})),
     saveEnvConfig: vi.fn(() => of({ success: true })),
+    hasMaliciousPackagesCsv: vi.fn(() => maliciousPackagesSig().length > 0),
+    requireMaliciousPackagesCsv: vi.fn(() => maliciousCsvRequiredSig.set(true)),
+    loadMaliciousPackagesCsvFile: vi.fn(),
+    loadMaliciousPackagesCsvContent: vi.fn(),
+    clearMaliciousPackagesCsv: vi.fn(() => {
+      maliciousPackagesSig.set([]);
+      maliciousCsvFileNameSig.set(null);
+    }),
+    _maliciousPackagesSig: maliciousPackagesSig,
+    _maliciousCsvRequiredSig: maliciousCsvRequiredSig,
   };
 }
 
@@ -184,6 +205,16 @@ describe('DashboardComponent', () => {
       const { component } = await setup(mockService, mockConfig);
       component.refresh();
       expect(mockService.loadVersionData).toHaveBeenCalledTimes(2);
+    });
+
+    it('should require the CSV before refreshing', async () => {
+      const mockConfig = buildMockConfigService();
+      mockConfig._maliciousPackagesSig.set([]);
+      const { component } = await setup(buildMockVersionService(), mockConfig);
+      component.refresh();
+      expect(component.fetchDialogOpen()).toBe(false);
+      expect(mockConfig.requireMaliciousPackagesCsv).toHaveBeenCalledOnce();
+      expect(mockConfig.streamFetch).not.toHaveBeenCalled();
     });
   });
 
@@ -298,4 +329,3 @@ describe('DashboardComponent', () => {
     });
   });
 });
-

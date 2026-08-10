@@ -8,6 +8,7 @@ import { VersionMonitoringService, RepositoryResult, PipelineResult } from '../.
 import { PackagesRadarComponent } from '../packages-radar/packages-radar.component';
 import { PipelinesRadarComponent } from '../pipelines-radar/pipelines-radar.component';
 import { ConfigAdminComponent } from '../config-admin/config-admin.component';
+import { NpmWormComponent } from '../npm-worm/npm-worm.component';
 import { ConfigService } from '../../services/config.service';
 
 interface FetchLogLine {
@@ -18,7 +19,7 @@ interface FetchLogLine {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, ConfigAdminComponent],
+  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, ConfigAdminComponent, NpmWormComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -92,6 +93,11 @@ export class DashboardComponent implements OnInit {
   }
 
   refresh(): void {
+    if (!this.configService.hasMaliciousPackagesCsv()) {
+      this.configService.requireMaliciousPackagesCsv();
+      return;
+    }
+
     this.fetchDialogOpen.set(true);
     this.fetchRunning.set(true);
     this.fetchDone.set(false);
