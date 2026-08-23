@@ -8,6 +8,8 @@
   "dashboard.success": "Successo",
   "dashboard.errors": "Errori",
   "dashboard.retry": "Riprova",
+  "theme.use_dark": "Attiva il tema scuro",
+  "theme.use_light": "Attiva il tema chiaro",
   "table.repo_details": "Dettagli Repository",
   "table.pipeline_details": "Dettagli Pipeline",
   "table.repository": "Repository",

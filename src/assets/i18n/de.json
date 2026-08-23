@@ -8,6 +8,8 @@
   "dashboard.success": "Erfolgreich",
   "dashboard.errors": "Fehler",
   "dashboard.retry": "Erneut versuchen",
+  "theme.use_dark": "Dunkles Design aktivieren",
+  "theme.use_light": "Helles Design aktivieren",
   "table.repo_details": "Repository-Details",
   "table.pipeline_details": "Pipeline-Details",
   "table.repository": "Repository",
