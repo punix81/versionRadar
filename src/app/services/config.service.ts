@@ -276,8 +276,7 @@ export class ConfigService {
     let semicolonCount = 0;
     let inQuotes = false;
 
-    for (let i = 0; i < firstLine.length; i += 1) {
-      const char = firstLine[i];
+    for (const char of firstLine) {
       if (char === '"') inQuotes = !inQuotes;
       if (!inQuotes && char === ',') commaCount += 1;
       if (!inQuotes && char === ';') semicolonCount += 1;

@@ -21,8 +21,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, TypedDict
-from urllib.parse import urljoin
+from typing import Callable, TypedDict
 
 import requests
 import yaml
@@ -109,6 +108,7 @@ class RepositoryResult(TypedDict, total=False):
 BITBUCKET_BASE_URL = os.getenv('BITBUCKET_BASE_URL', 'https://bitbucket.bit.admin.ch')
 REQUEST_TIMEOUT_MS = int(os.getenv('REQUEST_TIMEOUT_MS', '30000')) / 1000
 DATE_LOCALE = os.getenv('DATE_LOCALE', 'fr-CH')
+BITBUCKET_AUTH_SCHEME = os.getenv('BITBUCKET_AUTH_SCHEME', 'bearer').lower()
 
 # Charger les fichiers de configuration
 config_dir = Path(__file__).parent.parent / 'config'
@@ -148,6 +148,13 @@ def create_auth_header(username: str, token: str) -> str:
     return f'Basic {encoded}'
 
 
+def create_bitbucket_auth_header(username: str, token: str) -> str:
+    """Créer l'en-tête Bitbucket selon le schéma configuré."""
+    if BITBUCKET_AUTH_SCHEME == 'basic':
+        return create_auth_header(username, token)
+    return f'Bearer {token}'
+
+
 def fetch_raw_file(
     project_key: str,
     repo_slug: str,
@@ -179,7 +186,10 @@ def fetch_raw_file(
         api_url += f'?at=refs/heads/{branch}'
 
     headers = {
-        'Authorization': create_auth_header(credentials['username'], credentials['token']),
+        'Authorization': create_bitbucket_auth_header(
+            credentials['username'],
+            credentials['token']
+        ),
         'Accept': 'text/plain, application/json',
         'User-Agent': 'VersionRadar/1.0',
         'X-Atlassian-Token': 'no-check',
@@ -446,4 +456,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

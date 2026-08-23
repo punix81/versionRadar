@@ -21,8 +21,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, TypedDict
-from urllib.parse import urljoin
+from typing import TypedDict
 
 import requests
 from dotenv import load_dotenv
@@ -39,6 +38,7 @@ class AzureCredentials(TypedDict):
     """Credentials pour Azure DevOps."""
     user: str
     token: str
+    collection_tokens: dict[str, str]
 
 
 class BitbucketCredentials(TypedDict):
@@ -104,6 +104,7 @@ AZURE_BASE_URL = 'https://devops-server.admin.ch'
 BITBUCKET_BASE_URL = os.getenv('BITBUCKET_BASE_URL', 'https://bitbucket.bit.admin.ch')
 REQUEST_TIMEOUT_MS = int(os.getenv('REQUEST_TIMEOUT_MS', '30000')) / 1000
 DATE_LOCALE = os.getenv('DATE_LOCALE', 'fr-CH')
+BITBUCKET_AUTH_SCHEME = os.getenv('BITBUCKET_AUTH_SCHEME', 'bearer').lower()
 
 # Charger les fichiers de configuration
 config_dir = Path(__file__).parent.parent / 'config'
@@ -124,6 +125,7 @@ def get_credentials() -> Credentials:
     """Récupérer les credentials depuis le fichier .env."""
     azure_user = os.getenv('AZUREDEVOPS_USER')
     azure_token = os.getenv('AZUREDEVOPS_TOKEN')
+    azure_collection18_token = os.getenv('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18')
     bitbucket_user = os.getenv('BITBUCKET_USER')
     bitbucket_token = os.getenv('BITBUCKET_TOKEN')
 
@@ -136,7 +138,13 @@ def get_credentials() -> Credentials:
         sys.exit(1)
 
     return {
-        'azure': {'user': azure_user, 'token': azure_token},
+        'azure': {
+            'user': azure_user,
+            'token': azure_token,
+            'collection_tokens': {
+                'DefaultCollection18': azure_collection18_token
+            } if azure_collection18_token else {}
+        },
         'bitbucket': {'user': bitbucket_user, 'token': bitbucket_token}
     }
 
@@ -146,6 +154,24 @@ def create_auth_header(username: str, token: str) -> str:
     auth_string = f'{username}:{token}'
     encoded = base64.b64encode(auth_string.encode()).decode()
     return f'Basic {encoded}'
+
+
+def get_azure_token_for_collection(
+    credentials: Credentials,
+    collection: str
+) -> str:
+    """Récupérer le token Azure adapté à la collection."""
+    return (
+        credentials['azure']['collection_tokens'].get(collection)
+        or credentials['azure']['token']
+    )
+
+
+def create_bitbucket_auth_header(username: str, token: str) -> str:
+    """Créer l'en-tête Bitbucket selon le schéma configuré."""
+    if BITBUCKET_AUTH_SCHEME == 'basic':
+        return create_auth_header(username, token)
+    return f'Bearer {token}'
 
 
 def fetch_from_azure(
@@ -158,6 +184,7 @@ def fetch_from_azure(
     API: https://devops-server.admin.ch/{collection}/{project}/_apis/git/repositories/{repositoryId}/items
     """
     collection = repo.get('collection', 'DefaultCollection')
+    token = get_azure_token_for_collection(credentials, collection)
     api_url = (
         f'{AZURE_BASE_URL}/{collection}/{repo["project"]}/_apis/git/repositories/'
         f'{repo["repo"]}/items?path=/{repo["path"]}&api-version=6.0'
@@ -166,7 +193,7 @@ def fetch_from_azure(
     headers = {
         'Authorization': create_auth_header(
             credentials['azure']['user'],
-            credentials['azure']['token']
+            token
         ),
         'Accept': 'text/plain',  # Important: demander le contenu brut
         'User-Agent': 'VersionRadar/1.0',
@@ -210,7 +237,7 @@ def fetch_from_bitbucket(
         api_url += f'?at=refs/heads/{repo["branch"]}'
 
     headers = {
-        'Authorization': create_auth_header(
+        'Authorization': create_bitbucket_auth_header(
             credentials['bitbucket']['user'],
             credentials['bitbucket']['token']
         ),
@@ -455,4 +482,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

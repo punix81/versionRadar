@@ -16,12 +16,10 @@
 
 import 'dotenv/config';
 import * as https from 'https';
-import * as http from 'http';
-import * as tls from 'tls';
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
-import type { Duplex } from 'stream';
+import { createHttpsOptions } from './http-utils';
 
 // Charger les fichiers de configuration
 const configDir = path.join(__dirname, '..', 'config');
@@ -95,100 +93,12 @@ interface RepositoryResult {
 const BITBUCKET_BASE_URL = process.env['BITBUCKET_BASE_URL'] || 'https://bitbucket.bit.admin.ch';
 const REQUEST_TIMEOUT_MS = parseInt(process.env['REQUEST_TIMEOUT_MS'] || '30000', 10);
 const DATE_LOCALE = process.env['DATE_LOCALE'] || 'fr-CH';
-const HTTPS_PROXY = process.env['HTTPS_PROXY'] || process.env['https_proxy'] || process.env['HTTP_PROXY'] || process.env['http_proxy'];
-const HOST_IP_OVERRIDES = parseHostIpOverrides(process.env['HOST_IP_OVERRIDES'] || '');
 const BITBUCKET_AUTH_SCHEME = (process.env['BITBUCKET_AUTH_SCHEME'] || 'bearer').toLowerCase();
 
 // Configuration depuis repositories.json
 const REPOSITORIES: Repository[] = repositoriesConfig.repositories;
 const FILE_PATH: string = repositoriesConfig.filePath;
 const PIPELINE_NAMES: string[] = repositoriesConfig.pipelineNames;
-
-class HttpsProxyAgent extends https.Agent {
-  constructor(private readonly proxyUrl: string) {
-    super();
-  }
-
-  override createConnection(
-    options: https.RequestOptions,
-    callback?: (err: Error | null, stream: Duplex) => void
-  ): Duplex | null | undefined {
-    const proxy = new URL(this.proxyUrl);
-    const targetHost = String(options.host || options.hostname);
-    const targetPort = options.port || 443;
-    let callbackDone = false;
-
-    const done = (err: Error | null, socket?: tls.TLSSocket) => {
-      if (callbackDone) return;
-      callbackDone = true;
-      if (callback) callback(err, socket as Duplex);
-    };
-
-    const connectReq = http.request({
-      hostname: proxy.hostname,
-      port: Number(proxy.port || 80),
-      method: 'CONNECT',
-      path: `${targetHost}:${targetPort}`,
-      headers: {
-        Host: `${targetHost}:${targetPort}`
-      }
-    });
-
-    connectReq.once('connect', (res, socket) => {
-      if (res.statusCode !== 200) {
-        socket.destroy();
-        done(new Error(`Proxy CONNECT HTTP ${res.statusCode}`));
-        return;
-      }
-
-      const tlsSocket = tls.connect({
-        socket,
-        servername: targetHost,
-        rejectUnauthorized: false
-      }, () => done(null, tlsSocket));
-
-      tlsSocket.once('error', error => done(error));
-    });
-
-    connectReq.once('error', error => done(error));
-    connectReq.end();
-
-    return undefined;
-  }
-}
-
-const proxyAgent = HTTPS_PROXY ? new HttpsProxyAgent(HTTPS_PROXY) : undefined;
-
-function createHttpsOptions(url: URL, headers: Record<string, string>): https.RequestOptions {
-  const hostIp = HOST_IP_OVERRIDES.get(url.hostname);
-
-  return {
-    hostname: hostIp || url.hostname,
-    port: 443,
-    path: url.pathname + url.search,
-    method: 'GET',
-    headers: {
-      Host: url.hostname,
-      ...headers
-    },
-    rejectUnauthorized: false,
-    servername: url.hostname,
-    agent: hostIp ? undefined : proxyAgent
-  };
-}
-
-function parseHostIpOverrides(raw: string): Map<string, string> {
-  const overrides = new Map<string, string>();
-
-  for (const entry of raw.split(',')) {
-    const [host, ip] = entry.split('=').map(part => part?.trim());
-    if (host && ip) {
-      overrides.set(host, ip);
-    }
-  }
-
-  return overrides;
-}
 
 /**
  * Récupérer les credentials depuis le fichier .env
