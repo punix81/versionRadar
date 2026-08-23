@@ -1,144 +1,38 @@
-<div class="dashboard-container">
-  <!-- Header -->
-  <header class="dashboard-header">
-    <div class="header-content">
-      <img src="assets/icons/versionradar_logo_with_text.png" alt="VersionRadar Logo" class="logo" />
-      <h1>VersionRadar Dashboard</h1>
-      <p class="subtitle">{{ 'dashboard.subtitle' | translate }}</p>
+<section id="overview" class="dashboard-page" aria-labelledby="page-title">
+  <header class="page-header">
+    <div>
+      <h1 id="page-title">{{ 'dashboard.title' | translate }}</h1>
+      <p>{{ 'dashboard.subtitle' | translate }}</p>
     </div>
-    <div class="header-actions">
-      <!-- Language switcher -->
-      <div class="lang-switcher">
-        <button type="button" [class.active]="currentLang === 'fr'" (click)="switchLang('fr')">FR</button>
-        <button type="button" [class.active]="currentLang === 'en'" (click)="switchLang('en')">EN</button>
-        <button type="button" [class.active]="currentLang === 'de'" (click)="switchLang('de')">DE</button>
-        <button type="button" [class.active]="currentLang === 'it'" (click)="switchLang('it')">IT</button>
-      </div>
-      <button type="button" class="refresh-btn" (click)="refresh()" [disabled]="loading()">
-        <span class="icon" aria-hidden="true"></span>
-        <span>{{ 'dashboard.refresh' | translate }}</span>
-      </button>
-      @if (data()) {
-        <div class="last-update">
-          {{ 'dashboard.last_update' | translate }}: {{ data()!.timestamp | date:'short' }}
-        </div>
-      }
+    <div class="page-actions">
+      @if (data()) { <span class="last-update">{{ 'dashboard.last_update' | translate }}: {{ data()!.timestamp | date:'short' }}</span> }
+      <button mat-flat-button type="button" (click)="refresh()" [disabled]="loading()"><mat-icon>refresh</mat-icon>{{ 'dashboard.refresh' | translate }}</button>
     </div>
   </header>
 
-  <!-- Admin Config Panel -->
-  <app-config-admin />
-
-  <!-- ── Fetch Console Dialog ────────────────────────────────────────────── -->
   @if (fetchDialogOpen()) {
-    <div class="fetch-overlay"
-         (click)="!fetchRunning() && closeFetchDialog()"
-         (keydown.escape)="!fetchRunning() && closeFetchDialog()"
-         tabindex="0"
-         role="presentation">
-      <div class="fetch-dialog"
-           (click)="$event.stopPropagation()"
-           (keydown)="$event.stopPropagation()"
-           role="dialog"
-           aria-modal="true"
-           tabindex="-1"
-           [attr.aria-label]="'fetch.aria_label' | translate">
-
-        <div class="fetch-dialog-header">
-          <span class="fetch-dialog-title">
-            @if (fetchRunning()) { <span class="fetch-spinner" aria-hidden="true"></span> }
-            @if (!fetchRunning() && fetchSuccess()) { <span aria-hidden="true">✅</span> }
-            @if (!fetchRunning() && !fetchSuccess() && fetchDone()) { <span aria-hidden="true">❌</span> }
-            {{ 'fetch.title' | translate }}
-          </span>
-          <button type="button" class="fetch-close-btn" (click)="closeFetchDialog()" [disabled]="fetchRunning()" [title]="'fetch.close' | translate">✕</button>
-        </div>
-
-        <div class="fetch-console" #consoleOutput>
-          @for (line of fetchLines(); track $index) {
-            <div class="fetch-line" [class]="'line-' + line.type">{{ line.text }}</div>
-          }
-          @if (fetchRunning() && fetchLines().length === 0) {
-            <div class="fetch-line line-info">{{ 'fetch.starting' | translate }}</div>
-          }
-        </div>
-
-        <div class="fetch-dialog-footer">
-          @if (fetchRunning()) {
-            <span class="fetch-status-running">{{ 'fetch.running' | translate }}</span>
-          }
-          @if (fetchDone() && fetchSuccess()) {
-            <span class="fetch-status-success">{{ 'fetch.success' | translate }}</span>
-          }
-          @if (fetchDone() && !fetchSuccess()) {
-            <span class="fetch-status-error">{{ 'fetch.error' | translate }}</span>
-          }
-          <button type="button" class="btn-close-dialog" (click)="closeFetchDialog()" [disabled]="fetchRunning()">
-            {{ 'fetch.close' | translate }}
-          </button>
-        </div>
-
-      </div>
-    </div>
+    <section class="fetch-panel" role="status" aria-live="polite">
+      <div class="fetch-panel-heading"><div><h2>{{ 'fetch.title' | translate }}</h2><p>@if (fetchRunning()) { {{ 'fetch.running' | translate }} } @else if (fetchSuccess()) { {{ 'fetch.success' | translate }} } @else { {{ 'fetch.error' | translate }} }</p></div><button mat-icon-button type="button" (click)="closeFetchDialog()" [disabled]="fetchRunning()" [matTooltip]="'fetch.close' | translate"><mat-icon>close</mat-icon></button></div>
+      <pre class="fetch-console" #consoleOutput>@for (line of fetchLines(); track $index) {<span [class]="'line-' + line.type">{{ line.text }}
+</span>}@if (fetchRunning() && fetchLines().length === 0) {<span>{{ 'fetch.starting' | translate }}</span>}</pre>
+      @if (!fetchRunning()) { <div class="fetch-actions"><button mat-button type="button" (click)="closeFetchDialog()">{{ 'fetch.close' | translate }}</button></div> }
+    </section>
   }
 
-  <!-- Loading State -->
   @if (loading()) {
-    <div class="loading-container">
-      <div class="spinner"></div>
-      <p>{{ 'dashboard.loading' | translate }}</p>
+    <section class="state-panel" aria-live="polite"><mat-spinner diameter="36" /><p>{{ 'dashboard.loading' | translate }}</p></section>
+  } @else if (error()) {
+    <section class="state-panel error-state" role="alert"><mat-icon>error_outline</mat-icon><p>{{ error() }}</p><button mat-button type="button" (click)="loadData()">{{ 'dashboard.retry' | translate }}</button></section>
+  } @else if (data()) {
+    <div class="summary-grid" aria-label="Repository summary">
+      <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.total_repos' | translate }}</span><strong>{{ data()!.stats.total }}</strong></mat-card-content></mat-card>
+      <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.success' | translate }}</span><strong>{{ data()!.stats.success }}</strong></mat-card-content></mat-card>
+      <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.errors' | translate }}</span><strong>{{ data()!.stats.errors }}</strong></mat-card-content></mat-card>
     </div>
+
+    <section id="pipelines"><app-pipelines-radar [pipelines]="data()!.pipelines" [pipelineStats]="data()!.pipelineStats" /></section>
+    <section id="security"><app-npm-worm [repositories]="data()!.repositories" /></section>
+    <section id="packages"><app-packages-radar [repositories]="data()!.repositories" /></section>
+    <section id="configuration"><app-config-admin /></section>
   }
-
-  <!-- Error State -->
-  @if (error()) {
-    <div class="error-container">
-      <span class="error-icon">⚠️</span>
-      <p>{{ error() }}</p>
-      <button type="button" (click)="refresh()">{{ 'dashboard.retry' | translate }}</button>
-    </div>
-  }
-
-  <!-- Dashboard Content -->
-  @if (data() && !loading()) {
-    <div class="dashboard-content">
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card total">
-          <div class="stat-icon" aria-hidden="true"></div>
-          <div class="stat-content">
-            <div class="stat-value">{{ data()!.stats.total }}</div>
-            <div class="stat-label">{{ 'dashboard.total_repos' | translate }}</div>
-          </div>
-        </div>
-        <div class="stat-card success">
-          <div class="stat-icon" aria-hidden="true">✅</div>
-          <div class="stat-content">
-            <div class="stat-value">{{ data()!.stats.success }}</div>
-            <div class="stat-label">{{ 'dashboard.success' | translate }}</div>
-          </div>
-        </div>
-        <div class="stat-card error">
-          <div class="stat-icon" aria-hidden="true">❌</div>
-          <div class="stat-content">
-            <div class="stat-value">{{ data()!.stats.errors }}</div>
-            <div class="stat-label">{{ 'dashboard.errors' | translate }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pipelines Table -->
-      <app-pipelines-radar
-        [pipelines]="data()!.pipelines"
-        [pipelineStats]="data()!.pipelineStats" />
-
-      <!-- NPM Worm Scan -->
-      <app-npm-worm [repositories]="data()!.repositories" />
-
-       <!-- Repositories Table -->
-      <app-packages-radar [repositories]="data()!.repositories" />
-
-
-    </div>
-  }
-</div>
+</section>

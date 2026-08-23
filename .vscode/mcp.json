@@ -4,6 +4,18 @@
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
     },
+    "angular-cli": {
+      "command": "npx",
+      "args": ["-y", "@angular/cli", "mcp"]
+    },
+    "ngm-dev-blocks": {
+      "command": "npx",
+      "args": ["-y", "@ngm-dev/cli", "mcp", "/home/punix81/IdeaProjects/versionRadar"]
+    },
+    "mdn": {
+      "type": "http",
+      "url": "https://mcp.mdn.mozilla.net/"
+    },
     "filesystem": {
       "command": "npx",
       "args": [

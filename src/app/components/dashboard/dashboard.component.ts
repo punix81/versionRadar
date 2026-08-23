@@ -10,6 +10,12 @@ import { PipelinesRadarComponent } from '../pipelines-radar/pipelines-radar.comp
 import { ConfigAdminComponent } from '../config-admin/config-admin.component';
 import { NpmWormComponent } from '../npm-worm/npm-worm.component';
 import { ConfigService } from '../../services/config.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface FetchLogLine {
   type: 'stdout' | 'stderr' | 'info' | 'success' | 'error';
@@ -19,7 +25,7 @@ interface FetchLogLine {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, ConfigAdminComponent, NpmWormComponent],
+  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, ConfigAdminComponent, NpmWormComponent, MatButtonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

@@ -1,109 +1,14 @@
-@use '../../../styles/variables' as var;
-
-.table-container {
-  background: var.$background-white;
-  border: 1px solid var.$border-color;
-  border-radius: var.$border-radius-lg;
-  padding: var.$spacing-xl;
-
-  h2 {
-    margin: 0 0 var.$spacing-lg 0;
-    font-size: var.$font-size-xl;
-    font-weight: 700;
-    color: var.$text-primary;
-  }
-}
-
-.table-wrapper { overflow-x: auto; }
-
-.repositories-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var.$font-size-sm;
-
-  thead {
-    background: #1e293b;
-    color: #fff;
-    th {
-      padding: var.$spacing-sm var.$spacing-md;
-      text-align: left;
-      font-weight: 600;
-      font-size: var.$font-size-xs;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: none;
-      white-space: nowrap;
-    }
-  }
-
-  tbody {
-    tr {
-      border-bottom: 1px solid var.$border-color;
-      transition: background var.$transition-fast;
-      &:last-child { border-bottom: none; }
-      &:hover { background: var.$background-light; }
-      &.status-success { border-left: 3px solid var.$success-color; }
-      &.status-error   { border-left: 3px solid var.$error-color; }
-    }
-    td { padding: var.$spacing-sm var.$spacing-md; color: var.$text-primary; }
-  }
-
-  .repo-name .repo-info {
-    display: flex; flex-direction: column; gap: 2px;
-    strong { color: var.$text-primary; font-weight: 600; }
-    small  { color: var.$text-muted; font-size: var.$font-size-xs; }
-  }
-
-  .platform-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px var.$spacing-sm;
-    border-radius: var.$border-radius-sm;
-    font-size: var.$font-size-xs;
-    font-weight: 600;
-    border: 1px solid;
-    &.azure     { background: #eff6ff; color: var.$badge-azure;     border-color: #bfdbfe; }
-    &.bitbucket { background: #eef2ff; color: var.$badge-bitbucket; border-color: #c7d2fe; }
-  }
-
-  .version-badge {
-    display: inline-block;
-    padding: 2px var.$spacing-sm;
-    border-radius: var.$border-radius-sm;
-    font-family: 'Courier New', monospace;
-    font-size: var.$font-size-xs;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: default;
-    border: 1px solid transparent;
-
-    &[href] {
-      cursor: pointer;
-      transition: opacity var.$transition-fast;
-      &:hover { opacity: 0.75; text-decoration: underline; }
-    }
-
-    &.package-version { background: #eff6ff; color: var.$badge-oblique; border-color: #bfdbfe; }
-  }
-
-  .no-version { color: var.$text-muted; font-size: var.$font-size-xs; }
-
-  .status-badge {
-    display: inline-block;
-    padding: 2px var.$spacing-sm;
-    border-radius: var.$border-radius-sm;
-    font-size: var.$font-size-xs;
-    font-weight: 600;
-    border: 1px solid;
-    &.success { background: var.$success-light; color: var.$success-color; border-color: #bbf7d0; }
-    &.error   { background: var.$error-light;   color: var.$error-color;   border-color: #fecaca; }
-  }
-}
-
-@media (max-width: 768px) {
-  .repositories-table {
-    font-size: var.$font-size-xs;
-    thead th, tbody td { padding: var.$spacing-xs var.$spacing-sm; }
-  }
-}
+.data-section mat-card-content { padding-top: 16px; }
+.table-wrapper { overflow: auto; }
+.data-table { width: 100%; min-width: 720px; border-collapse: collapse; }
+.data-table th { border-bottom: 1px solid var(--mat-sys-outline-variant); color: var(--mat-sys-on-surface-variant); font: var(--mat-sys-label-large); text-align: left; white-space: nowrap; }
+.data-table th, .data-table td { padding: 12px 16px; }
+.data-table td { border-bottom: 1px solid var(--mat-sys-outline-variant); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: 0; }
+.data-table small { display: block; margin-top: 4px; color: var(--mat-sys-on-surface-variant); }
+.data-table a { color: var(--mat-sys-primary); text-decoration: none; }
+.data-table a:hover { text-decoration: underline; }
+.platform, .status { display: inline-flex; align-items: center; gap: 6px; font: var(--mat-sys-label-large); }
+.platform mat-icon, .status mat-icon { width: 18px; height: 18px; font-size: 18px; }
+.status-ok { color: var(--mat-sys-primary); }
+.status-error { color: var(--mat-sys-error); }

@@ -2,6 +2,10 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
 import {
   ConfigService,
   PipelineConfig,
@@ -24,7 +28,7 @@ function emptyPackageRepo(): PackageRepository {
 @Component({
   selector: 'app-config-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule, MatButtonModule, MatCardModule, MatIconModule, MatTabsModule],
   templateUrl: './config-admin.component.html',
   styleUrl: './config-admin.component.scss',
 })

@@ -1,1 +1,26 @@
-<router-outlet />
+<mat-sidenav-container class="app-shell">
+  <mat-sidenav class="app-sidenav" mode="over" [opened]="navigationOpen()" (closedStart)="navigationOpen.set(false)">
+    <nav class="app-navigation" [attr.aria-label]="'dashboard.title' | translate">
+      <a mat-button class="nav-link" routerLink="/dashboard" fragment="overview" routerLinkActive="active" (click)="navigationOpen.set(false)"><mat-icon aria-hidden="true">dashboard</mat-icon>{{ 'dashboard.title' | translate }}</a>
+      <a mat-button class="nav-link" routerLink="/dashboard" fragment="pipelines" (click)="navigationOpen.set(false)"><mat-icon aria-hidden="true">account_tree</mat-icon>{{ 'table.pipeline_details' | translate }}</a>
+      <a mat-button class="nav-link" routerLink="/dashboard" fragment="security" (click)="navigationOpen.set(false)"><mat-icon aria-hidden="true">security</mat-icon>{{ 'npm_worm.title' | translate }}</a>
+      <a mat-button class="nav-link" routerLink="/dashboard" fragment="packages" (click)="navigationOpen.set(false)"><mat-icon aria-hidden="true">inventory_2</mat-icon>{{ 'table.repo_details' | translate }}</a>
+      <a mat-button class="nav-link" routerLink="/dashboard" fragment="configuration" (click)="navigationOpen.set(false)"><mat-icon aria-hidden="true">settings</mat-icon>{{ 'admin.title' | translate }}</a>
+    </nav>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <mat-toolbar class="app-toolbar">
+      <button mat-icon-button class="menu-button" type="button" (click)="toggleNavigation()" [attr.aria-label]="'dashboard.title' | translate"><mat-icon>menu</mat-icon></button>
+      <a class="app-brand" routerLink="/dashboard" aria-label="VersionRadar"><img class="brand-mark" src="assets/icons/versionradar_icon.png" alt="" /><span>VersionRadar</span></a>
+      <span class="toolbar-spacer"></span>
+      <button mat-icon-button type="button" [matMenuTriggerFor]="languageMenu" [attr.aria-label]="'dashboard.title' | translate"><mat-icon>language</mat-icon></button>
+      <mat-menu #languageMenu="matMenu">
+        <button mat-menu-item type="button" (click)="switchLanguage('fr')">FR</button>
+        <button mat-menu-item type="button" (click)="switchLanguage('en')">EN</button>
+        <button mat-menu-item type="button" (click)="switchLanguage('de')">DE</button>
+        <button mat-menu-item type="button" (click)="switchLanguage('it')">IT</button>
+      </mat-menu>
+    </mat-toolbar>
+    <main class="page-host"><router-outlet /></main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

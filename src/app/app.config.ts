@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
@@ -16,7 +16,7 @@ echarts.use([BarChart, LineChart, PieChart, GridComponent, TooltipComponent, Tit
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' })),
     provideHttpClient(),
     provideEchartsCore({ echarts }),
     provideTranslateService({ fallbackLang: 'fr' }),

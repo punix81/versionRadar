@@ -1,53 +1,21 @@
-// ==============================================
-// VersionRadar - Styles globaux
-// ==============================================
-
-@use 'styles/variables';
-
-// Reset et styles de base
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@use '@angular/material' as mat;
 
 html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+  @include mat.theme((
+    color: mat.$azure-palette,
+    typography: Roboto,
+    density: 0
+  ));
 }
 
-body {
-  font-family: variables.$font-family;
-  color: variables.$text-primary;
-  background-color: variables.$background-light;
-  line-height: 1.5;
-}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; color: var(--mat-sys-on-surface); background: var(--mat-sys-surface); font: var(--mat-sys-body-medium); }
+button, input, select, textarea { font: inherit; }
+:focus-visible { outline: 2px solid var(--mat-sys-primary); outline-offset: 2px; }
+code, .technical-value { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
-// Scrollbar personnalisée
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: variables.$background-light;
-  border-radius: variables.$border-radius-full;
-}
-
-::-webkit-scrollbar-thumb {
-  background: variables.$text-muted;
-  border-radius: variables.$border-radius-full;
-
-  &:hover {
-    background: variables.$text-secondary;
-  }
-}
-
-// Sélection de texte
-::selection {
-  background: rgba(variables.$primary-color, 0.2);
-  color: variables.$primary-dark;
+@media (prefers-color-scheme: dark) {
+  html { color-scheme: dark; }
 }
