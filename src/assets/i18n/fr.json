@@ -8,6 +8,8 @@
   "dashboard.success": "Succès",
   "dashboard.errors": "Erreurs",
   "dashboard.retry": "Réessayer",
+  "dashboard.csv_required_title": "Ajouter le CSV des paquets malveillants",
+  "dashboard.csv_required_message": "Un fichier CSV des paquets malveillants NPM est requis avant de rafraîchir et lancer le scan. Ajoutez-le dans la section Sécurité de la configuration.",
   "theme.use_dark": "Activer le thème sombre",
   "theme.use_light": "Activer le thème clair",
   "table.repo_details": "Détails des Repositories",
