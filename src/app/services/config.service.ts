@@ -71,7 +71,6 @@ export class ConfigService {
   readonly maliciousCsvFileName = signal<string | null>(null);
   readonly maliciousCsvSkippedRows = signal(0);
   readonly maliciousCsvError = signal<string | null>(null);
-  readonly maliciousCsvRequired = signal(false);
 
   constructor() {
     this.restoreMaliciousCsv();
@@ -148,7 +147,6 @@ export class ConfigService {
   loadMaliciousPackagesCsvContent(fileName: string, text: string): void {
     this.maliciousCsvFileName.set(fileName);
     this.maliciousCsvError.set(null);
-    this.maliciousCsvRequired.set(false);
 
     const result = this.parseCsv(text);
     this.maliciousPackages.set(result.packages);
@@ -170,19 +168,8 @@ export class ConfigService {
     this.maliciousCsvFileName.set(null);
     this.maliciousCsvSkippedRows.set(0);
     this.maliciousCsvError.set(null);
-    this.maliciousCsvRequired.set(false);
     localStorage.removeItem(this.maliciousCsvStorageKey);
     localStorage.removeItem(this.maliciousCsvFileNameStorageKey);
-  }
-
-  hasMaliciousPackagesCsv(): boolean {
-    return this.maliciousPackages().length > 0;
-  }
-
-  requireMaliciousPackagesCsv(): void {
-    if (!this.hasMaliciousPackagesCsv()) {
-      this.maliciousCsvRequired.set(true);
-    }
   }
 
   private restoreMaliciousCsv(): void {

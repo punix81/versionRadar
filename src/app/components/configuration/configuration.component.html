@@ -1,0 +1,14 @@
+<div class="configuration-page">
+  <header class="config-header">
+    <div class="config-heading">
+      <a mat-icon-button class="config-back" routerLink="/dashboard" [attr.aria-label]="'admin.back_to_dashboard' | translate" [matTooltip]="'admin.back_to_dashboard' | translate"><mat-icon>arrow_back</mat-icon></a>
+      <h1 class="config-title">{{ 'admin.title' | translate }}</h1>
+    </div>
+    <div class="config-page-actions">
+      <button mat-flat-button type="button" (click)="reloadConfig()">{{ 'dashboard.refresh' | translate }}</button>
+    </div>
+  </header>
+  <div class="config-content">
+    <app-config-admin initialTab="pipelines" (saved)="onSaved()" />
+  </div>
+</div>

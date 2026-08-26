@@ -25,7 +25,9 @@ export class VersionDisplayService {
   }
 
   getStatusClass(repo: RepositoryResult): string {
-    return repo.status === 'success' ? 'status-success' : 'status-error';
+    if (repo.status === 'success') return 'status-success';
+    if (repo.status === 'pending') return 'status-pending';
+    return 'status-error';
   }
 
   getPlatformIcon(platform: string): string {

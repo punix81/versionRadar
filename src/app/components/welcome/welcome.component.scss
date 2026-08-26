@@ -1,0 +1,36 @@
+.welcome-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-height: 60vh;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.welcome-logo {
+  max-width: 340px;
+  width: 100%;
+  height: auto;
+}
+
+.welcome-page h1 {
+  margin: 0;
+  font: var(--mat-sys-headline-medium);
+}
+
+.welcome-subtitle {
+  margin: 0;
+  max-width: 520px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.welcome-cta {
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .welcome-page { padding: 32px 20px; }
+  .welcome-logo { max-width: 260px; }
+}

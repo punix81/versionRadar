@@ -10,7 +10,6 @@ import { of } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { VersionMonitoringService, RepositoryResult, PipelineResult, VersionData } from '../../services/version-monitoring.service';
 import { ConfigService } from '../../services/config.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
   return {
@@ -84,7 +83,6 @@ function buildMockConfigService(streamEvents: object[] = []) {
   const maliciousCsvFileNameSig = signal<string | null>('malicious.csv');
   const maliciousCsvSkippedRowsSig = signal(0);
   const maliciousCsvErrorSig = signal<string | null>(null);
-  const maliciousCsvRequiredSig = signal(false);
 
   return {
     savedVersion: savedVersionSig.asReadonly(),
@@ -92,7 +90,6 @@ function buildMockConfigService(streamEvents: object[] = []) {
     maliciousCsvFileName: maliciousCsvFileNameSig.asReadonly(),
     maliciousCsvSkippedRows: maliciousCsvSkippedRowsSig.asReadonly(),
     maliciousCsvError: maliciousCsvErrorSig.asReadonly(),
-    maliciousCsvRequired: maliciousCsvRequiredSig.asReadonly(),
     streamFetch: vi.fn(() => of(...streamEvents)),
     getPipelineConfig: vi.fn(() => of({ filePath: '', pipelineNames: [], repositories: [] })),
     getPackageConfig: vi.fn(() => of({ filePath: '', packageNames: [], repositories: [] })),
@@ -100,8 +97,6 @@ function buildMockConfigService(streamEvents: object[] = []) {
     savePackageConfig: vi.fn(() => of({ success: true })),
     getEnvConfig: vi.fn(() => of({})),
     saveEnvConfig: vi.fn(() => of({ success: true })),
-    hasMaliciousPackagesCsv: vi.fn(() => maliciousPackagesSig().length > 0),
-    requireMaliciousPackagesCsv: vi.fn(() => maliciousCsvRequiredSig.set(true)),
     loadMaliciousPackagesCsvFile: vi.fn(),
     loadMaliciousPackagesCsvContent: vi.fn(),
     clearMaliciousPackagesCsv: vi.fn(() => {
@@ -109,15 +104,10 @@ function buildMockConfigService(streamEvents: object[] = []) {
       maliciousCsvFileNameSig.set(null);
     }),
     _maliciousPackagesSig: maliciousPackagesSig,
-    _maliciousCsvRequiredSig: maliciousCsvRequiredSig,
   };
 }
 
-function buildMockSnackBar() {
-  return { open: vi.fn() };
-}
-
-async function setup(mockService = buildMockVersionService(), mockConfig = buildMockConfigService(), mockSnackBar = buildMockSnackBar()) {
+async function setup(mockService = buildMockVersionService(), mockConfig = buildMockConfigService()) {
   await TestBed.configureTestingModule({
     imports: [DashboardComponent],
     providers: [
@@ -127,14 +117,13 @@ async function setup(mockService = buildMockVersionService(), mockConfig = build
       ...provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' }),
       { provide: VersionMonitoringService, useValue: mockService },
       { provide: ConfigService, useValue: mockConfig },
-      { provide: MatSnackBar, useValue: mockSnackBar },
     ],
   }).compileComponents();
 
   const fixture = TestBed.createComponent(DashboardComponent);
   const component = fixture.componentInstance;
   fixture.detectChanges();
-  return { fixture, component, mockService, mockConfig, mockSnackBar };
+  return { fixture, component, mockService, mockConfig };
 }
 
 describe('DashboardComponent', () => {
@@ -151,9 +140,26 @@ describe('DashboardComponent', () => {
       expect(mockService.loadVersionData).toHaveBeenCalledOnce();
     });
 
-    it('should default currentLang to "fr"', async () => {
+    it('should default currentLang to "en"', async () => {
       const { component } = await setup();
-      expect(component.currentLang).toBe('fr');
+      expect(component.currentLang).toBe('en');
+    });
+  });
+
+  describe('layout', () => {
+    it('should not render tabs when there is no data yet', async () => {
+      const { fixture, component } = await setup();
+      expect(component).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('.tabs')).toBeNull();
+    });
+
+    it('should render a tab group with pipelines, repositories and npm worm when data is present', async () => {
+      const mockService = buildMockVersionService(makeVersionData());
+      const { fixture } = await setup(mockService);
+      fixture.detectChanges();
+      const tabs = fixture.nativeElement.querySelector('.tabs');
+      expect(tabs).toBeTruthy();
+      expect(tabs.querySelectorAll('button').length).toBe(3);
     });
   });
 
@@ -197,11 +203,10 @@ describe('DashboardComponent', () => {
   });
 
   describe('refresh()', () => {
-    it('should open the fetch dialog and call streamFetch', async () => {
+    it('should call streamFetch on refresh', async () => {
       const mockConfig = buildMockConfigService();
       const { component } = await setup(buildMockVersionService(), mockConfig);
       component.refresh();
-      expect(component.fetchDialogOpen()).toBe(true);
       expect(mockConfig.streamFetch).toHaveBeenCalledWith('all');
     });
 
@@ -211,22 +216,6 @@ describe('DashboardComponent', () => {
       const { component } = await setup(mockService, mockConfig);
       component.refresh();
       expect(mockService.loadVersionData).toHaveBeenCalledTimes(2);
-    });
-
-    it('should show an error snackbar when the CSV is missing before refreshing', async () => {
-      const mockConfig = buildMockConfigService();
-      mockConfig._maliciousPackagesSig.set([]);
-      const mockSnackBar = buildMockSnackBar();
-      const { component } = await setup(buildMockVersionService(), mockConfig, mockSnackBar);
-      component.refresh();
-      expect(component.fetchDialogOpen()).toBe(false);
-      expect(mockSnackBar.open).toHaveBeenCalledOnce();
-      expect(mockSnackBar.open).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(String),
-        expect.objectContaining({ panelClass: ['snackbar-error'], verticalPosition: 'top', horizontalPosition: 'center' })
-      );
-      expect(mockConfig.streamFetch).not.toHaveBeenCalled();
     });
   });
 

@@ -1,14 +1,4 @@
 <div class="admin-panel">
-  <!-- Toggle Header -->
-  <div class="admin-toggle" (click)="togglePanel()" role="button" tabindex="0" (keydown.enter)="togglePanel()" (keydown.space)="togglePanel()">
-    <span class="admin-toggle-title">
-      <span aria-hidden="true">⚙️</span>
-      {{ 'admin.title' | translate }}
-    </span>
-    <span class="admin-toggle-icon" aria-hidden="true">{{ isOpen() ? '▲' : '▼' }}</span>
-  </div>
-
-  @if (isOpen()) {
     <div class="admin-body">
 
       <!-- Tabs -->
@@ -19,7 +9,7 @@
           [class.active]="activeTab() === 'pipelines'"
           (click)="setTab('pipelines')"
         >
-          <span aria-hidden="true">🔁</span> {{ 'admin.tab_pipelines' | translate }}
+          {{ 'admin.tab_pipelines' | translate }}
         </button>
         <button
           type="button"
@@ -27,7 +17,7 @@
           [class.active]="activeTab() === 'packages'"
           (click)="setTab('packages')"
         >
-          <span aria-hidden="true">📦</span> {{ 'admin.tab_packages' | translate }}
+          {{ 'admin.tab_packages' | translate }}
         </button>
         <button
           type="button"
@@ -35,7 +25,7 @@
           [class.active]="activeTab() === 'env'"
           (click)="setTab('env')"
         >
-          <span aria-hidden="true">🔑</span> {{ 'admin.tab_env' | translate }}
+          {{ 'admin.tab_env' | translate }}
         </button>
         <button
           type="button"
@@ -43,7 +33,7 @@
           [class.active]="activeTab() === 'security'"
           (click)="setTab('security')"
         >
-          <span aria-hidden="true">🛡️</span> {{ 'admin.tab_security' | translate }}
+          {{ 'admin.tab_security' | translate }}
         </button>
       </div>
 
@@ -52,11 +42,11 @@
         <div class="tab-content" role="tabpanel">
 
           @if (pipelineLoading()) {
-            <div class="loading-msg"><span aria-hidden="true">⏳</span> {{ 'admin.loading' | translate }}</div>
+            <div class="loading-msg">{{ 'admin.loading' | translate }}</div>
           }
           @if (pipelineError(); as err) {
             <div class="error-msg">
-              <span aria-hidden="true">⚠️</span>
+              
               {{ err }}
               @if (err.includes('npm start')) {
                 <code class="inline-cmd">npm start</code>
@@ -65,7 +55,7 @@
             </div>
           }
           @if (pipelineSuccess()) {
-            <div class="success-msg"><span aria-hidden="true">✅</span> {{ 'admin.saved_success' | translate }}</div>
+            <div class="success-msg">{{ 'admin.saved_success' | translate }}</div>
           }
 
           @if (pipelineConfig(); as cfg) {
@@ -84,7 +74,18 @@
 
             <!-- Pipeline names (tags) -->
             <div class="settings-section">
-              <div class="settings-section-title">{{ 'admin.pipeline_names_title' | translate }}</div>
+              <div class="settings-row names-add-row">
+                <label class="settings-label" for="pipeline-names">{{ 'admin.pipeline_names_title' | translate }}</label>
+                <input
+                  id="pipeline-names"
+                  class="settings-input"
+                  type="text"
+                  [placeholder]="'admin.new_name_placeholder' | translate"
+                  [ngModel]="newPipelineName()"
+                  (ngModelChange)="newPipelineName.set($event)"
+                  (keydown.enter)="addPipelineName()"
+                />
+              </div>
               <div class="tags-list">
                 @for (name of cfg.pipelineNames; track name; let i = $index) {
                   <span class="tag">
@@ -92,17 +93,6 @@
                     <button type="button" class="tag-remove" (click)="removePipelineName(i)" [title]="'admin.delete_title' | translate">×</button>
                   </span>
                 }
-                <div class="tag-add-row">
-                  <input
-                    class="tag-input"
-                    type="text"
-                    [placeholder]="'admin.new_name_placeholder' | translate"
-                    [ngModel]="newPipelineName()"
-                    (ngModelChange)="newPipelineName.set($event)"
-                    (keydown.enter)="addPipelineName()"
-                  />
-                  <button type="button" class="btn btn-sm btn-add" (click)="addPipelineName()">{{ 'admin.add_btn' | translate }}</button>
-                </div>
               </div>
             </div>
 
@@ -114,8 +104,8 @@
                   <thead>
                     <tr>
                       <th>{{ 'admin.col_name' | translate }}</th>
-                      <th>Project</th>
-                      <th>Repo</th>
+                      <th>{{ 'admin.col_project' | translate }}</th>
+                      <th>{{ 'admin.col_repo' | translate }}</th>
                       <th>{{ 'admin.col_branch' | translate }}</th>
                       <th>{{ 'admin.col_actions' | translate }}</th>
                     </tr>
@@ -125,9 +115,9 @@
                       @if (pipelineEditingIndex() === i) {
                         <tr class="row-editing">
                           <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].name" [placeholder]="'admin.col_name' | translate" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].project" placeholder="Project" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].repo" placeholder="Repo" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" placeholder="main" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].project" [placeholder]="'admin.placeholder_project' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].repo" [placeholder]="'admin.placeholder_repo' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" [placeholder]="'admin.placeholder_branch' | translate" /></td>
                           <td class="actions-cell">
                             <button type="button" class="btn btn-sm btn-save" (click)="confirmEditPipeline()">{{ 'admin.confirm_ok' | translate }}</button>
                             <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPipeline()">{{ 'admin.cancel' | translate }}</button>
@@ -160,7 +150,7 @@
                                 type="text"
                                 [ngModel]="pipelineUrlInput()"
                                 (ngModelChange)="pipelineUrlInput.set($event)"
-                                placeholder="ssh://git@bitbucket.bit.admin.ch/project/repo  ou  project/repo"
+                                [placeholder]="'admin.placeholder_pipeline_url' | translate"
                                 (keydown.enter)="parsePipelineUrl()"
                               />
                               <button type="button" class="btn btn-sm btn-parse" (click)="parsePipelineUrl()">
@@ -171,7 +161,7 @@
                               </button>
                             </div>
                             @if (pipelineUrlParseError()) {
-                              <div class="url-parse-error">⚠️ {{ pipelineUrlParseError() }}</div>
+                              <div class="url-parse-error">⚠️ {{ pipelineUrlParseError() | translate }}</div>
                             }
                             <div class="url-parse-hint">
                               {{ 'admin.formats_accepted' | translate }}
@@ -188,13 +178,13 @@
                             <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().name" [placeholder]="'admin.col_name' | translate" />
                           </td>
                           <td>
-                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().project" placeholder="Project *" />
+                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().project" [placeholder]="'admin.placeholder_project_req' | translate" />
                           </td>
                           <td>
-                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().repo" placeholder="Repo *" />
+                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().repo" [placeholder]="'admin.placeholder_repo_req' | translate" />
                           </td>
                           <td>
-                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().branch" placeholder="main" />
+                            <input class="td-input" type="text" [(ngModel)]="pipelineNewRepo().branch" [placeholder]="'admin.placeholder_branch' | translate" />
                           </td>
                           <td class="actions-cell">
                             <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPipelineRepo()">{{ 'admin.confirm_add' | translate }}</button>
@@ -208,7 +198,7 @@
                 </table>
               </div>
               <button type="button" class="btn btn-add-row" (click)="startAddPipelineRepo()">
-                <span aria-hidden="true">＋</span> {{ 'admin.add_repo' | translate }}
+                {{ 'admin.add_repo' | translate }}
               </button>
             </div>
 
@@ -217,9 +207,6 @@
               @if (pipelineSaving()) {
                 <span class="saving-indicator">{{ 'admin.saving' | translate }}</span>
               }
-              <button type="button" class="btn btn-secondary" (click)="loadPipelineConfig()">
-                {{ 'admin.reload' | translate }}
-              </button>
             </div>
           }
         </div>
@@ -230,11 +217,11 @@
         <div class="tab-content" role="tabpanel">
 
           @if (packageLoading()) {
-            <div class="loading-msg"><span aria-hidden="true">⏳</span> {{ 'admin.loading' | translate }}</div>
+            <div class="loading-msg">{{ 'admin.loading' | translate }}</div>
           }
           @if (packageError(); as err) {
             <div class="error-msg">
-              <span aria-hidden="true">⚠️</span>
+              
               {{ err }}
               @if (err.includes('npm start')) {
                 <code class="inline-cmd">npm start</code>
@@ -243,7 +230,7 @@
             </div>
           }
           @if (packageSuccess()) {
-            <div class="success-msg"><span aria-hidden="true">✅</span> {{ 'admin.saved_success' | translate }}</div>
+            <div class="success-msg">{{ 'admin.saved_success' | translate }}</div>
           }
 
           @if (packageConfig(); as cfg) {
@@ -256,13 +243,24 @@
                 type="text"
                 [ngModel]="cfg.filePath"
                 (ngModelChange)="updatePackageFilePath($event)"
-                placeholder="package.json"
+                [placeholder]="'admin.placeholder_path' | translate"
               />
             </div>
 
             <!-- Package names (tags) -->
             <div class="settings-section">
-              <div class="settings-section-title">{{ 'admin.package_names_title' | translate }}</div>
+              <div class="settings-row names-add-row">
+                <label class="settings-label" for="package-names">{{ 'admin.package_names_title' | translate }}</label>
+                <input
+                  id="package-names"
+                  class="settings-input"
+                  type="text"
+                  [placeholder]="'admin.package_placeholder' | translate"
+                  [ngModel]="newPackageName()"
+                  (ngModelChange)="newPackageName.set($event)"
+                  (keydown.enter)="addPackageName()"
+                />
+              </div>
               <div class="tags-list">
                 @for (name of cfg.packageNames; track name; let i = $index) {
                   <span class="tag">
@@ -270,17 +268,6 @@
                     <button type="button" class="tag-remove" (click)="removePackageName(i)" [title]="'admin.delete_title' | translate">×</button>
                   </span>
                 }
-                <div class="tag-add-row">
-                  <input
-                    class="tag-input"
-                    type="text"
-                    [placeholder]="'admin.package_placeholder' | translate"
-                    [ngModel]="newPackageName()"
-                    (ngModelChange)="newPackageName.set($event)"
-                    (keydown.enter)="addPackageName()"
-                  />
-                  <button type="button" class="btn btn-sm btn-add" (click)="addPackageName()">{{ 'admin.add_btn' | translate }}</button>
-                </div>
               </div>
             </div>
 
@@ -293,10 +280,10 @@
                     <tr>
                       <th>{{ 'admin.col_name' | translate }}</th>
                       <th>{{ 'table.platform' | translate }}</th>
-                      <th>Project</th>
-                      <th>Repo</th>
-                      <th>Path</th>
-                      <th>Collection</th>
+                      <th>{{ 'admin.col_project' | translate }}</th>
+                      <th>{{ 'admin.col_repo' | translate }}</th>
+                      <th>{{ 'admin.col_path' | translate }}</th>
+                      <th>{{ 'admin.col_collection' | translate }}</th>
                       <th>{{ 'admin.col_branch' | translate }}</th>
                       <th>{{ 'admin.col_actions' | translate }}</th>
                     </tr>
@@ -312,11 +299,11 @@
                               <option value="bitbucket">bitbucket</option>
                             </select>
                           </td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].project" placeholder="Project" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].repo" placeholder="Repo" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].path" placeholder="package.json" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].collection" placeholder="DefaultCollection" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" placeholder="main" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].project" [placeholder]="'admin.placeholder_project' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].repo" [placeholder]="'admin.placeholder_repo' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].path" [placeholder]="'admin.placeholder_path' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].collection" [placeholder]="'admin.placeholder_collection' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="cfg.repositories[i].branch" [placeholder]="'admin.placeholder_branch' | translate" /></td>
                           <td class="actions-cell">
                             <button type="button" class="btn btn-sm btn-save" (click)="confirmEditPackage()">{{ 'admin.confirm_ok' | translate }}</button>
                             <button type="button" class="btn btn-sm btn-cancel" (click)="cancelEditPackage()">{{ 'admin.cancel' | translate }}</button>
@@ -356,7 +343,7 @@
                                 type="text"
                                 [ngModel]="packageUrlInput()"
                                 (ngModelChange)="packageUrlInput.set($event)"
-                                placeholder="https://bitbucket…/projects/PRJ/repos/repo/browse/package.json  ou  Azure DevOps URL"
+                                [placeholder]="'admin.placeholder_package_url' | translate"
                                 (keydown.enter)="parsePackageUrl()"
                               />
                               <button type="button" class="btn btn-sm btn-parse" (click)="parsePackageUrl()">
@@ -367,11 +354,11 @@
                               </button>
                             </div>
                             @if (packageUrlParseError()) {
-                              <div class="url-parse-error">⚠️ {{ packageUrlParseError() }}</div>
+                              <div class="url-parse-error">⚠️ {{ packageUrlParseError() | translate }}</div>
                             }
                             <div class="url-parse-hint">
-                              Bitbucket : <code>https://bitbucket.bit.admin.ch/projects/PRJ/repos/repo/browse/package.json</code><br/>
-                              Azure DevOps : <code>https://devops-server.admin.ch/Collection/Project/_git/Repo?path=/path/package.json</code>
+                                {{ 'admin.hint_bitbucket_label' | translate }} <code>https://bitbucket.bit.admin.ch/projects/PRJ/repos/repo/browse/package.json</code><br/>
+                                {{ 'admin.hint_azure_label' | translate }} <code>https://devops-server.admin.ch/Collection/Project/_git/Repo?path=/path/package.json</code>
                             </div>
                           </td>
                         </tr>
@@ -385,11 +372,11 @@
                               <option value="bitbucket">bitbucket</option>
                             </select>
                           </td>
-                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().project" placeholder="Project *" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().repo" placeholder="Repo *" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().path" placeholder="package.json *" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().collection" placeholder="DefaultCollection" /></td>
-                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().branch" placeholder="main" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().project" [placeholder]="'admin.placeholder_project_req' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().repo" [placeholder]="'admin.placeholder_repo_req' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().path" [placeholder]="'admin.placeholder_path_req' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().collection" [placeholder]="'admin.placeholder_collection' | translate" /></td>
+                          <td><input class="td-input" type="text" [(ngModel)]="packageNewRepo().branch" [placeholder]="'admin.placeholder_branch' | translate" /></td>
                           <td class="actions-cell">
                             <button type="button" class="btn btn-sm btn-save" (click)="confirmAddPackageRepo()">{{ 'admin.confirm_add' | translate }}</button>
                             <button type="button" class="btn btn-sm btn-back" (click)="resetPackageUrlParse()" [title]="'admin.back_url_title' | translate">{{ 'admin.back_url' | translate }}</button>
@@ -402,7 +389,7 @@
                 </table>
               </div>
               <button type="button" class="btn btn-add-row" (click)="startAddPackageRepo()">
-                <span aria-hidden="true">＋</span> {{ 'admin.add_repo' | translate }}
+                {{ 'admin.add_repo' | translate }}
               </button>
             </div>
 
@@ -411,9 +398,6 @@
               @if (packageSaving()) {
                 <span class="saving-indicator">{{ 'admin.saving' | translate }}</span>
               }
-              <button type="button" class="btn btn-secondary" (click)="loadPackageConfig()">
-                {{ 'admin.reload' | translate }}
-              </button>
             </div>
           }
         </div>
@@ -446,7 +430,7 @@
 
               @if (maliciousCsvError()) {
                 <div class="error-msg">
-                  <span aria-hidden="true">⚠️</span>
+                  
                   {{ maliciousCsvError()! | translate }}
                 </div>
               }
@@ -474,21 +458,21 @@
         <div class="tab-content" role="tabpanel">
 
           @if (envLoading()) {
-            <div class="loading-msg"><span aria-hidden="true">⏳</span> {{ 'admin.loading' | translate }}</div>
+            <div class="loading-msg">{{ 'admin.loading' | translate }}</div>
           }
           @if (envError(); as err) {
             <div class="error-msg">
-              <span aria-hidden="true">⚠️</span> {{ err }}
+               {{ err }}
               <button type="button" class="btn btn-sm btn-cancel btn-reload-retry" (click)="loadEnvConfig()">{{ 'dashboard.retry' | translate }}</button>
             </div>
           }
           @if (envSuccess()) {
-            <div class="success-msg"><span aria-hidden="true">✅</span> {{ 'admin.env_saved_success' | translate }}</div>
+            <div class="success-msg">{{ 'admin.env_saved_success' | translate }}</div>
           }
 
           @if (envConfig(); as cfg) {
             <div class="env-warning">
-              <span aria-hidden="true">⚠️</span>
+              
               {{ 'admin.tokens_warning' | translate }}
             </div>
 
@@ -640,14 +624,10 @@
               <button type="button" class="btn btn-primary" (click)="saveEnvConfig()" [disabled]="envSaving()">
                 {{ 'admin.save_env_btn' | translate }}
               </button>
-              <button type="button" class="btn btn-secondary" (click)="loadEnvConfig()">
-                {{ 'admin.reload' | translate }}
-              </button>
             </div>
           }
         </div>
       }
 
     </div>
-  }
 </div>

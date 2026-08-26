@@ -8,7 +8,6 @@ import { GridComponent, TooltipComponent, TitleComponent, LegendComponent } from
 import { CanvasRenderer } from 'echarts/renderers';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { routes } from './app.routes';
 
@@ -20,8 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' })),
     provideHttpClient(),
     provideEchartsCore({ echarts }),
-    MatSnackBarModule,
-    provideTranslateService({ fallbackLang: 'fr' }),
+    provideTranslateService({ defaultLanguage: 'en', fallbackLang: 'en' }),
     ...provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' })
   ]
 };

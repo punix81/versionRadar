@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -35,7 +35,11 @@ function emptyPackageRepo(): PackageRepository {
 export class ConfigAdminComponent implements OnInit {
   private readonly configService = inject(ConfigService);
 
-  isOpen = signal(false);
+  /** Tab selected on initial render. */
+  @Input() initialTab: Tab = 'pipelines';
+  /** Emitted whenever a package or pipeline repository config is saved. */
+  @Output() saved = new EventEmitter<void>();
+
   activeTab = signal<Tab>('pipelines');
 
   // ── Pipeline state ─────────────────────────────────────────────────────────
@@ -82,13 +86,22 @@ export class ConfigAdminComponent implements OnInit {
   readonly maliciousCsvError = this.configService.maliciousCsvError;
 
   ngOnInit(): void {
+    this.activeTab.set(this.initialTab);
     this.loadPipelineConfig();
     this.loadPackageConfig();
     this.loadEnvConfig();
   }
 
-  togglePanel(): void { this.isOpen.update(v => !v); }
   setTab(tab: Tab): void { this.activeTab.set(tab); }
+
+  reloadActiveTab(): void {
+    switch (this.activeTab()) {
+      case 'pipelines': this.loadPipelineConfig(); break;
+      case 'packages': this.loadPackageConfig(); break;
+      case 'env': this.loadEnvConfig(); break;
+      default: break;
+    }
+  }
 
   // ── Pipeline methods ────────────────────────────────────────────────────────
 
@@ -109,6 +122,7 @@ export class ConfigAdminComponent implements OnInit {
     cfg.pipelineNames = [...cfg.pipelineNames, name];
     this.pipelineConfig.set({ ...cfg });
     this.newPipelineName.set('');
+    this.autoSavePipeline();
   }
 
   removePipelineName(index: number): void {
@@ -116,6 +130,7 @@ export class ConfigAdminComponent implements OnInit {
     if (!cfg) return;
     cfg.pipelineNames = cfg.pipelineNames.filter((_, i) => i !== index);
     this.pipelineConfig.set({ ...cfg });
+    this.autoSavePipeline();
   }
 
   startEditPipeline(index: number): void { this.pipelineEditingIndex.set(index); this.pipelineAddingNew.set(false); }
@@ -157,7 +172,7 @@ export class ConfigAdminComponent implements OnInit {
     if (!project) { m = raw.match(/git@[^:]+:([^/]+)\/([^/\s]+)$/); if (m) { project = m[1]; repo = m[2]; } }
     if (!project) { m = raw.match(/\/projects\/([^/]+)\/repos\/([^/\s]+)/); if (m) { project = m[1]; repo = m[2]; } }
     if (!project) { m = raw.match(/^([^/\s]+)\/([^/\s]+)$/); if (m) { project = m[1]; repo = m[2]; } }
-    if (!project || !repo) { this.pipelineUrlParseError.set('URL non reconnue. Formats supportés : SSH, HTTPS Bitbucket ou project/repo'); return; }
+    if (!project || !repo) { this.pipelineUrlParseError.set('admin.url_error_pipeline'); return; }
     this.pipelineNewRepo.set({ project, repo, name: repo, branch: '' });
     this.pipelineUrlParsed.set(true);
   }
@@ -185,7 +200,12 @@ export class ConfigAdminComponent implements OnInit {
     this.pipelineSuccess.set(false);
     this.pipelineError.set(null);
     this.configService.savePipelineConfig(cfg).subscribe({
-      next: () => { this.pipelineSaving.set(false); this.pipelineSuccess.set(true); setTimeout(() => this.pipelineSuccess.set(false), 2500); },
+      next: () => {
+        this.pipelineSaving.set(false);
+        this.pipelineSuccess.set(true);
+        this.saved.emit();
+        setTimeout(() => this.pipelineSuccess.set(false), 2500);
+      },
       error: err => { this.pipelineError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.pipelineSaving.set(false); },
     });
   }
@@ -209,6 +229,7 @@ export class ConfigAdminComponent implements OnInit {
     cfg.packageNames = [...cfg.packageNames, name];
     this.packageConfig.set({ ...cfg });
     this.newPackageName.set('');
+    this.autoSavePackage();
   }
 
   removePackageName(index: number): void {
@@ -216,6 +237,7 @@ export class ConfigAdminComponent implements OnInit {
     if (!cfg) return;
     cfg.packageNames = cfg.packageNames.filter((_, i) => i !== index);
     this.packageConfig.set({ ...cfg });
+    this.autoSavePackage();
   }
 
   startEditPackage(index: number): void { this.packageEditingIndex.set(index); this.packageAddingNew.set(false); }
@@ -278,7 +300,7 @@ export class ConfigAdminComponent implements OnInit {
     }
 
     if (!parsed) {
-      this.packageUrlParseError.set('URL non reconnue. Formats supportés : HTTPS Bitbucket ou Azure DevOps');
+      this.packageUrlParseError.set('admin.url_error_package');
       return;
     }
 
@@ -317,7 +339,12 @@ export class ConfigAdminComponent implements OnInit {
     this.packageSuccess.set(false);
     this.packageError.set(null);
     this.configService.savePackageConfig(cfg).subscribe({
-      next: () => { this.packageSaving.set(false); this.packageSuccess.set(true); setTimeout(() => this.packageSuccess.set(false), 2500); },
+      next: () => {
+        this.packageSaving.set(false);
+        this.packageSuccess.set(true);
+        this.saved.emit();
+        setTimeout(() => this.packageSuccess.set(false), 2500);
+      },
       error: err => { this.packageError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.packageSaving.set(false); },
     });
   }

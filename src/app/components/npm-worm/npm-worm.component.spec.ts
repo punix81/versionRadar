@@ -154,13 +154,4 @@ describe('NpmWormComponent', () => {
     expect(fixture.componentInstance.projectResults()[0].lockPackageCount).toBe(0);
     expect(fixture.componentInstance.projectResults()[0].contaminatedPackageCount).toBe(0);
   });
-
-  it('should expose CSV requirement state', async () => {
-    const fixture = await setup();
-
-    expect(fixture.componentInstance.hasCsvFile()).toBe(false);
-    fixture.componentInstance.requireCsvFile();
-
-    expect(fixture.componentInstance.config.maliciousCsvRequired()).toBe(true);
-  });
 });

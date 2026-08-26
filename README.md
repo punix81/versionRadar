@@ -13,7 +13,7 @@ VersionRadar is an Angular dashboard for monitoring package, pipeline, and NPM l
   - total packages found in `package-lock.json`
   - contaminated package count
   - secure / not secure status
-- Manage repositories, tokens, script settings, and the malicious package CSV from the dashboard admin panel.
+- Manage repositories, tokens, script settings, and the malicious package CSV from the admin (Configuration Administration) page.
 
 ## Quick Start
 
@@ -21,12 +21,6 @@ Install dependencies:
 
 ```bash
 npm install
-```
-
-Create `.env` from `.env.example` and fill in the credentials:
-
-```bash
-cp .env.example .env
 ```
 
 Start the local config server and Angular app:
@@ -41,43 +35,24 @@ Open:
 http://localhost:4200/
 ```
 
+On first use, follow the on-screen flow: add your repositories and enter your Azure DevOps / Bitbucket tokens under **Configuration → Tokens & Settings**. Everything (repositories, tokens, and settings) is managed from the app — no manual `.env` editing is required.
+
 ## Configuration
 
-Most configuration can be edited in the dashboard under `Configuration Administration`.
+All configuration is edited in the app under **Configuration Administration** (reachable from the cog icon in the top toolbar).
 
 ### Tokens & Settings
 
-The app uses `.env` for credentials and runtime settings:
+Azure DevOps and Bitbucket credentials, the Bitbucket base URL, request timeout, date locale, and advanced connection overrides are entered under **Configuration → Tokens & Settings** and saved with the **Save .env** button. The local config server persists them to a `.env` file, which the fetch scripts load automatically, so you do not need to create or edit `.env` yourself.
 
-```bash
-# Azure DevOps
-AZUREDEVOPS_TOKEN=your_azure_devops_token_here
-AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18=your_defaultcollection18_azure_devops_token_here
-AZUREDEVOPS_USER=your_azure_username
+The two Azure tokens are used as follows:
 
-# Bitbucket
-BITBUCKET_USER=your_bitbucket_username
-BITBUCKET_TOKEN=your_bitbucket_token_here
-BITBUCKET_BASE_URL=https://bitbucket.bit.admin.ch
-BITBUCKET_AUTH_SCHEME=bearer
+- `AZUREDEVOPS_TOKEN` — normal collections such as `DefaultCollection`.
+- `AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18` — used automatically for repositories whose `collection` is `DefaultCollection18`.
 
-# Script settings
-REQUEST_TIMEOUT_MS=30000
-DATE_LOCALE=fr-CH
-HOST_IP_OVERRIDES=bitbucket.bit.admin.ch=10.176.71.49,devops-server.admin.ch=10.222.11.225
-```
+`BITBUCKET_AUTH_SCHEME=bearer` is the default for current Bitbucket tokens; only switch to `basic` if your token explicitly requires Basic Auth.
 
-`AZUREDEVOPS_TOKEN` is used for normal Azure DevOps collections such as `DefaultCollection`.
-
-`AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18` is used automatically for Azure repositories configured with:
-
-```json
-"collection": "DefaultCollection18"
-```
-
-`BITBUCKET_AUTH_SCHEME=bearer` is the default for current Bitbucket tokens. Set it to `basic` only if your Bitbucket token explicitly requires Basic Auth.
-
-`HOST_IP_OVERRIDES` is optional but useful in environments where Node.js cannot resolve internal DNS names reliably. It keeps the real host name for TLS and HTTP headers while connecting to the configured IP.
+`HOST_IP_OVERRIDES` is optional but useful when Node.js cannot reliably resolve internal DNS names. It keeps the real host name for TLS and HTTP headers while connecting to the configured IP. It can be set from the same **Tokens & Settings** tab or added directly to `.env`.
 
 Never commit `.env`.
 
@@ -138,7 +113,7 @@ Configuration Administration > Security
 Add the CSV file, for example:
 
 ```text
-/home/punix81/Downloads/malicious-packages.csv
+path/to/malicious-packages.csv
 ```
 
 Supported CSV columns:
@@ -176,7 +151,31 @@ Fetch both from the UI:
 Dashboard > Refresh
 ```
 
-The refresh button requires a malicious package CSV to be configured first, because the NPM Worm scan is part of the refresh workflow.
+The dashboard **Refresh** re-runs the fetch scripts for the configured repositories and reloads the displayed data. A malicious package CSV is optional and not required for the refresh to work.
+
+### Python versions from the command line
+
+The same fetchers are also available as Python scripts and can be run directly from the terminal:
+
+```bash
+npm run fetch-packages:python
+npm run fetch-pipelines:python
+```
+
+or:
+
+```bash
+python scripts/fetch_package_versions.py
+python scripts/fetch_pipeline_versions.py
+```
+
+On Windows, use `python` (not `python3`). Install the Python dependencies once with:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+The Python scripts read the same `config/*.json` and `.env` and write to the same `src/assets/data/*.json` files, so the results are identical to the TypeScript versions.
 
 ## Output Files
 

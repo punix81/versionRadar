@@ -11,7 +11,7 @@ export interface RepositoryResult {
   platform: string;
   project: string;
   repo: string;
-  status: 'success' | 'error';
+  status: 'success' | 'error' | 'pending';
   packageVersions: PackageVersions;
   packageName?: string;
   packageVersion?: string;
@@ -24,7 +24,7 @@ export interface PipelineResult {
   name: string;
   project: string;
   repo: string;
-  status: 'success' | 'error';
+  status: 'success' | 'error' | 'pending';
   pipelineVersions: PipelineVersions;
   chartName?: string;
   chartVersion?: string;
@@ -66,14 +66,11 @@ export class VersionMonitoringService {
     this.errorSignal.set(null);
 
     return forkJoin({
-      repositories: this.http.get<RepositoryResult[]>('assets/data/repositories.json'),
-      pipelines: this.http.get<PipelineResult[]>('assets/data/pipelines.json')
+      repositories: this.http.get<RepositoryResult[]>(`assets/data/repositories.json?v=${Date.now()}`),
+      pipelines: this.http.get<PipelineResult[]>(`assets/data/pipelines.json?v=${Date.now()}`)
     }).pipe(
       tap(({ repositories, pipelines }) => {
         if (repositories.length === 0 && pipelines.length === 0) {
-          this.errorSignal.set(
-            'Aucune donnée disponible. Lancez la commande "npm run fetch-all" pour récupérer les versions depuis Azure DevOps et Bitbucket.'
-          );
           this.dataSignal.set(null);
           return;
         }

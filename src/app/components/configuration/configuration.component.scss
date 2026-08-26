@@ -1,0 +1,28 @@
+.configuration-page {
+  display: grid;
+  gap: 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.config-heading { display: flex; align-items: center; gap: 16px; }
+
+.config-page-actions { display: flex; align-items: center; gap: 16px; }
+
+.config-back { flex-shrink: 0; }
+
+.config-title { margin: 0; font-size: 4rem; line-height: 1.2; }
+
+.config-content { display: grid; gap: 32px; padding-top: 32px; }
+
+@media (max-width: 768px) {
+  .configuration-page { padding: 24px 16px; }
+}

@@ -88,14 +88,6 @@ export class NpmWormComponent {
     this.projectResults().reduce((total, result) => total + result.contaminatedPackageCount, 0)
   );
 
-  hasCsvFile(): boolean {
-    return this.config.hasMaliciousPackagesCsv();
-  }
-
-  requireCsvFile(): void {
-    this.config.requireMaliciousPackagesCsv();
-  }
-
   getMatchStatusClass(): string {
     return this.contaminatedPackageCount() > 0 ? 'error' : 'success';
   }

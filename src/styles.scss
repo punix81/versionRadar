@@ -4,13 +4,14 @@ html {
   color-scheme: light;
   @include mat.theme((
     color: mat.$azure-palette,
-    typography: Roboto,
+    typography: Bahnschrift,
     density: 0
   ));
 }
 
 * { box-sizing: border-box; }
 html, body { min-height: 100%; }
+html { scrollbar-gutter: stable; }
 body { margin: 0; color: var(--mat-sys-on-surface); background: var(--mat-sys-surface); font: var(--mat-sys-body-medium); }
 button, input, select, textarea { font: inherit; }
 :focus-visible { outline: 2px solid var(--mat-sys-primary); outline-offset: 2px; }
