@@ -4,7 +4,7 @@ html {
   color-scheme: light;
   @include mat.theme((
     color: mat.$azure-palette,
-    typography: Roboto,
+    typography: Bahnschrift,
     density: 0
   ));
 }
