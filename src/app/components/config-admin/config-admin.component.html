@@ -74,7 +74,18 @@
 
             <!-- Pipeline names (tags) -->
             <div class="settings-section">
-              <div class="settings-section-title">{{ 'admin.pipeline_names_title' | translate }}</div>
+              <div class="settings-row names-add-row">
+                <label class="settings-label" for="pipeline-names">{{ 'admin.pipeline_names_title' | translate }}</label>
+                <input
+                  id="pipeline-names"
+                  class="settings-input"
+                  type="text"
+                  [placeholder]="'admin.new_name_placeholder' | translate"
+                  [ngModel]="newPipelineName()"
+                  (ngModelChange)="newPipelineName.set($event)"
+                  (keydown.enter)="addPipelineName()"
+                />
+              </div>
               <div class="tags-list">
                 @for (name of cfg.pipelineNames; track name; let i = $index) {
                   <span class="tag">
@@ -82,17 +93,6 @@
                     <button type="button" class="tag-remove" (click)="removePipelineName(i)" [title]="'admin.delete_title' | translate">×</button>
                   </span>
                 }
-                <div class="tag-add-row">
-                  <input
-                    class="tag-input"
-                    type="text"
-                    [placeholder]="'admin.new_name_placeholder' | translate"
-                    [ngModel]="newPipelineName()"
-                    (ngModelChange)="newPipelineName.set($event)"
-                    (keydown.enter)="addPipelineName()"
-                  />
-                  <button type="button" class="btn btn-sm btn-add" (click)="addPipelineName()">{{ 'admin.add_btn' | translate }}</button>
-                </div>
               </div>
             </div>
 
@@ -207,9 +207,6 @@
               @if (pipelineSaving()) {
                 <span class="saving-indicator">{{ 'admin.saving' | translate }}</span>
               }
-              <button type="button" class="btn btn-secondary" (click)="loadPipelineConfig()">
-                {{ 'admin.reload' | translate }}
-              </button>
             </div>
           }
         </div>
@@ -252,7 +249,18 @@
 
             <!-- Package names (tags) -->
             <div class="settings-section">
-              <div class="settings-section-title">{{ 'admin.package_names_title' | translate }}</div>
+              <div class="settings-row names-add-row">
+                <label class="settings-label" for="package-names">{{ 'admin.package_names_title' | translate }}</label>
+                <input
+                  id="package-names"
+                  class="settings-input"
+                  type="text"
+                  [placeholder]="'admin.package_placeholder' | translate"
+                  [ngModel]="newPackageName()"
+                  (ngModelChange)="newPackageName.set($event)"
+                  (keydown.enter)="addPackageName()"
+                />
+              </div>
               <div class="tags-list">
                 @for (name of cfg.packageNames; track name; let i = $index) {
                   <span class="tag">
@@ -260,17 +268,6 @@
                     <button type="button" class="tag-remove" (click)="removePackageName(i)" [title]="'admin.delete_title' | translate">×</button>
                   </span>
                 }
-                <div class="tag-add-row">
-                  <input
-                    class="tag-input"
-                    type="text"
-                    [placeholder]="'admin.package_placeholder' | translate"
-                    [ngModel]="newPackageName()"
-                    (ngModelChange)="newPackageName.set($event)"
-                    (keydown.enter)="addPackageName()"
-                  />
-                  <button type="button" class="btn btn-sm btn-add" (click)="addPackageName()">{{ 'admin.add_btn' | translate }}</button>
-                </div>
               </div>
             </div>
 
@@ -401,9 +398,6 @@
               @if (packageSaving()) {
                 <span class="saving-indicator">{{ 'admin.saving' | translate }}</span>
               }
-              <button type="button" class="btn btn-secondary" (click)="loadPackageConfig()">
-                {{ 'admin.reload' | translate }}
-              </button>
             </div>
           }
         </div>
@@ -629,9 +623,6 @@
               }
               <button type="button" class="btn btn-primary" (click)="saveEnvConfig()" [disabled]="envSaving()">
                 {{ 'admin.save_env_btn' | translate }}
-              </button>
-              <button type="button" class="btn btn-secondary" (click)="loadEnvConfig()">
-                {{ 'admin.reload' | translate }}
               </button>
             </div>
           }

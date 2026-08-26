@@ -1,10 +1,10 @@
 {
   "filePath": "package.json",
   "packageNames": [
-    "@oblique/oblique",
-    "@angular/cdk",
     "eslint",
-    "zone.js"
+    "zone.js",
+    "@oblique/oblique",
+    "@angular/cdk"
   ],
   "repositories": [
     {
@@ -12,6 +12,13 @@
       "project": "BJBOHREG",
       "repo": "bj_bo_hreg_ui",
       "name": "bj_bo_hreg_ui",
+      "path": "package.json"
+    },
+    {
+      "platform": "bitbucket",
+      "project": "SEM",
+      "repo": "sem_wis",
+      "name": "sem_wis",
       "path": "package.json"
     }
   ]

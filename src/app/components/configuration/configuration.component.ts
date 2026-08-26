@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,9 +16,14 @@ import { ConfigService } from '../../services/config.service';
   styleUrl: './configuration.component.scss',
 })
 export class ConfigurationComponent implements OnInit {
+  @ViewChild(ConfigAdminComponent) private readonly configAdmin?: ConfigAdminComponent;
   private readonly configService = inject(ConfigService);
   private readonly router = inject(Router);
   private initialRepoTotal = 0;
+
+  reloadConfig(): void {
+    this.configAdmin?.reloadActiveTab();
+  }
 
   ngOnInit(): void {
     forkJoin({

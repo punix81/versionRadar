@@ -94,6 +94,15 @@ export class ConfigAdminComponent implements OnInit {
 
   setTab(tab: Tab): void { this.activeTab.set(tab); }
 
+  reloadActiveTab(): void {
+    switch (this.activeTab()) {
+      case 'pipelines': this.loadPipelineConfig(); break;
+      case 'packages': this.loadPackageConfig(); break;
+      case 'env': this.loadEnvConfig(); break;
+      default: break;
+    }
+  }
+
   // ── Pipeline methods ────────────────────────────────────────────────────────
 
   loadPipelineConfig(): void {
@@ -113,6 +122,7 @@ export class ConfigAdminComponent implements OnInit {
     cfg.pipelineNames = [...cfg.pipelineNames, name];
     this.pipelineConfig.set({ ...cfg });
     this.newPipelineName.set('');
+    this.autoSavePipeline();
   }
 
   removePipelineName(index: number): void {
@@ -120,6 +130,7 @@ export class ConfigAdminComponent implements OnInit {
     if (!cfg) return;
     cfg.pipelineNames = cfg.pipelineNames.filter((_, i) => i !== index);
     this.pipelineConfig.set({ ...cfg });
+    this.autoSavePipeline();
   }
 
   startEditPipeline(index: number): void { this.pipelineEditingIndex.set(index); this.pipelineAddingNew.set(false); }
@@ -218,6 +229,7 @@ export class ConfigAdminComponent implements OnInit {
     cfg.packageNames = [...cfg.packageNames, name];
     this.packageConfig.set({ ...cfg });
     this.newPackageName.set('');
+    this.autoSavePackage();
   }
 
   removePackageName(index: number): void {
@@ -225,6 +237,7 @@ export class ConfigAdminComponent implements OnInit {
     if (!cfg) return;
     cfg.packageNames = cfg.packageNames.filter((_, i) => i !== index);
     this.packageConfig.set({ ...cfg });
+    this.autoSavePackage();
   }
 
   startEditPackage(index: number): void { this.packageEditingIndex.set(index); this.packageAddingNew.set(false); }
