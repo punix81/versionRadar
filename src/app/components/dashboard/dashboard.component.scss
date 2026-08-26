@@ -1,9 +1,9 @@
 .dashboard-page { display: grid; gap: 32px; max-width: 1600px; margin: 0 auto; padding: 32px; }
 .dashboard-content { display: grid; gap: 32px; padding-top: 32px; }
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
-.page-header h1 { margin: 0; font: var(--mat-sys-headline-medium); }
+.page-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.page-header h1 { margin: 0; font-size: 4rem; line-height: 1.2; }
 .page-header p, .last-update { margin: 8px 0 0; color: var(--mat-sys-on-surface-variant); }
-.page-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; width: 100% }
+.page-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
 .last-update { font: var(--mat-sys-body-small); }
 .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .summary-grid mat-card-content { display: grid; gap: 8px; padding: 20px; }
@@ -11,6 +11,9 @@
 .summary-grid strong { font: var(--mat-sys-headline-medium); }
 .state-panel { display: flex; align-items: center; justify-content: center; gap: 16px; min-height: 180px; border: 1px solid var(--mat-sys-outline-variant); border-radius: 12px; color: var(--mat-sys-on-surface-variant); }
 .error-state { color: var(--mat-sys-error); }
+.data-panel { border: 1px solid var(--mat-sys-outline-variant); border-radius: 12px; overflow: clip; }
+.data-panel-body { padding: 24px; }
+.tabs { display: flex; gap: 4px; overflow: auto; margin-bottom: 24px; border-bottom: 1px solid var(--mat-sys-outline-variant); }.tabs button { flex: 1 1 0; min-height: 44px; min-width: 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--mat-sys-on-surface-variant); cursor: pointer; padding: 0 16px; white-space: nowrap; text-align: center; }.tabs button.active { border-color: var(--mat-sys-primary); color: var(--mat-sys-primary); }
 .fetch-panel { border: 1px solid var(--mat-sys-outline-variant); border-radius: 12px; background: var(--mat-sys-surface-container); }
 .fetch-panel-heading, .fetch-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; }
 .fetch-panel h2, .fetch-panel p { margin: 0; }

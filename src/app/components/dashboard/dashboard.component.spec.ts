@@ -146,13 +146,20 @@ describe('DashboardComponent', () => {
     });
   });
 
-  describe('page tabs', () => {
-    it('should render two tabs so configuration stays reachable', async () => {
+  describe('layout', () => {
+    it('should not render tabs when there is no data yet', async () => {
       const { fixture, component } = await setup();
       expect(component).toBeTruthy();
-      const group = fixture.nativeElement.querySelector('mat-tab-group');
-      expect(group).toBeTruthy();
-      expect(group.querySelectorAll('.mat-mdc-tab').length).toBe(2);
+      expect(fixture.nativeElement.querySelector('.tabs')).toBeNull();
+    });
+
+    it('should render a tab group with pipelines, repositories and npm worm when data is present', async () => {
+      const mockService = buildMockVersionService(makeVersionData());
+      const { fixture } = await setup(mockService);
+      fixture.detectChanges();
+      const tabs = fixture.nativeElement.querySelector('.tabs');
+      expect(tabs).toBeTruthy();
+      expect(tabs.querySelectorAll('button').length).toBe(3);
     });
   });
 

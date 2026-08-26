@@ -96,6 +96,7 @@
   "admin.hint_azure_label": "Azure DevOps :",
   "admin.url_error_pipeline": "URL non reconnue. Formats supportés : SSH, HTTPS Bitbucket ou project/repo",
   "admin.url_error_package": "URL non reconnue. Formats supportés : HTTPS Bitbucket ou Azure DevOps",
+  "admin.back_to_dashboard": "Retour au tableau de bord",
   "admin.cancel": "Annuler",
   "admin.confirm_ok": "✔ OK",
   "admin.confirm_add": "✔ Ajouter",

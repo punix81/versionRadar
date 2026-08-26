@@ -16,6 +16,7 @@
       <button mat-icon-button type="button" (click)="toggleTheme()" [attr.aria-label]="(darkTheme() ? 'theme.use_light' : 'theme.use_dark') | translate" [matTooltip]="(darkTheme() ? 'theme.use_light' : 'theme.use_dark') | translate">
         <mat-icon>{{ darkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
+      <button mat-icon-button type="button" routerLink="/configuration" [attr.aria-label]="'admin.title' | translate" [matTooltip]="'admin.title' | translate"><mat-icon>settings</mat-icon></button>
       <button mat-icon-button type="button" [matMenuTriggerFor]="languageMenu" [attr.aria-label]="'dashboard.title' | translate"><mat-icon>language</mat-icon></button>
       <mat-menu #languageMenu="matMenu">
         <button mat-menu-item type="button" (click)="switchLanguage('fr')">FR</button>

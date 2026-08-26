@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, effect, inject, DestroyRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
@@ -8,20 +8,17 @@ import { VersionMonitoringService, RepositoryResult, PipelineResult } from '../.
 import { PackagesRadarComponent } from '../packages-radar/packages-radar.component';
 import { PipelinesRadarComponent } from '../pipelines-radar/pipelines-radar.component';
 import { NpmWormComponent } from '../npm-worm/npm-worm.component';
-import { ConfigAdminComponent } from '../config-admin/config-admin.component';
 import { ConfigService } from '../../services/config.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, NpmWormComponent, ConfigAdminComponent, MatButtonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatTabsModule, MatTooltipModule],
+  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, NpmWormComponent, MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -37,6 +34,7 @@ export class DashboardComponent implements OnInit {
   pipelineChartOptions: { name: string; option: EChartsOption }[] = [];
 
   currentLang = 'en';
+  activeDataTab = signal(0);
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly versionService = inject(VersionMonitoringService);
@@ -87,6 +85,10 @@ export class DashboardComponent implements OnInit {
   switchLang(lang: string): void {
     this.currentLang = lang;
     this.translate.use(lang);
+  }
+
+  setDataTab(index: number): void {
+    this.activeDataTab.set(index);
   }
 
   private updateCharts(repositories: RepositoryResult[]): void {

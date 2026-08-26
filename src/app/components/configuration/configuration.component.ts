@@ -1,13 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
 import { ConfigAdminComponent } from '../config-admin/config-admin.component';
 import { ConfigService } from '../../services/config.service';
 
 @Component({
   selector: 'app-configuration',
   standalone: true,
-  imports: [ConfigAdminComponent],
+  imports: [ConfigAdminComponent, RouterLink, MatButtonModule, MatIconModule, MatTooltipModule, TranslateModule],
   templateUrl: './configuration.component.html',
   styleUrl: './configuration.component.scss',
 })
