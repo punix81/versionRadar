@@ -140,9 +140,9 @@ describe('DashboardComponent', () => {
       expect(mockService.loadVersionData).toHaveBeenCalledOnce();
     });
 
-    it('should default currentLang to "fr"', async () => {
+    it('should default currentLang to "en"', async () => {
       const { component } = await setup();
-      expect(component.currentLang).toBe('fr');
+      expect(component.currentLang).toBe('en');
     });
   });
 

@@ -161,7 +161,7 @@ export class ConfigAdminComponent implements OnInit {
     if (!project) { m = raw.match(/git@[^:]+:([^/]+)\/([^/\s]+)$/); if (m) { project = m[1]; repo = m[2]; } }
     if (!project) { m = raw.match(/\/projects\/([^/]+)\/repos\/([^/\s]+)/); if (m) { project = m[1]; repo = m[2]; } }
     if (!project) { m = raw.match(/^([^/\s]+)\/([^/\s]+)$/); if (m) { project = m[1]; repo = m[2]; } }
-    if (!project || !repo) { this.pipelineUrlParseError.set('URL non reconnue. Formats supportés : SSH, HTTPS Bitbucket ou project/repo'); return; }
+    if (!project || !repo) { this.pipelineUrlParseError.set('admin.url_error_pipeline'); return; }
     this.pipelineNewRepo.set({ project, repo, name: repo, branch: '' });
     this.pipelineUrlParsed.set(true);
   }
@@ -287,7 +287,7 @@ export class ConfigAdminComponent implements OnInit {
     }
 
     if (!parsed) {
-      this.packageUrlParseError.set('URL non reconnue. Formats supportés : HTTPS Bitbucket ou Azure DevOps');
+      this.packageUrlParseError.set('admin.url_error_package');
       return;
     }
 

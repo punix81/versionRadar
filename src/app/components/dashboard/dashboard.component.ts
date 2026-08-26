@@ -36,7 +36,7 @@ export class DashboardComponent implements OnInit {
   packageChartOptions: { name: string; option: EChartsOption }[] = [];
   pipelineChartOptions: { name: string; option: EChartsOption }[] = [];
 
-  currentLang = 'fr';
+  currentLang = 'en';
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly versionService = inject(VersionMonitoringService);
