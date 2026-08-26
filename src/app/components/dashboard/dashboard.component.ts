@@ -16,6 +16,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface FetchLogLine {
   type: 'stdout' | 'stderr' | 'info' | 'success' | 'error';
@@ -55,6 +56,7 @@ export class DashboardComponent implements OnInit {
   private readonly versionService = inject(VersionMonitoringService);
   private readonly translate = inject(TranslateService);
   private readonly configService = inject(ConfigService);
+  private readonly snackBar = inject(MatSnackBar);
 
   constructor() {
     this.data = this.versionService.data;
@@ -100,7 +102,11 @@ export class DashboardComponent implements OnInit {
 
   refresh(): void {
     if (!this.configService.hasMaliciousPackagesCsv()) {
-      this.configService.requireMaliciousPackagesCsv();
+      this.snackBar.open(
+        this.translate.instant('dashboard.csv_required_message'),
+        this.translate.instant('fetch.close'),
+        { duration: 5000, panelClass: ['snackbar-error'], verticalPosition: 'top', horizontalPosition: 'center' }
+      );
       return;
     }
 

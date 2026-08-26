@@ -16,6 +16,20 @@ button, input, select, textarea { font: inherit; }
 :focus-visible { outline: 2px solid var(--mat-sys-primary); outline-offset: 2px; }
 code, .technical-value { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
+.snackbar-error {
+  --mat-snack-bar-container-color: var(--mat-sys-error-container);
+  --mat-snack-bar-supporting-text-color: #000;
+  --mat-snack-bar-button-color: #000;
+}
+
+.snackbar-error .mat-mdc-snack-bar-actions .mat-mdc-button {
+  background-color: #fff;
+  color: #000;
+  --mdc-text-button-label-text-color: #000;
+  --mdc-text-button-container-color: #fff;
+  --mat-text-button-label-text-color: #000;
+}
+
 @media (prefers-color-scheme: dark) {
   html { color-scheme: dark; }
 }

@@ -10,6 +10,7 @@ import { of } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { VersionMonitoringService, RepositoryResult, PipelineResult, VersionData } from '../../services/version-monitoring.service';
 import { ConfigService } from '../../services/config.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 function makeRepo(overrides: Partial<RepositoryResult> = {}): RepositoryResult {
   return {
@@ -112,7 +113,11 @@ function buildMockConfigService(streamEvents: object[] = []) {
   };
 }
 
-async function setup(mockService = buildMockVersionService(), mockConfig = buildMockConfigService()) {
+function buildMockSnackBar() {
+  return { open: vi.fn() };
+}
+
+async function setup(mockService = buildMockVersionService(), mockConfig = buildMockConfigService(), mockSnackBar = buildMockSnackBar()) {
   await TestBed.configureTestingModule({
     imports: [DashboardComponent],
     providers: [
@@ -122,13 +127,14 @@ async function setup(mockService = buildMockVersionService(), mockConfig = build
       ...provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' }),
       { provide: VersionMonitoringService, useValue: mockService },
       { provide: ConfigService, useValue: mockConfig },
+      { provide: MatSnackBar, useValue: mockSnackBar },
     ],
   }).compileComponents();
 
   const fixture = TestBed.createComponent(DashboardComponent);
   const component = fixture.componentInstance;
   fixture.detectChanges();
-  return { fixture, component, mockService, mockConfig };
+  return { fixture, component, mockService, mockConfig, mockSnackBar };
 }
 
 describe('DashboardComponent', () => {
@@ -207,13 +213,19 @@ describe('DashboardComponent', () => {
       expect(mockService.loadVersionData).toHaveBeenCalledTimes(2);
     });
 
-    it('should require the CSV before refreshing', async () => {
+    it('should show an error snackbar when the CSV is missing before refreshing', async () => {
       const mockConfig = buildMockConfigService();
       mockConfig._maliciousPackagesSig.set([]);
-      const { component } = await setup(buildMockVersionService(), mockConfig);
+      const mockSnackBar = buildMockSnackBar();
+      const { component } = await setup(buildMockVersionService(), mockConfig, mockSnackBar);
       component.refresh();
       expect(component.fetchDialogOpen()).toBe(false);
-      expect(mockConfig.requireMaliciousPackagesCsv).toHaveBeenCalledOnce();
+      expect(mockSnackBar.open).toHaveBeenCalledOnce();
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+        expect.objectContaining({ panelClass: ['snackbar-error'], verticalPosition: 'top', horizontalPosition: 'center' })
+      );
       expect(mockConfig.streamFetch).not.toHaveBeenCalled();
     });
   });

@@ -8,6 +8,8 @@
   "dashboard.success": "Erfolgreich",
   "dashboard.errors": "Fehler",
   "dashboard.retry": "Erneut versuchen",
+  "dashboard.csv_required_title": "CSV bösartiger Pakete hinzufügen",
+  "dashboard.csv_required_message": "Vor dem Aktualisieren und Starten des Scans ist eine CSV-Datei mit bösartigen NPM-Paketen erforderlich. Fügen Sie sie im Abschnitt Sicherheit der Konfiguration hinzu.",
   "theme.use_dark": "Dunkles Design aktivieren",
   "theme.use_light": "Helles Design aktivieren",
   "table.repo_details": "Repository-Details",
