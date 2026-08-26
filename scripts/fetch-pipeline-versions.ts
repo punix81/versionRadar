@@ -90,7 +90,7 @@ interface RepositoryResult {
 }
 
 // Configuration depuis .env
-const BITBUCKET_BASE_URL = process.env['BITBUCKET_BASE_URL'] || 'https://bitbucket.bit.admin.ch';
+const BITBUCKET_BASE_URL = (process.env['BITBUCKET_BASE_URL'] || 'https://bitbucket.bit.admin.ch').replace(/\/+$/, '');
 const REQUEST_TIMEOUT_MS = parseInt(process.env['REQUEST_TIMEOUT_MS'] || '30000', 10);
 const DATE_LOCALE = process.env['DATE_LOCALE'] || 'fr-CH';
 const BITBUCKET_AUTH_SCHEME = (process.env['BITBUCKET_AUTH_SCHEME'] || 'bearer').toLowerCase();

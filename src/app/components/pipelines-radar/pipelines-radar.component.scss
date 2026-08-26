@@ -10,4 +10,4 @@
 .data-table small { display: block; margin-top: 4px; color: var(--mat-sys-on-surface-variant); }
 .data-table a { color: var(--mat-sys-primary); text-decoration: none; }
 .data-table a:hover { text-decoration: underline; }
-.ok { color: var(--mat-sys-primary); } .error { color: var(--mat-sys-error); } mat-icon { width: 18px; height: 18px; font-size: 18px; }
+.ok { color: var(--mat-sys-primary); } .error { color: var(--mat-sys-error); } .status-pending { color: var(--mat-sys-tertiary); } mat-icon { width: 18px; height: 18px; font-size: 18px; }

@@ -8,12 +8,11 @@
   ],
   "repositories": [
     {
-      "platform": "azure",
-      "project": "DefaultCollection",
-      "repo": "BIT_FMZ_APP",
-      "name": "BIT_FMZ_APP",
-      "path": "src/frontend/pwa/package.json",
-      "collection": "devops-server.admin.ch"
+      "platform": "bitbucket",
+      "project": "BJBOHREG",
+      "repo": "bj_bo_hreg_ui",
+      "name": "bj_bo_hreg_ui",
+      "path": "package.json"
     }
   ]
 }

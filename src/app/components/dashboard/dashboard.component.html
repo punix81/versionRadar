@@ -8,15 +8,6 @@
   <mat-tab-group class="dashboard-tabs">
     <mat-tab [label]="'dashboard.tab_dashboard' | translate">
       <div class="dashboard-content">
-      @if (fetchDialogOpen()) {
-        <section class="fetch-panel" role="status" aria-live="polite">
-          <div class="fetch-panel-heading"><div><h2>{{ 'fetch.title' | translate }}</h2><p>@if (fetchRunning()) { {{ 'fetch.running' | translate }} } @else if (fetchSuccess()) { {{ 'fetch.success' | translate }} } @else { {{ 'fetch.error' | translate }} }</p></div><button mat-icon-button type="button" (click)="closeFetchDialog()" [disabled]="fetchRunning()" [matTooltip]="'fetch.close' | translate"><mat-icon>close</mat-icon></button></div>
-          <pre class="fetch-console" #consoleOutput>@for (line of fetchLines(); track $index) {<span [class]="'line-' + line.type">{{ line.text }}
-      </span>}@if (fetchRunning() && fetchLines().length === 0) {<span>{{ 'fetch.starting' | translate }}</span>}</pre>
-          @if (!fetchRunning()) { <div class="fetch-actions"><button mat-button type="button" (click)="closeFetchDialog()">{{ 'fetch.close' | translate }}</button></div> }
-        </section>
-      }
-
       @if (loading()) {
         <section class="state-panel" aria-live="polite"><mat-spinner diameter="36" /><p>{{ 'dashboard.loading' | translate }}</p></section>
       } @else if (error()) {

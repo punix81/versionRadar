@@ -23,6 +23,18 @@ function writeJson(filePath: string, data: unknown): void {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
 }
 
+// Returns how many repositories are configured in a given config file (0 if absent/unreadable).
+function configuredRepoCount(fileName: string): number {
+  const filePath = path.join(CONFIG_DIR, fileName);
+  if (!fs.existsSync(filePath)) return 0;
+  try {
+    const cfg = readJson<{ repositories?: unknown[] }>(filePath);
+    return Array.isArray(cfg.repositories) ? cfg.repositories.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
 // ── Types (mirrors Angular interfaces) ───────────────────────────────────────
 
 interface PipelineConfigRepo { project: string; repo: string; name: string; branch?: string }
@@ -235,7 +247,7 @@ app.get('/api/fetch/stream', (req: Request, res: Response) => {
       const proc = spawn(
         'npx',
         ['ts-node', '--project', 'tsconfig.scripts.json', scriptPath],
-        { cwd: rootDir, env: { ...process.env }, shell: false }
+        { cwd: rootDir, env: { ...process.env }, shell: true }
       );
       proc.stdout?.on('data', (chunk: Buffer) =>
         chunk.toString().split('\n').filter(Boolean).forEach(l => send('stdout', l))
@@ -247,8 +259,15 @@ app.get('/api/fetch/stream', (req: Request, res: Response) => {
     });
 
   const scripts: string[] = [];
-  if (type === 'all' || type === 'packages')  scripts.push('scripts/fetch-package-versions.ts');
-  if (type === 'all' || type === 'pipelines') scripts.push('scripts/fetch-pipeline-versions.ts');
+  if (type === 'packages') {
+    scripts.push('scripts/fetch-package-versions.ts');
+  } else if (type === 'pipelines') {
+    scripts.push('scripts/fetch-pipeline-versions.ts');
+  } else {
+    // 'all': only run the script(s) for platforms that have configured repositories.
+    if (configuredRepoCount('package-repositories.json') > 0) scripts.push('scripts/fetch-package-versions.ts');
+    if (configuredRepoCount('repositories.json') > 0) scripts.push('scripts/fetch-pipeline-versions.ts');
+  }
 
   (async () => {
     let allSuccess = true;

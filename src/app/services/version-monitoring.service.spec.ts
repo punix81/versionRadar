@@ -47,8 +47,8 @@ function flushLoad(
   repos: RepositoryResult[],
   pipelines: PipelineResult[],
 ) {
-  http.expectOne('assets/data/repositories.json').flush(repos);
-  http.expectOne('assets/data/pipelines.json').flush(pipelines);
+  http.expectOne(req => req.urlWithParams.startsWith('assets/data/repositories.json')).flush(repos);
+  http.expectOne(req => req.urlWithParams.startsWith('assets/data/pipelines.json')).flush(pipelines);
 }
 
 describe('VersionMonitoringService', () => {
@@ -104,8 +104,8 @@ describe('VersionMonitoringService', () => {
     it('should set loading to false after HTTP error', async () => {
       const { service, http } = setup();
       const done = lastValueFrom(service.loadVersionData());
-      http.expectOne('assets/data/repositories.json').error(new ProgressEvent('error'));
-      http.match('assets/data/pipelines.json');
+      http.expectOne(req => req.urlWithParams.startsWith('assets/data/repositories.json')).error(new ProgressEvent('error'));
+      http.match(req => req.urlWithParams.startsWith('assets/data/pipelines.json'));
       await done;
       expect(service.loading()).toBe(false);
     });
@@ -196,8 +196,8 @@ describe('VersionMonitoringService', () => {
       const { service, http } = setup();
       // First trigger an error (forkJoin cancels sibling)
       const done1 = lastValueFrom(service.loadVersionData());
-      http.expectOne('assets/data/repositories.json').error(new ProgressEvent('error'));
-      http.match('assets/data/pipelines.json'); // absorb cancelled sibling
+      http.expectOne(req => req.urlWithParams.startsWith('assets/data/repositories.json')).error(new ProgressEvent('error'));
+      http.match(req => req.urlWithParams.startsWith('assets/data/pipelines.json')); // absorb cancelled sibling
       await done1;
       expect(service.error()).not.toBeNull();
 
@@ -240,8 +240,8 @@ describe('VersionMonitoringService', () => {
     it('should set error() on HTTP failure', async () => {
       const { service, http } = setup();
       const done = lastValueFrom(service.loadVersionData());
-      http.expectOne('assets/data/repositories.json').error(new ProgressEvent('network error'));
-      http.match('assets/data/pipelines.json'); // absorb cancelled sibling
+      http.expectOne(req => req.urlWithParams.startsWith('assets/data/repositories.json')).error(new ProgressEvent('network error'));
+      http.match(req => req.urlWithParams.startsWith('assets/data/pipelines.json')); // absorb cancelled sibling
       await done;
       expect(service.error()).not.toBeNull();
     });
@@ -249,8 +249,8 @@ describe('VersionMonitoringService', () => {
     it('should leave data() as null after HTTP failure', async () => {
       const { service, http } = setup();
       const done = lastValueFrom(service.loadVersionData());
-      http.expectOne('assets/data/repositories.json').error(new ProgressEvent('network error'));
-      http.match('assets/data/pipelines.json'); // absorb cancelled sibling
+      http.expectOne(req => req.urlWithParams.startsWith('assets/data/repositories.json')).error(new ProgressEvent('network error'));
+      http.match(req => req.urlWithParams.startsWith('assets/data/pipelines.json')); // absorb cancelled sibling
       await done;
       expect(service.data()).toBeNull();
     });

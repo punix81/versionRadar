@@ -1,10 +1,7 @@
 {
   "filePath": "pipeline/Chart.yaml",
   "pipelineNames": [
-    "commons-pipeline",
-    "angular-pipeline",
-    "cd-pipelines",
-    "dotnet-pipeline"
+    "commons-pipeline"
   ],
   "repositories": []
 }

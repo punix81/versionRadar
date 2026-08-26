@@ -196,6 +196,13 @@ describe('PackagesRadarComponent', () => {
       const badge = fixture.debugElement.query(By.css('.status-badge.error'));
       expect(badge.nativeElement.getAttribute('title')).toBe('HTTP 401');
     });
+
+    it('should show a pending badge (not an error) for pending repos', async () => {
+      const { fixture } = await setup([makeRepo({ status: 'pending' })]);
+      const pending = fixture.debugElement.query(By.css('.status-badge.pending'));
+      expect(pending).not.toBeNull();
+      expect(fixture.debugElement.query(By.css('.status-badge.error'))).toBeNull();
+    });
   });
 
   describe('VersionDisplayService delegation', () => {
@@ -225,6 +232,11 @@ describe('PackagesRadarComponent', () => {
     it('getStatusClass returns status-error for error', async () => {
       const { component } = await setup();
       expect(component.display.getStatusClass(makeRepo({ status: 'error' }))).toBe('status-error');
+    });
+
+    it('getStatusClass returns status-pending for pending', async () => {
+      const { component } = await setup();
+      expect(component.display.getStatusClass(makeRepo({ status: 'pending' }))).toBe('status-pending');
     });
   });
 });

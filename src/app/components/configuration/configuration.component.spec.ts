@@ -25,7 +25,6 @@ function buildMockConfigService(pipelineRepos = 0, packageRepos = 0) {
     maliciousCsvFileName: signal<string | null>(null).asReadonly(),
     maliciousCsvSkippedRows: signal(0).asReadonly(),
     maliciousCsvError: signal<string | null>(null).asReadonly(),
-    maliciousCsvRequired: signal(false).asReadonly(),
     getPipelineConfig: () => of(makePipelineConfig(pipelineRepos)),
     getPackageConfig: () => of(makePackageConfig(packageRepos)),
     getEnvConfig: () => of({}),

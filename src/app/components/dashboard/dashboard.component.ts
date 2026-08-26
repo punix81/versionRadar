@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, inject, DestroyRef, ViewChild, ElementRef, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
@@ -17,12 +17,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar } from '@angular/material/snack-bar';
-
-interface FetchLogLine {
-  type: 'stdout' | 'stderr' | 'info' | 'success' | 'error';
-  text: string;
-}
 
 @Component({
   selector: 'app-dashboard',
@@ -44,20 +38,10 @@ export class DashboardComponent implements OnInit {
 
   currentLang = 'fr';
 
-  // ── Fetch dialog state ─────────────────────────────────────────────────────
-  fetchDialogOpen = signal(false);
-  fetchRunning = signal(false);
-  fetchDone = signal(false);
-  fetchSuccess = signal(false);
-  fetchLines = signal<FetchLogLine[]>([]);
-
-  @ViewChild('consoleOutput') consoleOutput?: ElementRef<HTMLDivElement>;
-
   private readonly destroyRef = inject(DestroyRef);
   private readonly versionService = inject(VersionMonitoringService);
   private readonly translate = inject(TranslateService);
   private readonly configService = inject(ConfigService);
-  private readonly snackBar = inject(MatSnackBar);
 
   constructor() {
     this.data = this.versionService.data;
@@ -69,17 +53,6 @@ export class DashboardComponent implements OnInit {
       if (currentData) {
         this.updateCharts(currentData.repositories);
         this.updatePipelineCharts(currentData.pipelines);
-      }
-    });
-
-    effect(() => {
-      const lines = this.fetchLines();
-      if (lines.length) {
-        setTimeout(() => {
-          if (this.consoleOutput) {
-            this.consoleOutput.nativeElement.scrollTop = this.consoleOutput.nativeElement.scrollHeight;
-          }
-        }, 0);
       }
     });
 
@@ -102,49 +75,13 @@ export class DashboardComponent implements OnInit {
   }
 
   refresh(): void {
-    if (!this.configService.hasMaliciousPackagesCsv()) {
-      this.snackBar.open(
-        this.translate.instant('dashboard.csv_required_message'),
-        this.translate.instant('fetch.close'),
-        { duration: 5000, panelClass: ['snackbar-error'], verticalPosition: 'top', horizontalPosition: 'center' }
-      );
-      return;
-    }
-
-    this.fetchDialogOpen.set(true);
-    this.fetchRunning.set(true);
-    this.fetchDone.set(false);
-    this.fetchSuccess.set(false);
-    this.fetchLines.set([]);
-
     this.configService.streamFetch('all').subscribe({
       next: event => {
-        if (event.type === 'done') {
-          this.fetchRunning.set(false);
-          this.fetchDone.set(true);
-          this.fetchSuccess.set(event.success ?? false);
-          if (event.success) this.loadData();
-        } else if (event.line) {
-          this.fetchLines.update(lines => [
-            ...lines,
-            { type: event.type as FetchLogLine['type'], text: event.line! }
-          ]);
+        if (event.type === 'done' && event.success) {
+          this.loadData();
         }
-      },
-      error: err => {
-        this.fetchRunning.set(false);
-        this.fetchDone.set(true);
-        this.fetchSuccess.set(false);
-        this.fetchLines.update(lines => [
-          ...lines,
-          { type: 'error', text: String((err as Error).message) }
-        ]);
       }
     });
-  }
-
-  closeFetchDialog(): void {
-    this.fetchDialogOpen.set(false);
   }
 
   switchLang(lang: string): void {
