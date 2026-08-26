@@ -71,9 +71,6 @@ export class VersionMonitoringService {
     }).pipe(
       tap(({ repositories, pipelines }) => {
         if (repositories.length === 0 && pipelines.length === 0) {
-          this.errorSignal.set(
-            'Aucune donnée disponible. Lancez la commande "npm run fetch-all" pour récupérer les versions depuis Azure DevOps et Bitbucket.'
-          );
           this.dataSignal.set(null);
           return;
         }

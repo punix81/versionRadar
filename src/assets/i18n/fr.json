@@ -1,4 +1,5 @@
 {
+  "dashboard.no.repositories": "Aucun dépôt n'a encore été ajouté",
   "dashboard.title": "VersionRadar Dashboard",
   "dashboard.subtitle": "Monitoring des versions des packages et pipelines",
   "dashboard.refresh": "Rafraîchir",

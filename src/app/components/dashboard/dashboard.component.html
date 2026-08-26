@@ -23,7 +23,9 @@
     <section class="state-panel" aria-live="polite"><mat-spinner diameter="36" /><p>{{ 'dashboard.loading' | translate }}</p></section>
   } @else if (error()) {
     <section class="state-panel error-state" role="alert"><mat-icon>error_outline</mat-icon><p>{{ error() }}</p><button mat-button type="button" (click)="loadData()">{{ 'dashboard.retry' | translate }}</button></section>
-  } @else if (data()) {
+  } @else if (!data()) {
+    <section class="state-panel" aria-live="polite"><p>{{ 'dashboard.no.repositories' | translate }}</p></section>
+  } @else {
     <div class="summary-grid" aria-label="Repository summary">
       <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.total_repos' | translate }}</span><strong>{{ data()!.stats.total }}</strong></mat-card-content></mat-card>
       <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.success' | translate }}</span><strong>{{ data()!.stats.success }}</strong></mat-card-content></mat-card>
@@ -33,6 +35,7 @@
     <section id="pipelines"><app-pipelines-radar [pipelines]="data()!.pipelines" [pipelineStats]="data()!.pipelineStats" /></section>
     <section id="security"><app-npm-worm [repositories]="data()!.repositories" /></section>
     <section id="packages"><app-packages-radar [repositories]="data()!.repositories" /></section>
-    <section id="configuration"><app-config-admin /></section>
   }
+
+  <section id="configuration"><app-config-admin /></section>
 </section>

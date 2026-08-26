@@ -43,6 +43,9 @@ export class DashboardComponent implements OnInit {
 
   currentLang = 'fr';
 
+  emptyMessage =
+    'Aucune donnée n\'a encore été chargée. Renseignez vos identifiants dans la section Configuration, puis cliquez sur Actualiser pour récupérer les versions depuis Azure DevOps et Bitbucket.';
+
   // ── Fetch dialog state ─────────────────────────────────────────────────────
   fetchDialogOpen = signal(false);
   fetchRunning = signal(false);

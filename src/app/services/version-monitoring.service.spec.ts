@@ -210,12 +210,12 @@ describe('VersionMonitoringService', () => {
   });
 
   describe('loadVersionData() – empty data', () => {
-    it('should set an error when both arrays are empty', async () => {
+    it('should leave data empty (no error) when both arrays are empty', async () => {
       const { service, http } = setup();
       const done = lastValueFrom(service.loadVersionData());
       flushLoad(http, [], []);
       await done;
-      expect(service.error()).not.toBeNull();
+      expect(service.error()).toBeNull();
       expect(service.data()).toBeNull();
     });
 
