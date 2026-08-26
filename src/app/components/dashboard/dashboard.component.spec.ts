@@ -157,6 +157,16 @@ describe('DashboardComponent', () => {
     });
   });
 
+  describe('page tabs', () => {
+    it('should render two tabs so configuration stays reachable', async () => {
+      const { fixture, component } = await setup();
+      expect(component).toBeTruthy();
+      const group = fixture.nativeElement.querySelector('mat-tab-group');
+      expect(group).toBeTruthy();
+      expect(group.querySelectorAll('.mat-mdc-tab').length).toBe(2);
+    });
+  });
+
   describe('loading state', () => {
     it('should expose loading signal from service', async () => {
       const mockService = buildMockVersionService();

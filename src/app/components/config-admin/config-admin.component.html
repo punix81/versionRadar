@@ -1,14 +1,4 @@
 <div class="admin-panel">
-  <!-- Toggle Header -->
-  <div class="admin-toggle" (click)="togglePanel()" role="button" tabindex="0" (keydown.enter)="togglePanel()" (keydown.space)="togglePanel()">
-    <span class="admin-toggle-title">
-      <span aria-hidden="true">⚙️</span>
-      {{ 'admin.title' | translate }}
-    </span>
-    <span class="admin-toggle-icon" aria-hidden="true">{{ isOpen() ? '▲' : '▼' }}</span>
-  </div>
-
-  @if (isOpen()) {
     <div class="admin-body">
 
       <!-- Tabs -->
@@ -19,7 +9,7 @@
           [class.active]="activeTab() === 'pipelines'"
           (click)="setTab('pipelines')"
         >
-          <span aria-hidden="true">🔁</span> {{ 'admin.tab_pipelines' | translate }}
+          {{ 'admin.tab_pipelines' | translate }}
         </button>
         <button
           type="button"
@@ -27,7 +17,7 @@
           [class.active]="activeTab() === 'packages'"
           (click)="setTab('packages')"
         >
-          <span aria-hidden="true">📦</span> {{ 'admin.tab_packages' | translate }}
+          {{ 'admin.tab_packages' | translate }}
         </button>
         <button
           type="button"
@@ -35,7 +25,7 @@
           [class.active]="activeTab() === 'env'"
           (click)="setTab('env')"
         >
-          <span aria-hidden="true">🔑</span> {{ 'admin.tab_env' | translate }}
+          {{ 'admin.tab_env' | translate }}
         </button>
         <button
           type="button"
@@ -43,7 +33,7 @@
           [class.active]="activeTab() === 'security'"
           (click)="setTab('security')"
         >
-          <span aria-hidden="true">🛡️</span> {{ 'admin.tab_security' | translate }}
+          {{ 'admin.tab_security' | translate }}
         </button>
       </div>
 
@@ -52,11 +42,11 @@
         <div class="tab-content" role="tabpanel">
 
           @if (pipelineLoading()) {
-            <div class="loading-msg"><span aria-hidden="true">⏳</span> {{ 'admin.loading' | translate }}</div>
+            <div class="loading-msg">{{ 'admin.loading' | translate }}</div>
           }
           @if (pipelineError(); as err) {
             <div class="error-msg">
-              <span aria-hidden="true">⚠️</span>
+              
               {{ err }}
               @if (err.includes('npm start')) {
                 <code class="inline-cmd">npm start</code>
@@ -65,7 +55,7 @@
             </div>
           }
           @if (pipelineSuccess()) {
-            <div class="success-msg"><span aria-hidden="true">✅</span> {{ 'admin.saved_success' | translate }}</div>
+            <div class="success-msg">{{ 'admin.saved_success' | translate }}</div>
           }
 
           @if (pipelineConfig(); as cfg) {
@@ -208,7 +198,7 @@
                 </table>
               </div>
               <button type="button" class="btn btn-add-row" (click)="startAddPipelineRepo()">
-                <span aria-hidden="true">＋</span> {{ 'admin.add_repo' | translate }}
+                {{ 'admin.add_repo' | translate }}
               </button>
             </div>
 
@@ -230,11 +220,11 @@
         <div class="tab-content" role="tabpanel">
 
           @if (packageLoading()) {
-            <div class="loading-msg"><span aria-hidden="true">⏳</span> {{ 'admin.loading' | translate }}</div>
+            <div class="loading-msg">{{ 'admin.loading' | translate }}</div>
           }
           @if (packageError(); as err) {
             <div class="error-msg">
-              <span aria-hidden="true">⚠️</span>
+              
               {{ err }}
               @if (err.includes('npm start')) {
                 <code class="inline-cmd">npm start</code>
@@ -243,7 +233,7 @@
             </div>
           }
           @if (packageSuccess()) {
-            <div class="success-msg"><span aria-hidden="true">✅</span> {{ 'admin.saved_success' | translate }}</div>
+            <div class="success-msg">{{ 'admin.saved_success' | translate }}</div>
           }
 
           @if (packageConfig(); as cfg) {
@@ -402,7 +392,7 @@
                 </table>
               </div>
               <button type="button" class="btn btn-add-row" (click)="startAddPackageRepo()">
-                <span aria-hidden="true">＋</span> {{ 'admin.add_repo' | translate }}
+                {{ 'admin.add_repo' | translate }}
               </button>
             </div>
 
@@ -446,7 +436,7 @@
 
               @if (maliciousCsvError()) {
                 <div class="error-msg">
-                  <span aria-hidden="true">⚠️</span>
+                  
                   {{ maliciousCsvError()! | translate }}
                 </div>
               }
@@ -474,21 +464,21 @@
         <div class="tab-content" role="tabpanel">
 
           @if (envLoading()) {
-            <div class="loading-msg"><span aria-hidden="true">⏳</span> {{ 'admin.loading' | translate }}</div>
+            <div class="loading-msg">{{ 'admin.loading' | translate }}</div>
           }
           @if (envError(); as err) {
             <div class="error-msg">
-              <span aria-hidden="true">⚠️</span> {{ err }}
+               {{ err }}
               <button type="button" class="btn btn-sm btn-cancel btn-reload-retry" (click)="loadEnvConfig()">{{ 'dashboard.retry' | translate }}</button>
             </div>
           }
           @if (envSuccess()) {
-            <div class="success-msg"><span aria-hidden="true">✅</span> {{ 'admin.env_saved_success' | translate }}</div>
+            <div class="success-msg">{{ 'admin.env_saved_success' | translate }}</div>
           }
 
           @if (envConfig(); as cfg) {
             <div class="env-warning">
-              <span aria-hidden="true">⚠️</span>
+              
               {{ 'admin.tokens_warning' | translate }}
             </div>
 
@@ -649,5 +639,4 @@
       }
 
     </div>
-  }
 </div>

@@ -1,0 +1,9 @@
+.configuration-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+@media (max-width: 768px) {
+  .configuration-page { padding: 24px 16px; }
+}

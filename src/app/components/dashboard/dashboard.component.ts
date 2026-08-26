@@ -7,14 +7,15 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { VersionMonitoringService, RepositoryResult, PipelineResult } from '../../services/version-monitoring.service';
 import { PackagesRadarComponent } from '../packages-radar/packages-radar.component';
 import { PipelinesRadarComponent } from '../pipelines-radar/pipelines-radar.component';
-import { ConfigAdminComponent } from '../config-admin/config-admin.component';
 import { NpmWormComponent } from '../npm-worm/npm-worm.component';
+import { ConfigAdminComponent } from '../config-admin/config-admin.component';
 import { ConfigService } from '../../services/config.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -26,7 +27,7 @@ interface FetchLogLine {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, ConfigAdminComponent, NpmWormComponent, MatButtonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
+  imports: [CommonModule, NgxEchartsModule, TranslateModule, PackagesRadarComponent, PipelinesRadarComponent, NpmWormComponent, ConfigAdminComponent, MatButtonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatTabsModule, MatTooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -42,9 +43,6 @@ export class DashboardComponent implements OnInit {
   pipelineChartOptions: { name: string; option: EChartsOption }[] = [];
 
   currentLang = 'fr';
-
-  emptyMessage =
-    'Aucune donnée n\'a encore été chargée. Renseignez vos identifiants dans la section Configuration, puis cliquez sur Actualiser pour récupérer les versions depuis Azure DevOps et Bitbucket.';
 
   // ── Fetch dialog state ─────────────────────────────────────────────────────
   fetchDialogOpen = signal(false);

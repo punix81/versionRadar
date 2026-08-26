@@ -1,5 +1,6 @@
 {
   "dashboard.no.repositories": "No repositories have been added yet",
+  "dashboard.tab_dashboard": "Dashboard",
   "dashboard.title": "VersionRadar Dashboard",
   "dashboard.subtitle": "Monitoring package and pipeline versions",
   "dashboard.refresh": "Refresh",
@@ -9,8 +10,9 @@
   "dashboard.success": "Success",
   "dashboard.errors": "Errors",
   "dashboard.retry": "Retry",
-  "dashboard.csv_required_title": "Add malicious packages CSV",
-  "dashboard.csv_required_message": "An NPM malicious packages CSV is required before refreshing and starting the scan. Add it in the Security section of the configuration.",
+  "welcome.title": "Welcome to VersionRadar",
+  "welcome.subtitle": "Start monitoring your package and pipeline versions by adding your first repository.",
+  "welcome.add_repository": "Add repository",
   "theme.use_dark": "Use dark theme",
   "theme.use_light": "Use light theme",
   "table.repo_details": "Repositories Details",

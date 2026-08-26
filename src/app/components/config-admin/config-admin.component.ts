@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -35,7 +35,11 @@ function emptyPackageRepo(): PackageRepository {
 export class ConfigAdminComponent implements OnInit {
   private readonly configService = inject(ConfigService);
 
-  isOpen = signal(false);
+  /** Tab selected on initial render. */
+  @Input() initialTab: Tab = 'pipelines';
+  /** Emitted whenever a package or pipeline repository config is saved. */
+  @Output() saved = new EventEmitter<void>();
+
   activeTab = signal<Tab>('pipelines');
 
   // ── Pipeline state ─────────────────────────────────────────────────────────
@@ -82,12 +86,12 @@ export class ConfigAdminComponent implements OnInit {
   readonly maliciousCsvError = this.configService.maliciousCsvError;
 
   ngOnInit(): void {
+    this.activeTab.set(this.initialTab);
     this.loadPipelineConfig();
     this.loadPackageConfig();
     this.loadEnvConfig();
   }
 
-  togglePanel(): void { this.isOpen.update(v => !v); }
   setTab(tab: Tab): void { this.activeTab.set(tab); }
 
   // ── Pipeline methods ────────────────────────────────────────────────────────
@@ -185,7 +189,12 @@ export class ConfigAdminComponent implements OnInit {
     this.pipelineSuccess.set(false);
     this.pipelineError.set(null);
     this.configService.savePipelineConfig(cfg).subscribe({
-      next: () => { this.pipelineSaving.set(false); this.pipelineSuccess.set(true); setTimeout(() => this.pipelineSuccess.set(false), 2500); },
+      next: () => {
+        this.pipelineSaving.set(false);
+        this.pipelineSuccess.set(true);
+        this.saved.emit();
+        setTimeout(() => this.pipelineSuccess.set(false), 2500);
+      },
       error: err => { this.pipelineError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.pipelineSaving.set(false); },
     });
   }
@@ -317,7 +326,12 @@ export class ConfigAdminComponent implements OnInit {
     this.packageSuccess.set(false);
     this.packageError.set(null);
     this.configService.savePackageConfig(cfg).subscribe({
-      next: () => { this.packageSaving.set(false); this.packageSuccess.set(true); setTimeout(() => this.packageSuccess.set(false), 2500); },
+      next: () => {
+        this.packageSaving.set(false);
+        this.packageSuccess.set(true);
+        this.saved.emit();
+        setTimeout(() => this.packageSuccess.set(false), 2500);
+      },
       error: err => { this.packageError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.packageSaving.set(false); },
     });
   }

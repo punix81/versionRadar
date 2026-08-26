@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "name": "BIT_FMZ_APP",
+    "platform": "azure",
+    "project": "DefaultCollection",
+    "repo": "BIT_FMZ_APP",
+    "status": "pending",
+    "packageVersions": {
+      "@oblique/oblique": null,
+      "@angular/cdk": null,
+      "eslint": null,
+      "zone.js": null
+    }
+  }
+]

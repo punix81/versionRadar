@@ -1,5 +1,6 @@
 {
   "dashboard.no.repositories": "Es wurden noch keine Repositories hinzugefügt",
+  "dashboard.tab_dashboard": "Dashboard",
   "dashboard.title": "VersionRadar Dashboard",
   "dashboard.subtitle": "Überwachung von Paket- und Pipeline-Versionen",
   "dashboard.refresh": "Aktualisieren",
@@ -9,8 +10,9 @@
   "dashboard.success": "Erfolgreich",
   "dashboard.errors": "Fehler",
   "dashboard.retry": "Erneut versuchen",
-  "dashboard.csv_required_title": "CSV bösartiger Pakete hinzufügen",
-  "dashboard.csv_required_message": "Vor dem Aktualisieren und Starten des Scans ist eine CSV-Datei mit bösartigen NPM-Paketen erforderlich. Fügen Sie sie im Abschnitt Sicherheit der Konfiguration hinzu.",
+  "welcome.title": "Willkommen bei VersionRadar",
+  "welcome.subtitle": "Überwachen Sie die Versionen Ihrer Pakete und Pipelines, indem Sie Ihr erstes Repository hinzufügen.",
+  "welcome.add_repository": "Repository hinzufügen",
   "theme.use_dark": "Dunkles Design aktivieren",
   "theme.use_light": "Helles Design aktivieren",
   "table.repo_details": "Repository-Details",

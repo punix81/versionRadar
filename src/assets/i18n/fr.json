@@ -1,5 +1,6 @@
 {
   "dashboard.no.repositories": "Aucun dépôt n'a encore été ajouté",
+  "dashboard.tab_dashboard": "Tableau de bord",
   "dashboard.title": "VersionRadar Dashboard",
   "dashboard.subtitle": "Monitoring des versions des packages et pipelines",
   "dashboard.refresh": "Rafraîchir",
@@ -9,8 +10,9 @@
   "dashboard.success": "Succès",
   "dashboard.errors": "Erreurs",
   "dashboard.retry": "Réessayer",
-  "dashboard.csv_required_title": "Ajouter le CSV des paquets malveillants",
-  "dashboard.csv_required_message": "Un fichier CSV des paquets malveillants NPM est requis avant de rafraîchir et lancer le scan. Ajoutez-le dans la section Sécurité de la configuration.",
+  "welcome.title": "Bienvenue sur VersionRadar",
+  "welcome.subtitle": "Commencez à surveiller les versions de vos packages et pipelines en ajoutant votre premier dépôt.",
+  "welcome.add_repository": "Ajouter un dépôt",
   "theme.use_dark": "Activer le thème sombre",
   "theme.use_light": "Activer le thème clair",
   "table.repo_details": "Détails des Repositories",

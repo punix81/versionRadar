@@ -1,41 +1,45 @@
-<section id="overview" class="dashboard-page" aria-labelledby="page-title">
-  <header class="page-header">
-    <div>
-      <h1 id="page-title">{{ 'dashboard.title' | translate }}</h1>
-      <p>{{ 'dashboard.subtitle' | translate }}</p>
-    </div>
+<section id="overview" class="dashboard-page">
+  <header class="page-header" aria-labelledby="page-title">
     <div class="page-actions">
       @if (data()) { <span class="last-update">{{ 'dashboard.last_update' | translate }}: {{ data()!.timestamp | date:'short' }}</span> }
       <button mat-flat-button type="button" (click)="refresh()" [disabled]="loading()"><mat-icon>refresh</mat-icon>{{ 'dashboard.refresh' | translate }}</button>
     </div>
   </header>
+  <mat-tab-group class="dashboard-tabs">
+    <mat-tab [label]="'dashboard.tab_dashboard' | translate">
+      <div class="dashboard-content">
+      @if (fetchDialogOpen()) {
+        <section class="fetch-panel" role="status" aria-live="polite">
+          <div class="fetch-panel-heading"><div><h2>{{ 'fetch.title' | translate }}</h2><p>@if (fetchRunning()) { {{ 'fetch.running' | translate }} } @else if (fetchSuccess()) { {{ 'fetch.success' | translate }} } @else { {{ 'fetch.error' | translate }} }</p></div><button mat-icon-button type="button" (click)="closeFetchDialog()" [disabled]="fetchRunning()" [matTooltip]="'fetch.close' | translate"><mat-icon>close</mat-icon></button></div>
+          <pre class="fetch-console" #consoleOutput>@for (line of fetchLines(); track $index) {<span [class]="'line-' + line.type">{{ line.text }}
+      </span>}@if (fetchRunning() && fetchLines().length === 0) {<span>{{ 'fetch.starting' | translate }}</span>}</pre>
+          @if (!fetchRunning()) { <div class="fetch-actions"><button mat-button type="button" (click)="closeFetchDialog()">{{ 'fetch.close' | translate }}</button></div> }
+        </section>
+      }
 
-  @if (fetchDialogOpen()) {
-    <section class="fetch-panel" role="status" aria-live="polite">
-      <div class="fetch-panel-heading"><div><h2>{{ 'fetch.title' | translate }}</h2><p>@if (fetchRunning()) { {{ 'fetch.running' | translate }} } @else if (fetchSuccess()) { {{ 'fetch.success' | translate }} } @else { {{ 'fetch.error' | translate }} }</p></div><button mat-icon-button type="button" (click)="closeFetchDialog()" [disabled]="fetchRunning()" [matTooltip]="'fetch.close' | translate"><mat-icon>close</mat-icon></button></div>
-      <pre class="fetch-console" #consoleOutput>@for (line of fetchLines(); track $index) {<span [class]="'line-' + line.type">{{ line.text }}
-</span>}@if (fetchRunning() && fetchLines().length === 0) {<span>{{ 'fetch.starting' | translate }}</span>}</pre>
-      @if (!fetchRunning()) { <div class="fetch-actions"><button mat-button type="button" (click)="closeFetchDialog()">{{ 'fetch.close' | translate }}</button></div> }
-    </section>
-  }
+      @if (loading()) {
+        <section class="state-panel" aria-live="polite"><mat-spinner diameter="36" /><p>{{ 'dashboard.loading' | translate }}</p></section>
+      } @else if (error()) {
+        <section class="state-panel error-state" role="alert"><mat-icon>error_outline</mat-icon><p>{{ error() }}</p><button mat-button type="button" (click)="loadData()">{{ 'dashboard.retry' | translate }}</button></section>
+      } @else if (!data()) {
+        <section class="state-panel" aria-live="polite"><p>{{ 'dashboard.no.repositories' | translate }}</p></section>
+      } @else {
+        <div class="summary-grid" aria-label="Repository summary">
+          <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.total_repos' | translate }}</span><strong>{{ data()!.stats.total }}</strong></mat-card-content></mat-card>
+          <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.success' | translate }}</span><strong>{{ data()!.stats.success }}</strong></mat-card-content></mat-card>
+          <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.errors' | translate }}</span><strong>{{ data()!.stats.errors }}</strong></mat-card-content></mat-card>
+        </div>
 
-  @if (loading()) {
-    <section class="state-panel" aria-live="polite"><mat-spinner diameter="36" /><p>{{ 'dashboard.loading' | translate }}</p></section>
-  } @else if (error()) {
-    <section class="state-panel error-state" role="alert"><mat-icon>error_outline</mat-icon><p>{{ error() }}</p><button mat-button type="button" (click)="loadData()">{{ 'dashboard.retry' | translate }}</button></section>
-  } @else if (!data()) {
-    <section class="state-panel" aria-live="polite"><p>{{ 'dashboard.no.repositories' | translate }}</p></section>
-  } @else {
-    <div class="summary-grid" aria-label="Repository summary">
-      <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.total_repos' | translate }}</span><strong>{{ data()!.stats.total }}</strong></mat-card-content></mat-card>
-      <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.success' | translate }}</span><strong>{{ data()!.stats.success }}</strong></mat-card-content></mat-card>
-      <mat-card appearance="outlined"><mat-card-content><span class="summary-label">{{ 'dashboard.errors' | translate }}</span><strong>{{ data()!.stats.errors }}</strong></mat-card-content></mat-card>
-    </div>
-
-    <section id="pipelines"><app-pipelines-radar [pipelines]="data()!.pipelines" [pipelineStats]="data()!.pipelineStats" /></section>
-    <section id="security"><app-npm-worm [repositories]="data()!.repositories" /></section>
-    <section id="packages"><app-packages-radar [repositories]="data()!.repositories" /></section>
-  }
-
-  <section id="configuration"><app-config-admin /></section>
+        <section id="pipelines"><app-pipelines-radar [pipelines]="data()!.pipelines" [pipelineStats]="data()!.pipelineStats" /></section>
+        <section id="security"><app-npm-worm [repositories]="data()!.repositories" /></section>
+        <section id="packages"><app-packages-radar [repositories]="data()!.repositories" /></section>
+      }
+      </div>
+    </mat-tab>
+    <mat-tab [label]="'admin.title' | translate">
+      <div class="dashboard-content">
+        <app-config-admin initialTab="pipelines" />
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 </section>
