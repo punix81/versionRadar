@@ -28,6 +28,7 @@ export interface PipelineResult {
   pipelineVersions: PipelineVersions;
   chartName?: string;
   chartVersion?: string;
+  nodeVersion?: string | null;
   error?: string;
 }
 

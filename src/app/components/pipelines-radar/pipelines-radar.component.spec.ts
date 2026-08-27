@@ -130,7 +130,7 @@ describe('PipelinesRadarComponent', () => {
       const pipes = [makePipeline({ pipelineVersions: { 'p1': '1.0.0', 'p2': '2.0.0', 'p3': '3.0.0' } })];
       const { fixture } = await setup(pipes);
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      expect(headers).toHaveLength(6);
+      expect(headers).toHaveLength(7);
     });
 
     it('should display each pipeline key as a column header', async () => {
@@ -146,7 +146,7 @@ describe('PipelinesRadarComponent', () => {
     it('should render only fixed headers when pipelines is empty', async () => {
       const { fixture } = await setup([]);
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      expect(headers).toHaveLength(3);
+      expect(headers).toHaveLength(4);
     });
   });
 
@@ -204,6 +204,23 @@ describe('PipelinesRadarComponent', () => {
     it('should show a dash when chartName is absent', async () => {
       const { fixture } = await setup([makePipeline({ chartName: undefined })]);
       const dash = fixture.debugElement.query(By.css('.chart-info .no-version'));
+      expect(dash).not.toBeNull();
+    });
+  });
+
+  describe('node column', () => {
+    it('should display the node version when present', async () => {
+      const { fixture } = await setup([
+        makePipeline({ nodeVersion: '22' }),
+      ]);
+      const badge = fixture.debugElement.query(By.css('.node-badge'));
+      expect(badge).not.toBeNull();
+      expect(badge.nativeElement.textContent).toContain('22');
+    });
+
+    it('should show a dash when nodeVersion is absent', async () => {
+      const { fixture } = await setup([makePipeline({ nodeVersion: undefined })]);
+      const dash = fixture.debugElement.query(By.css('.node-info .no-version'));
       expect(dash).not.toBeNull();
     });
   });

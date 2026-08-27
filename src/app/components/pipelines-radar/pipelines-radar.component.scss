@@ -9,5 +9,6 @@
 .data-table tr:last-child td { border-bottom: 0; }
 .data-table small { display: block; margin-top: 4px; color: var(--mat-sys-on-surface-variant); }
 .data-table a { color: var(--mat-sys-primary); text-decoration: none; }
+.node-badge { color: var(--mat-sys-primary); }
 .data-table a:hover { text-decoration: underline; }
 .ok { color: var(--mat-sys-primary); } .error { color: var(--mat-sys-error); } .status-pending { color: var(--mat-sys-tertiary); } mat-icon { width: 18px; height: 18px; font-size: 18px; }

@@ -22,6 +22,7 @@
   "table.status": "Status",
   "table.project": "Projet",
   "table.chart": "Chart",
+  "table.node": "Node",
   "table.total": "Total",
   "table.status_ok": "OK",
   "table.status_error": "Erreur",
