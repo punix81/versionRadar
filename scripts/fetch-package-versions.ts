@@ -19,6 +19,7 @@ import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createHttpsOptions } from './http-utils';
+import { resolveNginxVersion } from './nginx-version';
 
 // Charger les fichiers de configuration
 const configDir = path.join(__dirname, '..', 'config');
@@ -38,6 +39,7 @@ interface Repository {
   name: string;
   path: string;
   branch?: string;
+  dockerFilePath?: string;
 }
 
 interface Credentials {
@@ -90,6 +92,7 @@ interface RepositoryResult {
   packageVersions: PackageVersions;
   packageName?: string;
   packageVersion?: string;
+  nginxVersion?: string | null;
   allDependencies?: { [key: string]: string };
   lockDependencies?: { [key: string]: string };
   error?: string;
@@ -303,6 +306,22 @@ function getPackageLockPath(packageJsonPath: string): string {
   return slashIndex >= 0
     ? `${packageJsonPath.slice(0, slashIndex + 1)}package-lock.json`
     : 'package-lock.json';
+}
+
+function getDockerfilePath(repo: Repository): string {
+  if (repo.dockerFilePath) return repo.dockerFilePath;
+  const slashIndex = repo.path.lastIndexOf('/');
+  return slashIndex >= 0
+    ? `${repo.path.slice(0, slashIndex + 1)}Dockerfile`
+    : 'Dockerfile';
+}
+
+function fetchDockerfile(
+  repo: Repository,
+  credentials: Credentials,
+  onComplete: (data: string | null, error: string | null) => void
+): void {
+  fetchRepositoryFile(repo, credentials, getDockerfilePath(repo), onComplete);
 }
 
 /**
@@ -524,22 +543,36 @@ function main(): void {
             }
 
             const info = extractPackageVersions(data, lockData);
-            displayRepoResults(repo, info, index);
 
-            results.push({
-              name: repo.name,
-              platform: repo.platform,
-              project: repo.project,
-              repo: repo.repo,
-              status: 'success',
-              packageVersions: info.packageVersions,
-              packageName: info.packageName,
-              packageVersion: info.packageVersion,
-              allDependencies: info.allDependencies,
-              lockDependencies: info.lockDependencies
+            fetchDockerfile(repo, credentials, (dockerData) => {
+              let nginxVersion: string | null = null;
+              if (dockerData) {
+                try {
+                  nginxVersion = resolveNginxVersion(dockerData);
+                } catch {
+                  nginxVersion = null;
+                }
+              }
+
+              displayRepoResults(repo, info, index);
+
+              results.push({
+                name: repo.name,
+                platform: repo.platform,
+                project: repo.project,
+                repo: repo.repo,
+                status: 'success',
+                packageVersions: info.packageVersions,
+                packageName: info.packageName,
+                packageVersion: info.packageVersion,
+                nginxVersion,
+                allDependencies: info.allDependencies,
+                lockDependencies: info.lockDependencies
+              });
+
+              processNextRepository(index + 1);
             });
-
-            processNextRepository(index + 1);
+            return;
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.log(`\n${status.error} Erreur pour ${repo.name}: ${errorMessage}`);

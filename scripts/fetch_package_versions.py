@@ -18,6 +18,7 @@ import base64
 import json
 import logging
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -276,6 +277,49 @@ def fetch_package_json(
         return fetch_from_bitbucket(repo, credentials)
 
 
+def get_dockerfile_path(repo: Repository) -> str:
+    """Chemin du Dockerfile: auto-dérivé du dossier du package.json, ou surchargé."""
+    if repo.get('dockerFilePath'):
+        return repo['dockerFilePath']
+    slash = repo['path'].rfind('/')
+    return repo['path'][:slash + 1] + 'Dockerfile' if slash >= 0 else 'Dockerfile'
+
+
+def fetch_repository_file(
+    repo: Repository,
+    credentials: Credentials,
+    file_path: str
+) -> tuple[str | None, str | None]:
+    """Récupérer un fichier arbitraire selon la plateforme."""
+    file_repo = {**repo, 'path': file_path}
+    if repo['platform'] == 'azure':
+        return fetch_from_azure(file_repo, credentials)
+    return fetch_from_bitbucket(file_repo, credentials)
+
+
+def format_nginx_version(raw: str) -> str:
+    """Formater une version brute `120` en `1.20` (les versions avec un point restent inchangées)."""
+    if '.' in raw:
+        return raw
+    if len(raw) >= 2:
+        return raw[:-2] + '.' + raw[-2:]
+    return raw
+
+
+def resolve_nginx_version(dockerfile_content: str | None) -> str | None:
+    """Extraire la version nginx depuis le contenu du Dockerfile (None si absente)."""
+    if not dockerfile_content:
+        return None
+    match = re.search(
+        r'^\s*FROM\s+[^\s]*nginx[-_]?(\d[\d.]*)',
+        dockerfile_content,
+        re.IGNORECASE | re.MULTILINE,
+    )
+    if not match:
+        return None
+    return format_nginx_version(match.group(1))
+
+
 def extract_package_versions(json_content: str) -> PackageInfo:
     """
     Parser le package.json et extraire les versions des packages.
@@ -443,6 +487,15 @@ def main() -> None:
         elif data:
             try:
                 info = extract_package_versions(data)
+
+                # Récupérer le Dockerfile pour la version nginx (optionnelle)
+                nginx_version: str | None = None
+                docker_data, _ = fetch_repository_file(
+                    repo, credentials, get_dockerfile_path(repo)
+                )
+                if docker_data:
+                    nginx_version = resolve_nginx_version(docker_data)
+
                 display_repo_results(repo, info, index)
 
                 results.append({
@@ -454,6 +507,7 @@ def main() -> None:
                     'package_versions': info['package_versions'],
                     'package_name': info['package_name'],
                     'package_version': info['package_version'],
+                    'nginx_version': nginx_version,
                     'all_dependencies': info['all_dependencies'],
                 })
             except ValueError as e:
