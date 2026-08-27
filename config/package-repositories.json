@@ -20,6 +20,14 @@
       "repo": "sem_wis",
       "name": "sem_wis",
       "path": "package.json"
+    },
+    {
+      "platform": "azure",
+      "project": "BIT_FMZ_APP",
+      "repo": "BIT_FMZ_APP",
+      "name": "BIT_FMZ_APP",
+      "path": "src/frontend/pwa/package.json",
+      "collection": "DefaultCollection"
     }
   ]
 }
