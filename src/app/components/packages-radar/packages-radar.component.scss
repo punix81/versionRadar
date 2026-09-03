@@ -8,6 +8,7 @@
 .data-table small { display: block; margin-top: 4px; color: var(--mat-sys-on-surface-variant); }
 .data-table a { color: var(--mat-sys-primary); text-decoration: none; }
 .data-table a:hover { text-decoration: underline; }
+.node-badge { color: var(--mat-sys-primary); }
 .platform, .status { display: inline-flex; align-items: center; gap: 6px; font: var(--mat-sys-label-large); }
 .platform mat-icon, .status mat-icon { width: 18px; height: 18px; font-size: 18px; }
 .status-ok { color: var(--mat-sys-primary); }

@@ -87,7 +87,7 @@ describe('PackagesRadarComponent', () => {
       const repos = [makeRepo({ packageVersions: { '@oblique/oblique': '^11.0.0', '@angular/cdk': '^17.0.0', '@angular/core': '^17.0.0' } })];
       const { fixture } = await setup(repos);
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      expect(headers).toHaveLength(6);
+      expect(headers).toHaveLength(7);
     });
 
     it('should display the package name in each column header', async () => {
@@ -103,7 +103,7 @@ describe('PackagesRadarComponent', () => {
     it('should not render package headers when repositories is empty', async () => {
       const { fixture } = await setup([]);
       const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      expect(headers).toHaveLength(3);
+      expect(headers).toHaveLength(4);
     });
   });
 
@@ -137,6 +137,22 @@ describe('PackagesRadarComponent', () => {
       const noDash = fixture.debugElement.query(By.css('.no-version'));
       expect(noDash).not.toBeNull();
       expect(noDash.nativeElement.textContent.trim()).toBe('-');
+    });
+  });
+
+  describe('nginx column', () => {
+    it('should render the nginx version when present', async () => {
+      const { fixture } = await setup([makeRepo({ nginxVersion: '1.20' })]);
+      const badge = fixture.debugElement.query(By.css('.node-badge'));
+      expect(badge).not.toBeNull();
+      expect(badge.nativeElement.textContent).toContain('1.20');
+    });
+
+    it('should show a dash when nginxVersion is absent', async () => {
+      const { fixture } = await setup([makeRepo({ nginxVersion: undefined })]);
+      const dash = fixture.debugElement.query(By.css('td.version .no-version'));
+      expect(dash).not.toBeNull();
+      expect(dash.nativeElement.textContent.trim()).toBe('-');
     });
   });
 

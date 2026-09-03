@@ -1,7 +1,6 @@
 {
   "filePath": "package.json",
   "packageNames": [
-    "eslint",
     "zone.js",
     "@oblique/oblique",
     "@angular/cdk"
