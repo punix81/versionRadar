@@ -20,6 +20,7 @@ import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createHttpsOptions } from './http-utils';
+import { resolveNodeVersion } from './node-version';
 
 // Charger les fichiers de configuration
 const configDir = path.join(__dirname, '..', 'config');
@@ -85,6 +86,7 @@ interface RepositoryResult {
   pipelineVersions: PipelineVersions;
   chartName?: string;
   chartVersion?: string;
+  nodeVersion?: string | null;
   allDependencies?: ChartDependency[];
   error?: string;
 }
@@ -98,6 +100,7 @@ const BITBUCKET_AUTH_SCHEME = (process.env['BITBUCKET_AUTH_SCHEME'] || 'bearer')
 // Configuration depuis repositories.json
 const REPOSITORIES: Repository[] = repositoriesConfig.repositories;
 const FILE_PATH: string = repositoriesConfig.filePath;
+const VALUES_FILE_PATH: string = repositoriesConfig.valuesFilePath || 'values.yaml';
 const PIPELINE_NAMES: string[] = repositoriesConfig.pipelineNames;
 
 /**
@@ -136,12 +139,13 @@ function createBitbucketAuthHeader(username: string, token: string): string {
 function fetchRawFile(
   projectKey: string,
   repoSlug: string,
-  branch: string | null = null,
+  branch: string | null,
+  filePath: string,
   onComplete: (data: string | null, error: string | null) => void
 ): void {
   const { username, token } = getCredentials();
 
-  let apiUrl = `${BITBUCKET_BASE_URL}/rest/api/1.0/projects/${projectKey}/repos/${repoSlug}/raw/${FILE_PATH}`;
+  let apiUrl = `${BITBUCKET_BASE_URL}/rest/api/1.0/projects/${projectKey}/repos/${repoSlug}/raw/${filePath}`;
 
   if (branch) {
     apiUrl += `?at=refs/heads/${branch}`;
@@ -237,7 +241,7 @@ function extractPipelineVersions(yamlContent: string): ChartInfo {
 /**
  * Afficher les résultats d'un repository en console
  */
-function displayRepoResults(repoConfig: Repository, info: ChartInfo, index: number): void {
+function displayRepoResults(repoConfig: Repository, info: ChartInfo, nodeVersion: string | null, index: number): void {
   const { display, status } = messages;
   const separator = display.separator.repeat(display.separatorLength);
 
@@ -247,6 +251,9 @@ function displayRepoResults(repoConfig: Repository, info: ChartInfo, index: numb
   console.log(separator);
 
   console.log(`   ${display.chartLabel}: ${info.chartName} v${info.chartVersion}`);
+  if (nodeVersion) {
+    console.log(`   ${status.success} Node: ${nodeVersion}`);
+  }
 
   for (const pipelineName of PIPELINE_NAMES) {
     const version = info.pipelineVersions[pipelineName];
@@ -342,8 +349,8 @@ function main(): void {
 
     console.log(`\n${status.fetching} [${index + 1}/${totalRepos}] ${repoConfig.name}...`);
 
-    // Récupérer le fichier avec callback
-    fetchRawFile(repoConfig.project, repoConfig.repo, repoConfig.branch || null, (data, error) => {
+    // Récupérer Chart.yaml
+    fetchRawFile(repoConfig.project, repoConfig.repo, repoConfig.branch || null, FILE_PATH, (data, error) => {
       if (error) {
         console.log(`\n${status.error} Erreur pour ${repoConfig.name}: ${error}`);
 
@@ -360,43 +367,65 @@ function main(): void {
           error: error,
           pipelineVersions: emptyVersions
         });
-      } else if (data) {
-        try {
-          const info = extractPipelineVersions(data);
-          displayRepoResults(repoConfig, info, index);
-
-          results.push({
-            name: repoConfig.name,
-            project: repoConfig.project,
-            repo: repoConfig.repo,
-            status: 'success',
-            pipelineVersions: info.pipelineVersions,
-            chartName: info.chartName,
-            chartVersion: info.chartVersion,
-            allDependencies: info.allDependencies
-          });
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.log(`\n${status.error} Erreur pour ${repoConfig.name}: ${errorMessage}`);
-
-          const emptyVersions: PipelineVersions = {};
-          for (const pipelineName of PIPELINE_NAMES) {
-            emptyVersions[pipelineName] = null;
-          }
-
-          results.push({
-            name: repoConfig.name,
-            project: repoConfig.project,
-            repo: repoConfig.repo,
-            status: 'error',
-            error: errorMessage,
-            pipelineVersions: emptyVersions
-          });
-        }
+        processNextRepository(index + 1);
+        return;
       }
 
-      // Passer au repository suivant
-      processNextRepository(index + 1);
+      if (!data) {
+        processNextRepository(index + 1);
+        return;
+      }
+
+      let info: ChartInfo;
+      try {
+        info = extractPipelineVersions(data);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.log(`\n${status.error} Erreur pour ${repoConfig.name}: ${errorMessage}`);
+
+        const emptyVersions: PipelineVersions = {};
+        for (const pipelineName of PIPELINE_NAMES) {
+          emptyVersions[pipelineName] = null;
+        }
+
+        results.push({
+          name: repoConfig.name,
+          project: repoConfig.project,
+          repo: repoConfig.repo,
+          status: 'error',
+          error: errorMessage,
+          pipelineVersions: emptyVersions
+        });
+        processNextRepository(index + 1);
+        return;
+      }
+
+      // Récupérer values.yaml pour la version Node (optionnelle)
+      fetchRawFile(repoConfig.project, repoConfig.repo, repoConfig.branch || null, VALUES_FILE_PATH, (valuesData) => {
+        let nodeVersion: string | null = null;
+        if (valuesData) {
+          try {
+            nodeVersion = resolveNodeVersion(yaml.load(valuesData));
+          } catch {
+            nodeVersion = null;
+          }
+        }
+
+        displayRepoResults(repoConfig, info, nodeVersion, index);
+
+        results.push({
+          name: repoConfig.name,
+          project: repoConfig.project,
+          repo: repoConfig.repo,
+          status: 'success',
+          pipelineVersions: info.pipelineVersions,
+          chartName: info.chartName,
+          chartVersion: info.chartVersion,
+          nodeVersion,
+          allDependencies: info.allDependencies
+        });
+        processNextRepository(index + 1);
+      });
     });
   }
 

@@ -275,6 +275,9 @@ export class ConfigAdminComponent implements OnInit {
     this.packageUrlParseError.set(null);
     let parsed: Partial<PackageRepository> | null = null;
 
+    // Ignorer le schéma et l'hôte pour ne pas confondre l'hôte avec une collection
+    const pathOnly = raw.replace(/^https?:\/\/[^/]+/, '');
+
     // Bitbucket HTTPS: /projects/{project}/repos/{repo}/browse/{path}
     let m = raw.match(/\/projects\/([^/]+)\/repos\/([^/]+)\/browse\/(.+?)(?:\?.*)?$/);
     if (m) {
@@ -283,7 +286,7 @@ export class ConfigAdminComponent implements OnInit {
 
     // Azure DevOps — with project: /{collection}/{project}/_git/{repo}?path=...
     if (!parsed) {
-      m = raw.match(/\/([^/]+)\/([^/]+)\/_git\/([^?/]+)/);
+      m = pathOnly.match(/\/([^/]+)\/([^/]+)\/_git\/([^?/]+)/);
       if (m) {
         const pathParam = this.extractPathParam(raw);
         parsed = { platform: 'azure', collection: m[1], project: m[2], repo: m[3], name: m[3], path: pathParam };
@@ -292,7 +295,7 @@ export class ConfigAdminComponent implements OnInit {
 
     // Azure DevOps — without project: /{collection}/_git/{repo}?path=...
     if (!parsed) {
-      m = raw.match(/\/([^/]+)\/_git\/([^?/]+)/);
+      m = pathOnly.match(/\/([^/]+)\/_git\/([^?/]+)/);
       if (m) {
         const pathParam = this.extractPathParam(raw);
         parsed = { platform: 'azure', collection: m[1], project: m[2], repo: m[2], name: m[2], path: pathParam };

@@ -18,6 +18,7 @@ import base64
 import json
 import logging
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -122,6 +123,7 @@ with open(config_dir / 'messages.json', encoding='utf-8') as f:
 # Configuration depuis repositories.json
 REPOSITORIES: list[Repository] = repositories_config['repositories']
 FILE_PATH: str = repositories_config['filePath']
+VALUES_FILE_PATH: str = repositories_config.get('valuesFilePath', 'values.yaml')
 PIPELINE_NAMES: list[str] = repositories_config['pipelineNames']
 
 
@@ -159,6 +161,7 @@ def fetch_raw_file(
     project_key: str,
     repo_slug: str,
     branch: str | None = None,
+    file_path: str = FILE_PATH,
     on_complete: Callable[[str | None, str | None], None] | None = None,
 ) -> tuple[str | None, str | None]:
     """
@@ -170,6 +173,7 @@ def fetch_raw_file(
         project_key: Clé du projet Bitbucket
         repo_slug: Slug du repository
         branch: Branche optionnelle
+        file_path: Chemin du fichier à récupérer (Chart.yaml par défaut)
         on_complete: Callback avec (data, error)
 
     Returns:
@@ -179,7 +183,7 @@ def fetch_raw_file(
 
     api_url = (
         f'{BITBUCKET_BASE_URL}/rest/api/1.0/projects/{project_key}/'
-        f'repos/{repo_slug}/raw/{FILE_PATH}'
+        f'repos/{repo_slug}/raw/{file_path}'
     )
 
     if branch:
@@ -280,13 +284,51 @@ def extract_pipeline_versions(yaml_content: str) -> ChartInfo:
     }
 
 
-def display_repo_results(repo_config: Repository, info: ChartInfo, index: int) -> None:
+DEFAULT_NODE_VERSION = '22'
+
+
+def resolve_node_version(values_content: str) -> str:
+    """
+    Résoudre la version Node à afficher depuis le contenu du fichier values.yaml.
+
+    La version est encodée dans `angular-pipeline.defaultNodejsBuildImage` (ou
+    `angular-pipeline.nodejsBuildImage`), une image du type
+    `.../ubi9/nodejs-22:latest`. On extrait le numéro qui suit `nodejs-`. Si le
+    paramètre est absent (défaut = latest), on renvoie la version par défaut.
+    """
+    try:
+        values = yaml.safe_load(values_content)
+    except yaml.YAMLError:
+        return DEFAULT_NODE_VERSION
+
+    if not isinstance(values, dict):
+        return DEFAULT_NODE_VERSION
+
+    chart = values.get('angular-pipeline')
+    if not isinstance(chart, dict):
+        return DEFAULT_NODE_VERSION
+
+    image = chart.get('defaultNodejsBuildImage') or chart.get('nodejsBuildImage')
+    if not image:
+        return DEFAULT_NODE_VERSION
+
+    match = re.search(r'nodejs[-_]?(\d+(?:\.\d+)*)', image, re.IGNORECASE)
+    return match.group(1) if match else DEFAULT_NODE_VERSION
+
+
+def display_repo_results(
+    repo_config: Repository,
+    info: ChartInfo,
+    node_version: str | None,
+    index: int,
+) -> None:
     """
     Afficher les résultats d'un repository en console.
 
     Args:
         repo_config: Configuration du repository
         info: Informations extraites du Chart.yaml
+        node_version: Version Node extraite (peut être absente)
         index: Index du repository dans la liste
     """
     display_config = messages['display']
@@ -302,6 +344,8 @@ def display_repo_results(repo_config: Repository, info: ChartInfo, index: int) -
 
     print(f"   {display_config['chartLabel']}: {info['chart_name']} "
           f"v{info['chart_version']}")
+    if node_version:
+        print(f"   {status_config['success']} Node: {node_version}")
 
     for pipeline_name in PIPELINE_NAMES:
         version = info['pipeline_versions'].get(pipeline_name)
@@ -419,7 +463,19 @@ def main() -> None:
         elif data:
             try:
                 info = extract_pipeline_versions(data)
-                display_repo_results(repo_config, info, index)
+
+                # Récupérer values.yaml pour la version Node (optionnelle)
+                node_version: str | None = None
+                values_data, _ = fetch_raw_file(
+                    repo_config['project'],
+                    repo_config['repo'],
+                    repo_config.get('branch'),
+                    VALUES_FILE_PATH,
+                )
+                if values_data:
+                    node_version = resolve_node_version(values_data)
+
+                display_repo_results(repo_config, info, node_version, index)
 
                 results.append({
                     'name': repo_config['name'],
@@ -429,6 +485,7 @@ def main() -> None:
                     'pipeline_versions': info['pipeline_versions'],
                     'chart_name': info['chart_name'],
                     'chart_version': info['chart_version'],
+                    'node_version': node_version,
                     'all_dependencies': info['all_dependencies'],
                 })
             except ValueError as e:

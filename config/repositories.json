@@ -1,7 +1,19 @@
 {
   "filePath": "pipeline/Chart.yaml",
+  "valuesFilePath": "pipeline/values.yaml",
   "pipelineNames": [
     "commons-pipeline"
   ],
-  "repositories": []
+  "repositories": [
+    {
+      "project": "LOGIB",
+      "repo": "ebg-logib-gitops",
+      "name": "ebg-logib-gitops"
+    },
+    {
+      "project": "SEM",
+      "repo": "sem_wis_gitops",
+      "name": "sem_wis_gitops"
+    }
+  ]
 }
