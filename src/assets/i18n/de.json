@@ -23,6 +23,7 @@
   "table.project": "Projekt",
   "table.chart": "Diagramm",
   "table.node": "Node",
+  "table.nginx": "Nginx",
   "table.total": "Gesamt",
   "table.status_ok": "OK",
   "table.status_error": "Fehler",

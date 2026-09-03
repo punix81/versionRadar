@@ -15,6 +15,7 @@ export interface RepositoryResult {
   packageVersions: PackageVersions;
   packageName?: string;
   packageVersion?: string;
+  nginxVersion?: string | null;
   allDependencies?: Record<string, string>;
   lockDependencies?: Record<string, string>;
   error?: string;
