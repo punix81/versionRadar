@@ -1,0 +1,6 @@
+{
+  "filePath": "pipeline/Chart.yaml",
+  "valuesFilePath": "pipeline/values.yaml",
+  "pipelineNames": [],
+  "repositories": []
+}

@@ -18,7 +18,12 @@
     "fetch-pipelines:python": "python3 scripts/fetch_pipeline_versions.py",
     "fetch-packages": "ts-node --project tsconfig.scripts.json scripts/fetch-package-versions.ts",
     "fetch-packages:python": "python3 scripts/fetch_package_versions.py",
-    "fetch-all": "npm run fetch-packages && npm run fetch-pipelines"
+    "fetch-all": "npm run fetch-packages && npm run fetch-pipelines",
+    "data:init": "ts-node --project tsconfig.scripts.json scripts/init-local-data.ts",
+    "prestart": "npm run data:init",
+    "prestart:ng": "npm run data:init",
+    "prestart:server": "npm run data:init",
+    "prebuild": "npm run data:init"
   },
   "prettier": {
     "printWidth": 100,

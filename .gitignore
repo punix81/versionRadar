@@ -2,6 +2,7 @@
 
 # Compiled output
 /dist
+/dist-mcp
 /tmp
 /out-tsc
 /bazel-out
@@ -28,6 +29,15 @@ yarn-error.log
 !.vscode/extensions.json
 !.vscode/mcp.json
 .history/*
+
+# Operational data: real scan results and monitored repository inventory.
+# Tracked examples live in config/*.example.json; run `npm run data:init` to seed
+# empty local files, then configure repositories from the admin UI.
+/config/repositories.json
+/config/package-repositories.json
+/src/assets/data/repositories.json
+/src/assets/data/pipelines.json
+/src/assets/data/scan-metadata.json
 
 # Miscellaneous
 /.angular/cache
@@ -62,6 +72,9 @@ eggs/
 .eggs/
 lib/
 lib64/
+# scripts/lib is TypeScript source, not Python build output
+!/scripts/lib/
+!/scripts/lib/**
 parts/
 sdist/
 var/

@@ -6,11 +6,20 @@
     },
     "angular-cli": {
       "command": "npx",
-      "args": ["-y", "@angular/cli", "mcp"]
+      "args": [
+        "-y",
+        "@angular/cli",
+        "mcp"
+      ]
     },
     "ngm-dev-blocks": {
       "command": "npx",
-      "args": ["-y", "@ngm-dev/cli", "mcp", "/home/punix81/IdeaProjects/versionRadar"]
+      "args": [
+        "-y",
+        "@ngm-dev/cli",
+        "mcp",
+        "${workspaceFolder}"
+      ]
     },
     "mdn": {
       "type": "http",
