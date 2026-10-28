@@ -8,6 +8,7 @@ Use the skill that matches the task:
 - `testing`: Vitest tests and validation strategy.
 - `security`: secrets, untrusted input, and security-scanning behaviour.
 - `version-radar`: repository scanning, generated data, and domain rules.
+- `versionradar-mcp`: how to answer VersionRadar questions through the MCP tools.
 - `azure-devops`: Azure DevOps retrieval and authentication.
 - `bitbucket`: Bitbucket Server retrieval and authentication.
 
