@@ -19,6 +19,10 @@
     "fetch-packages": "ts-node --project tsconfig.scripts.json scripts/fetch-package-versions.ts",
     "fetch-packages:python": "python3 scripts/fetch_package_versions.py",
     "fetch-all": "npm run fetch-packages && npm run fetch-pipelines",
+    "mcp:build": "tsc --project tsconfig.mcp.json",
+    "mcp": "npm run mcp:build && node dist-mcp/mcp/server.js",
+    "mcp:check": "tsc --project tsconfig.test.json",
+    "mcp:allow-refresh": "npm run mcp:build && node dist-mcp/mcp/allow-refresh.js",
     "data:init": "ts-node --project tsconfig.scripts.json scripts/init-local-data.ts",
     "prestart": "npm run data:init",
     "prestart:ng": "npm run data:init",
@@ -70,10 +74,12 @@
     "@angular/compiler-cli": "^21.1.0",
     "@angular/platform-browser-dynamic": "^21.1.4",
     "@eslint/js": "^10.0.1",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^25.2.3",
+    "@types/semver": "^7.8.0",
     "@vitest/coverage-v8": "^4.1.5",
     "@vitest/ui": "^4.1.5",
     "angular-eslint": "^21.3.1",
@@ -81,9 +87,11 @@
     "dotenv": "^17.3.1",
     "eslint": "^10.2.1",
     "jsdom": "^27.1.0",
+    "semver": "^7.8.5",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.59.1",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "zod": "^4.6.7"
   }
 }

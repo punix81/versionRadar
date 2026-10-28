@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist-mcp",
+    "rootDir": "./scripts",
+    "types": ["node"]
+  },
+  "include": [
+    "scripts/mcp/**/*.ts",
+    "scripts/lib/**/*.ts",
+    "scripts/http-utils.ts",
+    "scripts/nginx-version.ts",
+    "scripts/node-version.ts"
+  ],
+  "exclude": ["**/*.spec.ts", "node_modules"]
+}
