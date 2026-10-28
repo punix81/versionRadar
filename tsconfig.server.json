@@ -9,8 +9,15 @@
     "resolveJsonModule": true,
     "outDir": "./dist/server",
     "rootDir": "./server",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["server/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "server/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
 }

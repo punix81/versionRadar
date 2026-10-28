@@ -7,7 +7,7 @@ import {
 
 describe('extractNodeVersionFromImage', () => {
   it('extracts the major version from a nodejs image', () => {
-    expect(extractNodeVersionFromImage('bit-base-images-docker-hosted.nexus.bit.admin.ch/bit/ubi9/nodejs-22:latest')).toBe('22');
+    expect(extractNodeVersionFromImage('registry.example.internal/bit/ubi9/nodejs-22:latest')).toBe('22');
   });
 
   it('extracts a patch version when present', () => {

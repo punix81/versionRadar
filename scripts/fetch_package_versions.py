@@ -27,6 +27,16 @@ from typing import TypedDict
 import requests
 from dotenv import load_dotenv
 
+# TLS policy: certificate validation is enabled by default.
+# Trust internal CAs with VERSIONRADAR_CA_FILE (PEM bundle) or REQUESTS_CA_BUNDLE.
+_TLS_INSECURE = os.getenv('VERSIONRADAR_TLS_INSECURE', '').strip().lower() in ('1', 'true', 'yes')
+_TLS_CA_FILE = os.getenv('VERSIONRADAR_CA_FILE', '').strip()
+TLS_VERIFY = False if _TLS_INSECURE else (_TLS_CA_FILE or True)
+if _TLS_INSECURE:
+    import urllib3
+
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 # Configuration du logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -205,7 +215,7 @@ def fetch_from_azure(
             api_url,
             headers=headers,
             timeout=REQUEST_TIMEOUT_MS,
-            verify=False,
+            verify=TLS_VERIFY,
         )
 
         if response.status_code >= 200 and response.status_code < 300:
@@ -252,7 +262,7 @@ def fetch_from_bitbucket(
             api_url,
             headers=headers,
             timeout=REQUEST_TIMEOUT_MS,
-            verify=False,
+            verify=TLS_VERIFY,
         )
 
         if response.status_code >= 200 and response.status_code < 300:

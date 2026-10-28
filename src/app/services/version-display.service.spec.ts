@@ -135,9 +135,9 @@ describe('VersionDisplayService', () => {
   describe('getPipelineUrl()', () => {
     it('should build the Chart.yaml URL from project and repo', () => {
       const service = setup();
-      const pipeline = makePipeline({ project: 'FEDPOLPWA', repo: 'fedpol-pwa-app-gitops' });
+      const pipeline = makePipeline({ project: 'EXAMPLE_PROJECT', repo: 'example-gitops' });
       expect(service.getPipelineUrl(pipeline)).toBe(
-        'https://bitbucket.bit.admin.ch/projects/FEDPOLPWA/repos/fedpol-pwa-app-gitops/browse/pipeline/Chart.yaml',
+        'https://bitbucket.bit.admin.ch/projects/EXAMPLE_PROJECT/repos/example-gitops/browse/pipeline/Chart.yaml',
       );
     });
 

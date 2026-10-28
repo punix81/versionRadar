@@ -7,7 +7,7 @@ import {
 
 describe('extractNginxVersionFromImage', () => {
   it('formats a bare number as major.minor', () => {
-    expect(extractNginxVersionFromImage('bit-base-images-docker-hosted.nexus.bit.admin.ch/bit/nginx-120:latest')).toBe('1.20');
+    expect(extractNginxVersionFromImage('registry.example.internal/bit/nginx-120:latest')).toBe('1.20');
   });
 
   it('keeps an explicit-dot version verbatim', () => {
@@ -39,7 +39,7 @@ describe('formatNginxVersion', () => {
 });
 
 describe('resolveNginxVersion', () => {
-  const dockerfile = `FROM bit-base-images-docker-hosted.nexus.bit.admin.ch/bit/nginx-120:latest
+  const dockerfile = `FROM registry.example.internal/bit/nginx-120:latest
 COPY /dist /usr/share/nginx/html
 ENTRYPOINT ["nginx","-g","daemon off;"]`;
 

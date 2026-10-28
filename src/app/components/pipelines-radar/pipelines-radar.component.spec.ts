@@ -159,11 +159,11 @@ describe('PipelinesRadarComponent', () => {
 
     it('should build the correct Bitbucket Chart.yaml URL', async () => {
       const { fixture } = await setup([
-        makePipeline({ project: 'FEDPOLPWA', repo: 'fedpol-pwa-app-gitops' }),
+        makePipeline({ project: 'EXAMPLE_PROJECT', repo: 'example-gitops' }),
       ]);
       const link: HTMLAnchorElement = fixture.debugElement.query(By.css('a.version-badge')).nativeElement;
       expect(link.href).toBe(
-        'https://bitbucket.bit.admin.ch/projects/FEDPOLPWA/repos/fedpol-pwa-app-gitops/browse/pipeline/Chart.yaml',
+        'https://bitbucket.bit.admin.ch/projects/EXAMPLE_PROJECT/repos/example-gitops/browse/pipeline/Chart.yaml',
       );
     });
 
