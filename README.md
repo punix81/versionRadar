@@ -35,7 +35,7 @@ Open:
 http://localhost:4200/
 ```
 
-On first use, follow the on-screen flow: add your repositories and enter your Azure DevOps / Bitbucket tokens under **Configuration → Tokens & Settings**. Everything (repositories, tokens, and settings) is managed from the app — no manual `.env` editing is required.
+On first use, follow the on-screen flow: add your repositories and enter your Azure DevOps / Bitbucket tokens under **Configuration → Tokens & Settings**. Tokens are write-only in the UI: once stored, the app only reports whether they are configured, never their value.
 
 ## Configuration
 
@@ -43,7 +43,7 @@ All configuration is edited in the app under **Configuration Administration** (r
 
 ### Tokens & Settings
 
-Azure DevOps and Bitbucket credentials, the Bitbucket base URL, request timeout, date locale, and advanced connection overrides are entered under **Configuration → Tokens & Settings** and saved with the **Save .env** button. The local config server persists them to a `.env` file, which the fetch scripts load automatically, so you do not need to create or edit `.env` yourself.
+Azure DevOps and Bitbucket credentials, the Bitbucket base URL, request timeout, date locale, and advanced connection overrides are entered under **Configuration → Tokens & Settings** and saved with the **Save .env** button. The local config server persists them to the external credential file (`~/.config/opencode/versionRadar.env`, permissions 600), which the fetch scripts and the MCP server load at startup. The file lives outside the repository and is never committed.
 
 The two Azure tokens are used as follows:
 
@@ -52,9 +52,9 @@ The two Azure tokens are used as follows:
 
 `BITBUCKET_AUTH_SCHEME=bearer` is the default for current Bitbucket tokens; only switch to `basic` if your token explicitly requires Basic Auth.
 
-`HOST_IP_OVERRIDES` is optional but useful when Node.js cannot reliably resolve internal DNS names. It keeps the real host name for TLS and HTTP headers while connecting to the configured IP. It can be set from the same **Tokens & Settings** tab or added directly to `.env`.
+`HOST_IP_OVERRIDES` is optional but useful when Node.js cannot reliably resolve internal DNS names. It keeps the real host name for TLS and HTTP headers while connecting to the configured IP. It can be set from the same **Tokens & Settings** tab or added directly to the credential file.
 
-Never commit `.env`.
+Never commit the credential file, and never paste its contents in a chat or an issue.
 
 ### Package Repositories
 
@@ -85,9 +85,9 @@ Example Bitbucket repository:
 ```json
 {
   "platform": "bitbucket",
-  "project": "BJBOHREG",
-  "repo": "bj_bo_hreg_ui",
-  "name": "BJ BO HREG",
+  "project": "EXAMPLE_PROJECT",
+  "repo": "example-repo",
+  "name": "Example repository",
   "path": "package.json"
 }
 ```
@@ -175,7 +175,30 @@ On Windows, use `python` (not `python3`). Install the Python dependencies once w
 python -m pip install -r requirements.txt
 ```
 
-The Python scripts read the same `config/*.json` and `.env` and write to the same `src/assets/data/*.json` files, so the results are identical to the TypeScript versions.
+The Python scripts read the same `config/*.json` and credential file, and write to the same `src/assets/data/*.json` files, so the results are identical to the TypeScript versions.
+
+## Data separation (public repository)
+
+VersionRadar is published as source code only. Operational data stays local:
+
+| Content | Tracked in Git | Location |
+| --- | --- | --- |
+| Application and server code | yes | `src/`, `server/`, `scripts/` |
+| Anonymised examples and fixtures | yes | `config/*.example.json`, `scripts/test/fixtures.ts` |
+| Monitored repository inventory | **no** (gitignored) | `config/repositories.json`, `config/package-repositories.json` |
+| Real scan results | **no** (gitignored) | `src/assets/data/repositories.json`, `src/assets/data/pipelines.json` |
+| Scan metadata | **no** (gitignored) | `src/assets/data/scan-metadata.json` |
+| Credentials | **no** (outside the repository) | `~/.config/opencode/versionRadar.env` |
+
+On a fresh clone, empty local files are seeded from the examples:
+
+```bash
+npm run data:init   # also runs automatically before npm start
+```
+
+Existing files are never overwritten. Configure your repositories from the admin
+UI, then run a scan. `scan_status` reports `lastScanAt: null` until a complete
+scan has succeeded.
 
 ## Output Files
 
@@ -187,6 +210,101 @@ src/assets/data/pipelines.json
 ```
 
 The Angular dashboard reads these files to display package, pipeline, and NPM Worm scan results.
+
+## MCP server (OpenCode terminal)
+
+VersionRadar exposes its data through a local MCP server (stdio transport, no web
+server, no Angular, no Express). It reads the generated JSON assets and never
+triggers a network call unless `refresh_versions` is explicitly enabled.
+
+```bash
+npm run mcp:build   # compiles to dist-mcp/
+npm run mcp         # build + run over stdio (for manual testing)
+```
+
+Credentials come from a single file outside the repository:
+
+```text
+~/.config/opencode/versionRadar.env   (chmod 600, directory 700)
+```
+
+`.env.example` documents the variables with placeholders only. The server reports
+which credentials are present (`check_credentials`) and never returns their values.
+
+The server is registered in the global OpenCode V2 configuration under
+`mcp.servers.versionradar`. Available tools: `scan_status`, `list_repositories`,
+`get_repository`, `query_dependencies`, `find_package_usage`, `list_pipelines`,
+`get_pipeline`, `compare_versions`, `check_credentials`.
+
+`refresh_versions` is **disabled by default**. It is only registered when the
+server is started with `VERSIONRADAR_MCP_ALLOW_REFRESH=1`, and it then applies one
+of two authorization modes.
+
+### Strict mode (default)
+
+A local single-use consent file created by the human operator is required:
+
+```bash
+npm run mcp:allow-refresh -- --target all
+```
+
+No token is transmitted to the model: the consent file itself is the authorization.
+It expires (10 minutes by default), is consumed by the next refresh call, and a
+confirmation in the chat is not accepted as consent. This stays the default for
+unknown clients.
+
+### OpenCode local mode (explicit opt-in)
+
+For a local OpenCode installation, the per-call approval can be delegated to
+OpenCode's permission prompt instead of a consent file. Enable it explicitly in
+the **private** local configuration (`~/.config/opencode/opencode.json`), never in
+a shared or Marketplace default:
+
+```jsonc
+{
+  "mcp": {
+    "servers": {
+      "versionradar": {
+        "type": "local",
+        "command": ["node", "/path/to/versionRadar/dist-mcp/mcp/server.js"],
+        "environment": {
+          "VERSIONRADAR_ENV_FILE": "~/.config/opencode/versionRadar.env",
+          "VERSIONRADAR_MCP_ALLOW_REFRESH": "1",
+          "VERSIONRADAR_MCP_APPROVAL_MODE": "opencode"
+        }
+      }
+    }
+  },
+  "permissions": [
+    { "action": "versionradar_refresh_versions", "resource": "*", "effect": "ask" }
+  ]
+}
+```
+
+`VERSIONRADAR_MCP_ALLOW_REFRESH=1` is still required: the mode only replaces the
+consent file, it never registers the tool on its own. An unknown
+`VERSIONRADAR_MCP_APPROVAL_MODE` value falls back to `strict`.
+
+The `permissions` rule is not optional. OpenCode's default policy allows every
+action, so without an explicit `ask` rule the tool would run unattended. The action
+name is the MCP tool name prefixed with the server name, as documented in the
+OpenCode V2 permissions guide.
+
+**Security limits of this mode.** An OpenCode permission rule is a client-side
+control, not authentication of the MCP server. It only protects calls made through
+this OpenCode host: any other local client or process that can start
+`dist-mcp/mcp/server.js` with the same environment bypasses it. The mode therefore
+delegates trust to the local host. It never disables TLS validation, credential
+handling, input validation, repository/path limits or error handling, and it never
+grants a generic shell tool. Choosing **Allow always** in OpenCode saves a durable
+`allow` rule outside the server's control; the server cannot enforce a single
+execution per approval, only the client can.
+
+Each successful retrieval records its real date in
+`src/assets/data/scan-metadata.json`. `scan_status` exposes `lastScanAt` (null when
+unknown) separately from the file modification time.
+
+The usage guide for models is `.agents/skills/versionradar-mcp/SKILL.md`.
 
 ## Troubleshooting
 
@@ -219,7 +337,7 @@ Check:
 If scripts show `EAI_AGAIN` for internal hosts, configure:
 
 ```bash
-HOST_IP_OVERRIDES=bitbucket.bit.admin.ch=10.176.71.49,devops-server.admin.ch=10.222.11.225
+HOST_IP_OVERRIDES=bitbucket.example.internal=<ip>,devops.example.internal=<ip>
 ```
 
 Update the IPs if the internal endpoints change.

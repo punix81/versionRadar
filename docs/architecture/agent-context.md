@@ -13,7 +13,7 @@ Angular dashboard (src/app)
 Configuration server (server/config-server.ts)
         │ reads/writes
         ├── config/*.json
-        ├── .env (local only)
+        ├── ~/.config/opencode/versionRadar.env (local only, 600)
         └── src/assets/data/*.json (synchronised stubs)
 
 Fetch scripts (scripts/)
@@ -48,8 +48,9 @@ Angular dashboard
   container-image versions. Its generated result is `pipelines.json`.
 - The NPM malware CSV is selected by the user in the admin UI and persisted in
   browser storage; repository content and CSV data are untrusted.
-- `.env` is a local credential store and must never be committed, displayed, or
-  included in test fixtures.
+- The credential file (`~/.config/opencode/versionRadar.env`) is the single local
+  credential store. It must never be committed, displayed, or included in test
+  fixtures, and the config API must never return its values.
 
 ## Change guidance
 
