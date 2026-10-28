@@ -165,7 +165,7 @@
                             }
                             <div class="url-parse-hint">
                               {{ 'admin.formats_accepted' | translate }}
-                              <code>ssh://git&#64;bitbucket.bit.admin.ch/project/repo</code> ·
+                              <code>ssh://git&#64;bitbucket.example.internal/project/repo</code> ·
                               <code>https://bitbucket…/projects/PROJECT/repos/repo</code> ·
                               <code>project/repo</code>
                             </div>
@@ -357,8 +357,8 @@
                               <div class="url-parse-error">⚠️ {{ packageUrlParseError() | translate }}</div>
                             }
                             <div class="url-parse-hint">
-                                {{ 'admin.hint_bitbucket_label' | translate }} <code>https://bitbucket.bit.admin.ch/projects/PRJ/repos/repo/browse/package.json</code><br/>
-                                {{ 'admin.hint_azure_label' | translate }} <code>https://devops-server.admin.ch/Collection/Project/_git/Repo?path=/path/package.json</code>
+                                {{ 'admin.hint_bitbucket_label' | translate }} <code>https://bitbucket.example.internal/projects/PRJ/repos/repo/browse/package.json</code><br/>
+                                {{ 'admin.hint_azure_label' | translate }} <code>https://devops.example.internal/Collection/Project/_git/Repo?path=/path/package.json</code>
                             </div>
                           </td>
                         </tr>
@@ -475,6 +475,10 @@
               
               {{ 'admin.tokens_warning' | translate }}
             </div>
+            <div class="settings-row settings-row--meta">
+              <span class="settings-label">{{ 'admin.env_file_label' | translate }}</span>
+              <code class="env-file-path">{{ cfg.envFilePath }}</code>
+            </div>
 
             <!-- Azure DevOps -->
             <div class="settings-section">
@@ -486,22 +490,27 @@
                   id="env-az-user"
                   class="settings-input"
                   type="text"
-                  [ngModel]="cfg.AZUREDEVOPS_USER"
-                  (ngModelChange)="updateEnvField('AZUREDEVOPS_USER', $event)"
-                  placeholder="u80795574"
+                  [ngModel]="cfg.users['AZUREDEVOPS_USER']"
+                  (ngModelChange)="updateEnvUser('AZUREDEVOPS_USER', $event)"
+                  placeholder="your-user"
                   autocomplete="off"
                 />
               </div>
 
               <div class="settings-row">
-                <label class="settings-label" for="env-az-token">{{ 'admin.token_label' | translate }}</label>
+                <label class="settings-label" for="env-az-token">
+                  {{ 'admin.token_label' | translate }}
+                  <span class="token-status" [class.token-status--set]="isSecretConfigured('AZUREDEVOPS_TOKEN')">
+                    {{ (isSecretConfigured('AZUREDEVOPS_TOKEN') ? 'admin.token_configured' : 'admin.token_not_configured') | translate }}
+                  </span>
+                </label>
                 <div class="token-field">
                   <input
                     id="env-az-token"
                     class="settings-input"
                     [type]="showAzureToken() ? 'text' : 'password'"
-                    [ngModel]="cfg.AZUREDEVOPS_TOKEN"
-                    (ngModelChange)="updateEnvField('AZUREDEVOPS_TOKEN', $event)"
+                    [ngModel]="tokenDraft('AZUREDEVOPS_TOKEN')"
+                    (ngModelChange)="setTokenDraft('AZUREDEVOPS_TOKEN', $event)"
                     [placeholder]="'admin.paste_azure_pat' | translate"
                     autocomplete="off"
                   />
@@ -509,18 +518,27 @@
                     [title]="showAzureToken() ? ('admin.hide' | translate) : ('admin.show' | translate)">
                     {{ showAzureToken() ? '🙈' : '👁️' }}
                   </button>
+                  @if (isSecretConfigured('AZUREDEVOPS_TOKEN')) {
+                    <button type="button" class="btn btn-sm btn-cancel token-toggle" (click)="clearToken('AZUREDEVOPS_TOKEN')"
+                      [title]="'admin.token_remove' | translate">✕</button>
+                  }
                 </div>
               </div>
 
               <div class="settings-row">
-                <label class="settings-label" for="env-az-token-dc18">{{ 'admin.azure_dc18_token_label' | translate }}</label>
+                <label class="settings-label" for="env-az-token-dc18">
+                  {{ 'admin.azure_dc18_token_label' | translate }}
+                  <span class="token-status" [class.token-status--set]="isSecretConfigured('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18')">
+                    {{ (isSecretConfigured('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18') ? 'admin.token_configured' : 'admin.token_not_configured') | translate }}
+                  </span>
+                </label>
                 <div class="token-field">
                   <input
                     id="env-az-token-dc18"
                     class="settings-input"
                     [type]="showAzureCollection18Token() ? 'text' : 'password'"
-                    [ngModel]="cfg.AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18"
-                    (ngModelChange)="updateEnvField('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18', $event)"
+                    [ngModel]="tokenDraft('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18')"
+                    (ngModelChange)="setTokenDraft('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18', $event)"
                     [placeholder]="'admin.paste_azure_dc18_pat' | translate"
                     autocomplete="off"
                   />
@@ -528,6 +546,10 @@
                     [title]="showAzureCollection18Token() ? ('admin.hide' | translate) : ('admin.show' | translate)">
                     {{ showAzureCollection18Token() ? '🙈' : '👁️' }}
                   </button>
+                  @if (isSecretConfigured('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18')) {
+                    <button type="button" class="btn btn-sm btn-cancel token-toggle" (click)="clearToken('AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18')"
+                      [title]="'admin.token_remove' | translate">✕</button>
+                  }
                 </div>
               </div>
             </div>
@@ -542,22 +564,27 @@
                   id="env-bb-user"
                   class="settings-input"
                   type="text"
-                  [ngModel]="cfg.BITBUCKET_USER"
-                  (ngModelChange)="updateEnvField('BITBUCKET_USER', $event)"
-                  placeholder="u80795574"
+                  [ngModel]="cfg.users['BITBUCKET_USER']"
+                  (ngModelChange)="updateEnvUser('BITBUCKET_USER', $event)"
+                  placeholder="your-user"
                   autocomplete="off"
                 />
               </div>
 
               <div class="settings-row">
-                <label class="settings-label" for="env-bb-token">{{ 'admin.token_label' | translate }}</label>
+                <label class="settings-label" for="env-bb-token">
+                  {{ 'admin.token_label' | translate }}
+                  <span class="token-status" [class.token-status--set]="isSecretConfigured('BITBUCKET_TOKEN')">
+                    {{ (isSecretConfigured('BITBUCKET_TOKEN') ? 'admin.token_configured' : 'admin.token_not_configured') | translate }}
+                  </span>
+                </label>
                 <div class="token-field">
                   <input
                     id="env-bb-token"
                     class="settings-input"
                     [type]="showBitbucketToken() ? 'text' : 'password'"
-                    [ngModel]="cfg.BITBUCKET_TOKEN"
-                    (ngModelChange)="updateEnvField('BITBUCKET_TOKEN', $event)"
+                    [ngModel]="tokenDraft('BITBUCKET_TOKEN')"
+                    (ngModelChange)="setTokenDraft('BITBUCKET_TOKEN', $event)"
                     placeholder="BBDC-..."
                     autocomplete="off"
                   />
@@ -565,6 +592,10 @@
                     [title]="showBitbucketToken() ? ('admin.hide' | translate) : ('admin.show' | translate)">
                     {{ showBitbucketToken() ? '🙈' : '👁️' }}
                   </button>
+                  @if (isSecretConfigured('BITBUCKET_TOKEN')) {
+                    <button type="button" class="btn btn-sm btn-cancel token-toggle" (click)="clearToken('BITBUCKET_TOKEN')"
+                      [title]="'admin.token_remove' | translate">✕</button>
+                  }
                 </div>
               </div>
 
@@ -574,9 +605,9 @@
                   id="env-bb-url"
                   class="settings-input"
                   type="text"
-                  [ngModel]="cfg.BITBUCKET_BASE_URL"
-                  (ngModelChange)="updateEnvField('BITBUCKET_BASE_URL', $event)"
-                  placeholder="https://bitbucket.bit.admin.ch"
+                  [ngModel]="cfg.settings['BITBUCKET_BASE_URL']"
+                  (ngModelChange)="updateEnvSetting('BITBUCKET_BASE_URL', $event)"
+                  placeholder="https://bitbucket.example.internal"
                 />
               </div>
             </div>
@@ -594,8 +625,8 @@
                   min="1000"
                   max="120000"
                   step="1000"
-                  [ngModel]="cfg.REQUEST_TIMEOUT_MS"
-                  (ngModelChange)="updateEnvField('REQUEST_TIMEOUT_MS', $event)"
+                  [ngModel]="cfg.settings['REQUEST_TIMEOUT_MS']"
+                  (ngModelChange)="updateEnvSetting('REQUEST_TIMEOUT_MS', $event)"
                   placeholder="30000"
                 />
               </div>
@@ -605,8 +636,8 @@
                 <select
                   id="env-locale"
                   class="settings-input settings-input--narrow"
-                  [ngModel]="cfg.DATE_LOCALE"
-                  (ngModelChange)="updateEnvField('DATE_LOCALE', $event)"
+                  [ngModel]="cfg.settings['DATE_LOCALE']"
+                  (ngModelChange)="updateEnvSetting('DATE_LOCALE', $event)"
                 >
                   <option value="fr-CH">fr-CH</option>
                   <option value="fr-FR">fr-FR</option>

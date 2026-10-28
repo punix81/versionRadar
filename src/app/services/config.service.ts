@@ -47,16 +47,23 @@ interface CsvParseResult {
   skippedRows: number;
 }
 
-export interface EnvConfig {
-  AZUREDEVOPS_TOKEN: string;
-  AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18: string;
-  AZUREDEVOPS_USER: string;
-  BITBUCKET_USER: string;
-  BITBUCKET_TOKEN: string;
-  BITBUCKET_BASE_URL: string;
-  REQUEST_TIMEOUT_MS: string;
-  DATE_LOCALE: string;
-  [key: string]: string;
+/**
+ * Masked environment view returned by the config server.
+ * Secrets are reported as booleans only: the API never returns a token value.
+ */
+export interface EnvConfigView {
+  envFilePath: string;
+  settings: Record<string, string>;
+  users: Record<string, string>;
+  secrets: Record<string, boolean>;
+}
+
+/** Write-only payload: a secret is replaced only when a non-empty value is supplied. */
+export interface EnvConfigUpdate {
+  settings?: Record<string, string>;
+  users?: Record<string, string>;
+  secrets?: Record<string, string>;
+  clearSecrets?: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -111,13 +118,13 @@ export class ConfigService {
     );
   }
 
-  getEnvConfig(): Observable<EnvConfig> {
-    return this.http.get<EnvConfig>('/api/config/env').pipe(
+  getEnvConfig(): Observable<EnvConfigView> {
+    return this.http.get<EnvConfigView>('/api/config/env').pipe(
       catchError(e => this.handleError(e))
     );
   }
 
-  saveEnvConfig(config: EnvConfig): Observable<{ success: boolean }> {
+  saveEnvConfig(config: EnvConfigUpdate): Observable<{ success: boolean }> {
     return this.http.put<{ success: boolean }>('/api/config/env', config).pipe(
       catchError(e => this.handleError(e))
     );

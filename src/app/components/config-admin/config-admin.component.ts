@@ -12,10 +12,15 @@ import {
   PipelineRepository,
   PackageConfig,
   PackageRepository,
-  EnvConfig,
+  EnvConfigUpdate,
+  EnvConfigView,
 } from '../../services/config.service';
 
 type Tab = 'pipelines' | 'packages' | 'security' | 'env';
+
+/** Credential fields are write-only: the server never returns their values. */
+const SECRET_KEYS = ['AZUREDEVOPS_TOKEN', 'AZUREDEVOPS_TOKEN_DEFAULTCOLLECTION18', 'BITBUCKET_TOKEN'] as const;
+type SecretKey = (typeof SECRET_KEYS)[number];
 
 function emptyPipelineRepo(): PipelineRepository {
   return { project: '', repo: '', name: '', branch: '' };
@@ -71,11 +76,13 @@ export class ConfigAdminComponent implements OnInit {
   packageUrlParsed = signal(false);
 
   // ── Env state ──────────────────────────────────────────────────────────────
-  envConfig = signal<EnvConfig | null>(null);
+  envConfig = signal<EnvConfigView | null>(null);
   envLoading = signal(false);
   envSaving = signal(false);
   envError = signal<string | null>(null);
   envSuccess = signal(false);
+  /** Local drafts only: secret values are never loaded from the server. */
+  tokenDrafts = signal<Record<string, string>>({});
   showAzureToken = signal(false);
   showAzureCollection18Token = signal(false);
   showBitbucketToken = signal(false);
@@ -368,24 +375,79 @@ export class ConfigAdminComponent implements OnInit {
     this.envLoading.set(true);
     this.envError.set(null);
     this.configService.getEnvConfig().subscribe({
-      next: cfg => { this.envConfig.set({ ...cfg }); this.envLoading.set(false); },
+      next: cfg => {
+        this.envConfig.set(cfg);
+        this.tokenDrafts.set({});
+        this.envLoading.set(false);
+      },
       error: err => { this.envError.set('Erreur chargement : ' + String(err?.message ?? err)); this.envLoading.set(false); },
     });
   }
 
-  updateEnvField(key: keyof EnvConfig, value: string): void {
+  updateEnvSetting(key: string, value: string): void {
     const cfg = this.envConfig();
-    if (cfg) this.envConfig.set({ ...cfg, [key]: value });
+    if (cfg) this.envConfig.set({ ...cfg, settings: { ...cfg.settings, [key]: value } });
+  }
+
+  updateEnvUser(key: string, value: string): void {
+    const cfg = this.envConfig();
+    if (cfg) this.envConfig.set({ ...cfg, users: { ...cfg.users, [key]: value } });
+  }
+
+  /** Stores a new token locally until save; the value is never read back from the server. */
+  setTokenDraft(key: SecretKey, value: string): void {
+    this.tokenDrafts.update(drafts => ({ ...drafts, [key]: value }));
+  }
+
+  tokenDraft(key: SecretKey): string {
+    return this.tokenDrafts()[key] ?? '';
+  }
+
+  isSecretConfigured(key: SecretKey): boolean {
+    return this.envConfig()?.secrets?.[key] === true;
   }
 
   saveEnvConfig(): void {
     const cfg = this.envConfig();
     if (!cfg) return;
+
+    const secrets: Record<string, string> = {};
+    for (const key of SECRET_KEYS) {
+      const draft = this.tokenDraft(key).trim();
+      if (draft.length > 0) secrets[key] = draft;
+    }
+
+    const update: EnvConfigUpdate = {
+      settings: cfg.settings,
+      users: cfg.users,
+      secrets,
+    };
+
     this.envSaving.set(true);
     this.envSuccess.set(false);
     this.envError.set(null);
-    this.configService.saveEnvConfig(cfg).subscribe({
-      next: () => { this.envSaving.set(false); this.envSuccess.set(true); setTimeout(() => this.envSuccess.set(false), 3000); },
+    this.configService.saveEnvConfig(update).subscribe({
+      next: () => {
+        this.envSaving.set(false);
+        this.envSuccess.set(true);
+        this.loadEnvConfig();
+        setTimeout(() => this.envSuccess.set(false), 3000);
+      },
+      error: err => { this.envError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.envSaving.set(false); },
+    });
+  }
+
+  /** Explicit removal of a stored credential. */
+  clearToken(key: SecretKey): void {
+    this.envSaving.set(true);
+    this.envError.set(null);
+    this.configService.saveEnvConfig({ clearSecrets: [key] }).subscribe({
+      next: () => {
+        this.envSaving.set(false);
+        this.envSuccess.set(true);
+        this.loadEnvConfig();
+        setTimeout(() => this.envSuccess.set(false), 3000);
+      },
       error: err => { this.envError.set('Erreur sauvegarde : ' + String(err?.message ?? err)); this.envSaving.set(false); },
     });
   }

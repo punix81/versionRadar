@@ -92,7 +92,7 @@
   "admin.placeholder_path_req": "package.json *",
   "admin.placeholder_collection": "DefaultCollection",
   "admin.placeholder_branch": "main",
-  "admin.placeholder_pipeline_url": "ssh://git@bitbucket.bit.admin.ch/project/repo  o  project/repo",
+  "admin.placeholder_pipeline_url": "ssh://git@bitbucket.example.internal/project/repo  o  project/repo",
   "admin.placeholder_package_url": "https://bitbucket…/projects/PRJ/repos/repo/browse/package.json  o  URL Azure DevOps",
   "admin.hint_bitbucket_label": "Bitbucket:",
   "admin.hint_azure_label": "Azure DevOps:",
@@ -112,6 +112,10 @@
   "admin.reload": "🔄 Ricarica",
   "admin.save_env_btn": "💾 Salva .env",
   "admin.tokens_warning": "I token sono dati sensibili. Non condividere questo file.",
+  "admin.env_file_label": "File di configurazione",
+  "admin.token_configured": "Configurato",
+  "admin.token_not_configured": "Non configurato",
+  "admin.token_remove": "Rimuovi il token",
   "admin.section_azure": "Azure DevOps",
   "admin.section_bitbucket": "Bitbucket",
   "admin.user_label": "Utente:",
@@ -134,5 +138,5 @@
   "admin.malicious_csv_clear": "Cancella CSV",
   "admin.malicious_csv_file": "File",
   "admin.malicious_csv_packages": "Pacchetti caricati",
-  "admin.malicious_csv_hint": "Aggiungi qui /home/punix81/Downloads/malicious-packages.csv. Il file viene usato dal controllo NPM Worm dopo ogni aggiornamento."
+  "admin.malicious_csv_hint": "Aggiungi qui ~/Downloads/malicious-packages.csv. Il file viene usato dal controllo NPM Worm dopo ogni aggiornamento."
 }

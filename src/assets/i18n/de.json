@@ -92,7 +92,7 @@
   "admin.placeholder_path_req": "package.json *",
   "admin.placeholder_collection": "DefaultCollection",
   "admin.placeholder_branch": "main",
-  "admin.placeholder_pipeline_url": "ssh://git@bitbucket.bit.admin.ch/project/repo  oder  project/repo",
+  "admin.placeholder_pipeline_url": "ssh://git@bitbucket.example.internal/project/repo  oder  project/repo",
   "admin.placeholder_package_url": "https://bitbucket…/projects/PRJ/repos/repo/browse/package.json  oder  Azure DevOps URL",
   "admin.hint_bitbucket_label": "Bitbucket:",
   "admin.hint_azure_label": "Azure DevOps:",
@@ -112,6 +112,10 @@
   "admin.reload": "🔄 Neu laden",
   "admin.save_env_btn": "💾 .env speichern",
   "admin.tokens_warning": "Tokens sind sensible Daten. Diese Datei nicht weitergeben.",
+  "admin.env_file_label": "Konfigurationsdatei",
+  "admin.token_configured": "Konfiguriert",
+  "admin.token_not_configured": "Nicht konfiguriert",
+  "admin.token_remove": "Token entfernen",
   "admin.section_azure": "Azure DevOps",
   "admin.section_bitbucket": "Bitbucket",
   "admin.user_label": "Benutzer:",
@@ -134,5 +138,5 @@
   "admin.malicious_csv_clear": "CSV leeren",
   "admin.malicious_csv_file": "Datei",
   "admin.malicious_csv_packages": "Geladene Pakete",
-  "admin.malicious_csv_hint": "/home/punix81/Downloads/malicious-packages.csv hier hinzufügen. Die Datei wird nach jeder Aktualisierung für den NPM-Wurm-Scan verwendet."
+  "admin.malicious_csv_hint": "~/Downloads/malicious-packages.csv hier hinzufügen. Die Datei wird nach jeder Aktualisierung für den NPM-Wurm-Scan verwendet."
 }
